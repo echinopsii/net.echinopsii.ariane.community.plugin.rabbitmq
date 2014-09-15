@@ -1,2 +1,1 @@
-net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory.rest.TibcorvBusEndpoint
-net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory.rest.TibcorvComponentEndpoint
+net.echinopsii.ariane.community.plugin.rabbitmq.directory.rest.RabbitmqComponentEndpoint

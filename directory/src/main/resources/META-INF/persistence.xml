@@ -3,8 +3,6 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              version="1.0">
     <persistence-unit name="ariane-directory">
-        <class>net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory.model.TibcorvComponent</class>
-        <class>net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory.model.TibcorvComponentType</class>
-        <class>net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory.model.TibcorvBus</class>
+        <class>net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent</class>
     </persistence-unit>
 </persistence>
