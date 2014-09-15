@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<ui:composition>
+    <h:panelGrid id="rabbitmqComponentNewGrid" columns="2" columnClasses="colStyle25,colStyle75" cellpadding="5" styleClass="ui-widget-content grid">
+        <h:outputText value="Name : " styleClass="inputTitle"/>
+        <p:inputText id="name" label="Name" required="true" value="#{rabbitmqComponentNewController.name}"/>
+
+        <h:outputText value="URL : " styleClass="inputTitle"/>
+        <p:inputText id="url" label="URL" required="true" value="#{rabbitmqComponentNewController.url}"/>
+
+        <h:outputText value="User : " styleClass="inputTitle"/>
+        <p:inputText id="user" label="User" required="true" value="#{rabbitmqComponentNewController.user}"/>
+
+        <h:outputText value="Password : " styleClass="inputTitle"/>
+        <h:inputSecret id="password" label="Password" value="#{rabbitmqComponentNewController.password}"/>
+
+        <h:outputText value="OS Instance : " styleClass="inputTitle"/>
+        <h:panelGroup>
+            <p:commandLink onclick="osInstanceCreateDialog.show()">
+                <h:outputText value=" create new OS Instance"/>
+            </p:commandLink><br/>
+            <h:selectOneMenu label="Select the OS Instance" value="#{rabbitmqComponentNewController.osInstance}">
+                <f:selectItems value="#{OSInstancesListController.getAllForSelector()}"  var="osi"
+                               itemLabel="#{osi.name}" itemValue="#{osi.name}"/>
+            </h:selectOneMenu>
+        </h:panelGroup>
+
+        <h:outputText value="Support team : " styleClass="inputTitle"/>
+        <h:panelGroup>
+            <p:commandLink onclick="teamCreateDialog.show()">
+                <h:outputText value=" create new team"/>
+            </p:commandLink><br/>
+            <h:selectOneMenu label="Select the support team" value="#{rabbitmqComponentNewController.supportTeam}">
+                <f:selectItems value="#{teamsListController.getAllForSelector()}"  var="team"
+                               itemLabel="#{team.name}" itemValue="#{team.name}"/>
+            </h:selectOneMenu>
+        </h:panelGroup>
+
+        <h:outputText value="Description : " styleClass="inputTitle"/>
+        <p:inputText id="description" label="Description" required="true" value="#{rabbitmqComponentNewController.description}"/>
+
+    </h:panelGrid>
+</ui:composition>
+</html>

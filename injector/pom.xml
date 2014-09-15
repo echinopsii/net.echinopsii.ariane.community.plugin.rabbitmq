@@ -35,14 +35,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.echinopsii.ariane.enterprise.plugin.tibco.rv</groupId>
-            <artifactId>net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.echinopsii.ariane.enterprise.plugin.tibco.rv</groupId>
-            <artifactId>net.echinopsii.ariane.enterprise.plugin.tibco.rv.htmlparser</artifactId>
+            <groupId>net.echinopsii.ariane.community.plugin.rabbitmq</groupId>
+            <artifactId>net.echinopsii.ariane.community.plugin.rabbitmq.directory</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

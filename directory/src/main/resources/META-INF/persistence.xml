@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             version="1.0">
+    <persistence-unit name="ariane-directory">
+        <class>net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory.model.TibcorvComponent</class>
+        <class>net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory.model.TibcorvComponentType</class>
+        <class>net.echinopsii.ariane.enterprise.plugin.tibco.rv.directory.model.TibcorvBus</class>
+    </persistence-unit>
+</persistence>
