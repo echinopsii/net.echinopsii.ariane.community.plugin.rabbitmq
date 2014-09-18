@@ -144,8 +144,10 @@ public class RabbitmqDirectoryBootstrap implements FaceletsResourceResolverServi
 
     @Override
     public URL resolveURL(String path) {
-        log.debug("Resolve {} from rabbitmq directory...", new Object[]{path});
-        return RabbitmqDirectoryBootstrap.class.getResource(basePath + path);
+        log.error("Resolve {} from rabbitmq directory...", new Object[]{path});
+        URL url = RabbitmqDirectoryBootstrap.class.getResource(basePath + path);
+        log.error("url: " + ((url!=null)?url.getPath():"null"));
+        return url;
     }
 
     private static JsonFactory jFactory = new JsonFactory();

@@ -13,7 +13,7 @@
         <h:form id="rabbitmqComponentTableForm">
             <p:growl id="rabbitmqComponentTableMessages" showDetail="true" />
             <p:dataTable id="rabbitmqComponentTable" var="tibc" value="#{rabbitmqComponentsListController.lazyModel}"
-                         selectionMode="multiple" selection="#{rabbitmqComponentsListController.selectedTibcorvComponentList}" rowKey="#{tibc.id}"
+                         selectionMode="multiple" selection="#{rabbitmqComponentsListController.selectedRabbitmqComponentList}" rowKey="#{tibc.id}"
                          paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                          rowsPerPageTemplate="5,10,15,20,25" lazy="true" rows="25" paginator="true">
                 <f:facet name="header">
@@ -32,10 +32,6 @@
 
                 <p:column headerText="URL" sortBy="#{tibc.url}" filterBy="#{tibc.url}">
                     <h:outputText value="#{tibc.url}"/>
-                </p:column>
-
-                <p:column headerText="Type">
-                    <h:outputText value="#{tibc.type.name}" />
                 </p:column>
 
                 <p:column headerText="Description" sortBy="#{tibc.description}" filterBy="#{tibc.description}">
@@ -68,7 +64,6 @@
                                 <p:inputText required="true" label="text" value="#{tibc.user}"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{tibc.type.name}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
 
                         <h:outputText value="Password : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
@@ -92,7 +87,7 @@
 
                         <h:outputText value="OS Instance : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
-                            <p:inplace label="#{rabbitmqComponentsListController.getTibcorvComponentOSInstanceName(tibc)}" effectSpeed="fast" editor="true">
+                            <p:inplace label="#{rabbitmqComponentsListController.getRabbitmqComponentOSInstanceName(tibc)}" effectSpeed="fast" editor="true">
                                 <h:selectOneMenu value="#{rabbitmqComponentsListController.changedOSInstance[tibc.id]}">
                                     <f:selectItems value="#{OSInstancesListController.getAllForSelector()}" var="osi"
                                                    itemLabel="#{osi.name}" itemValue="#{osi.name}"/>
@@ -100,11 +95,11 @@
                                 <p:ajax event="save" listener="#{rabbitmqComponentsListController.syncOSInstance(tibc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rabbitmqComponentsListController.getTibcorvComponentOSInstanceName(tibc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
+                        <h:outputText value="#{rabbitmqComponentsListController.getRabbitmqComponentOSInstanceName(tibc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
 
                         <h:outputText value="Support team : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
-                            <p:inplace label="#{rabbitmqComponentsListController.getTibcorvComponentTeamName(tibc)}" effectSpeed="fast" editor="true">
+                            <p:inplace label="#{rabbitmqComponentsListController.getRabbitmqComponentTeamName(tibc)}" effectSpeed="fast" editor="true">
                                 <h:selectOneMenu value="#{rabbitmqComponentsListController.changedSupportTeam[tibc.id]}">
                                     <f:selectItems value="#{teamsListController.getAllForSelector()}" var="team"
                                                    itemLabel="#{team.name}" itemValue="#{team.name}"/>
@@ -112,19 +107,7 @@
                                 <p:ajax event="save" listener="#{rabbitmqComponentsListController.syncSupportTeam(tibc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rabbitmqComponentsListController.getTibcorvComponentTeamName(tibc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
-
-                        <h:outputText value="Type : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
-                            <p:inplace label="#{rabbitmqComponentsListController.getTibcorvComponentTypeName(tibc)}" effectSpeed="fast" editor="true">
-                                <h:selectOneMenu value="#{rabbitmqComponentsListController.changedComponentType[tibc.id]}">
-                                    <f:selectItems value="#{rabbitmqComponentsListController.getAllTibcorvComponentTypeForSelector()}" var="type"
-                                                   itemLabel="#{type.name}" itemValue="#{type.name}"/>
-                                </h:selectOneMenu>
-                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.syncComponentType(tibc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
-                            </p:inplace>
-                        </h:form>
-                        <h:outputText value="#{rabbitmqComponentsListController.getTibcorvComponentTypeName(tibc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
+                        <h:outputText value="#{rabbitmqComponentsListController.getRabbitmqComponentTeamName(tibc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
 
                     </h:panelGrid>
 
@@ -150,11 +133,11 @@
                 <p:commandButton value="No" styleClass="ui-confirmdialog-no" icon="ui-icon-close" onclick="rabbitmqComponentRemoveDialog.hide();"/>
                 <p:separator/>
                 <p:dataList id="display"
-                            value="#{rabbitmqComponentsListController.selectedTibcorvComponentList}"
-                            var="selectedTibcorvComponent" type="definition">
+                            value="#{rabbitmqComponentsListController.selectedRabbitmqComponentList}"
+                            var="selectedRabbitmqComponent" type="definition">
                     <h:panelGrid columns="2" cellpadding="5">
                         <h:outputText value="Name : " styleClass="inputTitle"/>
-                        <h:outputText value="#{selectedTibcorvComponent.name}"/>
+                        <h:outputText value="#{selectedRabbitmqComponent.name}"/>
                     </h:panelGrid>
                     <p:separator/>
                 </p:dataList>
@@ -255,6 +238,18 @@
                 <p:commandButton value="Save this subnet" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                  actionListener="#{subnetNewController.save}" oncomplete="subnetCreateDialog.hide();"
                                  update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Create a new multicast area" widgetVar="mareaCreateDialog"
+                  width="450" showEffect="fade" hideEffect="explode">
+            <h:form id="createMareaDialogForm">
+                <ui:insert name="createMulticastArea" >
+                    <ui:include src="/templates/multicastAreaNewForm.xhtml" />
+                </ui:insert>
+                <p:commandButton value="Save this multicast area" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                 actionListener="#{multicastAreaNewController.save}" oncomplete="mareaCreateDialog.hide();"
+                                 update=":createSubnetDialogForm:subnetNewGrid,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
             </h:form>
         </p:dialog>
 

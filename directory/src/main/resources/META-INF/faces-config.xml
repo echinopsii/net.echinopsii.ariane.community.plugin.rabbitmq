@@ -9,7 +9,7 @@
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
     <managed-bean>
-        <managed-bean-name>tibcorvComponentsListController</managed-bean-name>
+        <managed-bean-name>rabbitmqComponentsListController</managed-bean-name>
         <managed-bean-class>net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcomponent.RabbitmqComponentsListController</managed-bean-class>
         <managed-bean-scope>session</managed-bean-scope>
     </managed-bean>
