@@ -172,7 +172,7 @@ public class RabbitmqComponentNewController implements Serializable {
         } catch (Exception e) {
             e.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                       "Exception raise while creating TibcoRV Bus " + name + " !",
+                                                       "Exception raise while creating RabbitMQComponent " + name + " !",
                                                        "Exception message : " + e.getMessage());
             FacesContext.getCurrentInstance().addMessage(null, msg);
             return;
@@ -192,7 +192,7 @@ public class RabbitmqComponentNewController implements Serializable {
             em.persist(rabbitmqComponent);
             em.flush();
             em.getTransaction().commit();
-            log.debug("Save new RabbitmqBus {} !", new Object[]{name});
+            log.debug("Save new RabbitmqComponent {} !", new Object[]{name});
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
                                                        "RabbitmqComponent created successfully !",
                                                        "RabbitmqComponent name : " + rabbitmqComponent.getName());

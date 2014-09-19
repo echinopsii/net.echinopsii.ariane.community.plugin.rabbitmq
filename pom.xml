@@ -12,6 +12,7 @@
     <modules>
         <module>directory</module>
         <module>injector</module>
+        <module>jsonparser</module>
     </modules>
 
     <repositories>

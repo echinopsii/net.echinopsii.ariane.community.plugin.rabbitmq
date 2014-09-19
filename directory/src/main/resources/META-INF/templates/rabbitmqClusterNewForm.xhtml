@@ -1,0 +1,16 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<ui:composition>
+    <h:panelGrid id="rabbitmqComponentNewGrid" columns="2" columnClasses="colStyle25,colStyle75" cellpadding="5" styleClass="ui-widget-content grid">
+        <h:outputText value="Name : " styleClass="inputTitle"/>
+        <p:inputText id="name" label="Name" required="true" value="#{rabbitmqComponentNewController.name}"/>
+
+        <h:outputText value="Description : " styleClass="inputTitle"/>
+        <p:inputText id="description" label="Description" required="true" value="#{rabbitmqComponentNewController.description}"/>
+
+    </h:panelGrid>
+</ui:composition>
+</html>

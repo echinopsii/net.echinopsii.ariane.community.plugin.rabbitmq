@@ -1,7 +1,7 @@
 /**
- * [DEFINE YOUR PROJECT NAME/MODULE HERE]
- * [DEFINE YOUR PROJECT DESCRIPTION HERE] 
- * Copyright (C) 15/09/14 echinopsii
+ * RabbitMQ plugin directory bundle
+ * Directories RabbitMQ Component
+ * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -159,6 +159,9 @@ public class RabbitmqComponent implements Serializable {
     @NotNull
     private Team supportTeam;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    private RabbitmqCluster cluster;
+
     public OSInstance getOsInstance() {
         return osInstance;
     }
@@ -185,6 +188,19 @@ public class RabbitmqComponent implements Serializable {
         return this;
     }
 
+    public RabbitmqCluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(RabbitmqCluster cluster) {
+        this.cluster = cluster;
+    }
+    public RabbitmqComponent setClusterR(RabbitmqCluster cluster) {
+        this.cluster = cluster;
+        return this;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -207,15 +223,12 @@ public class RabbitmqComponent implements Serializable {
     }
 
     public RabbitmqComponent clone() {
-        return new RabbitmqComponent().setIdR(id).setVersionR(version).setNameR(name).setUrlR(url).setUserR(user).setPasswdR(passwd).
+        return new RabbitmqComponent().setIdR(id).setVersionR(version).setNameR(name).setUrlR(url).setUserR(user).setPasswdR(passwd).setClusterR(cluster.clone()).
                                        setDescriptionR(description).setOsInstanceR(osInstance.clone()).setSupportTeamR(supportTeam.clone());
     }
 
     @Transient
     HashMap<String, Object> properties = null;
-
-    @Transient
-    String multicastArea = null;
 
     @Transient
     public HashMap<String, Object> getProperties() {

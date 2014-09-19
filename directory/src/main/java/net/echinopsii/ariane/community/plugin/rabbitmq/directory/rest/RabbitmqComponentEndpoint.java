@@ -1,6 +1,6 @@
 /**
- * Tibco rv addon directory bundle
- * Tibcorv Component REST endpoint
+ * RabbitMQ plugin directory bundle
+ * RabbitMQ Component REST endpoint
  *
  * Copyright (C) 2014 Mathilde Ffrench
  *
@@ -68,7 +68,7 @@ public class RabbitmqComponentEndpoint {
     }
 
     public static RabbitmqComponent findRabbitmqComponentById(EntityManager em, long id) {
-        TypedQuery<RabbitmqComponent> findByIdQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.type LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam WHERE t.id = :entityId ORDER BY t.id", RabbitmqComponent.class);
+        TypedQuery<RabbitmqComponent> findByIdQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam WHERE t.id = :entityId ORDER BY t.id", RabbitmqComponent.class);
         findByIdQuery.setParameter("entityId", id);
         RabbitmqComponent entity;
         try {
@@ -80,7 +80,7 @@ public class RabbitmqComponentEndpoint {
     }
 
     public static RabbitmqComponent findRabbitmqComponentByName(EntityManager em, String name) {
-        TypedQuery<RabbitmqComponent> findByNameQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.type LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam WHERE t.name = :entityName ORDER BY t.name", RabbitmqComponent.class);
+        TypedQuery<RabbitmqComponent> findByNameQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam WHERE t.name = :entityName ORDER BY t.name", RabbitmqComponent.class);
         findByNameQuery.setParameter("entityName", name);
         RabbitmqComponent entity;
         try {
@@ -122,7 +122,7 @@ public class RabbitmqComponentEndpoint {
                     subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
         {
             em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-            final HashSet<RabbitmqComponent> results = new HashSet(em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.type LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam ORDER BY t.id", RabbitmqComponent.class).getResultList());
+            final HashSet<RabbitmqComponent> results = new HashSet(em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam ORDER BY t.id", RabbitmqComponent.class).getResultList());
 
             Response ret = null;
             String result;

@@ -1,6 +1,6 @@
 /**
  * RabbitMQ plugin directory bundle
- * Directories RabbitMQ Component PrimeFaces Lazy Model
+ * Directories RabbitMQ Cluster PrimeFaces Lazy Model
  * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcomponent;
+package net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster;
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
 import org.slf4j.Logger;
@@ -37,13 +37,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class RabbitmqComponentLazyModel extends LazyDataModel<RabbitmqComponent> {
-    private static final Logger log = LoggerFactory.getLogger(RabbitmqComponentLazyModel.class);
+public class RabbitmqClusterLazyModel extends LazyDataModel<RabbitmqCluster> {
+    private static final Logger log = LoggerFactory.getLogger(RabbitmqClusterLazyModel.class);
 
     private int              rowCount      ;
-    private List<RabbitmqComponent> pageItems ;
+    private List<RabbitmqCluster> pageItems ;
 
-    private Predicate[] getSearchPredicates(EntityManager entityManager, Root<RabbitmqComponent> root, Map<String,String> filters) {
+    private Predicate[] getSearchPredicates(EntityManager entityManager, Root<RabbitmqCluster> root, Map<String,String> filters) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         List<Predicate> predicatesList = new ArrayList<Predicate>();
 
@@ -64,17 +64,17 @@ public class RabbitmqComponentLazyModel extends LazyDataModel<RabbitmqComponent>
 
         // Populate this.count
         CriteriaQuery<Long> countCriteria = builder.createQuery(Long.class);
-        Root<RabbitmqComponent> root = countCriteria.from(RabbitmqComponent.class);
+        Root<RabbitmqCluster> root = countCriteria.from(RabbitmqCluster.class);
         countCriteria = countCriteria.select(builder.count(root)).where(getSearchPredicates(entityManager,root,filters));
         this.rowCount = (int) (long) entityManager.createQuery(countCriteria).getSingleResult();
 
         // Populate this.pageItems
-        CriteriaQuery<RabbitmqComponent> criteria = builder.createQuery(RabbitmqComponent.class);
-        root = criteria.from(RabbitmqComponent.class);
+        CriteriaQuery<RabbitmqCluster> criteria = builder.createQuery(RabbitmqCluster.class);
+        root = criteria.from(RabbitmqCluster.class);
         criteria.select(root).where(getSearchPredicates(entityManager,root,filters));
         if (sortOrder!=null && sortField!=null)
             criteria.orderBy(sortOrder.toString().equals("DESCENDING") ? builder.desc(root.get(sortField)) : builder.asc(root.get(sortField)));
-        TypedQuery<RabbitmqComponent> query = entityManager.createQuery(criteria);
+        TypedQuery<RabbitmqCluster> query = entityManager.createQuery(criteria);
         query.setFirstResult(first).setMaxResults(getPageSize());
         log.debug("Query: {}", new Object[]{query.toString()});
         this.pageItems = query.getResultList();
@@ -82,21 +82,21 @@ public class RabbitmqComponentLazyModel extends LazyDataModel<RabbitmqComponent>
     }
 
     @Override
-    public RabbitmqComponent getRowData(String rowKey) {
-        for(RabbitmqComponent rabbitmqComponent : pageItems) {
-            if(rabbitmqComponent.getId().equals(rowKey))
-                return rabbitmqComponent;
+    public RabbitmqCluster getRowData(String rowKey) {
+        for(RabbitmqCluster rabbitMQCluster : pageItems) {
+            if(rabbitMQCluster.getId().equals(rowKey))
+                return rabbitMQCluster;
         }
         return null;
     }
 
     @Override
-    public Object getRowKey(RabbitmqComponent rabbitmqComponent) {
-        return rabbitmqComponent.getId();
+    public Object getRowKey(RabbitmqCluster rabbitmqCluster) {
+        return rabbitmqCluster.getId();
     }
 
     @Override
-    public List<RabbitmqComponent> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String,String> filters) {
+    public List<RabbitmqCluster> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String,String> filters) {
         this.setPageSize(pageSize);
         paginate(first,sortField,sortOrder,filters);
         this.setRowCount(rowCount);

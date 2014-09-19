@@ -1,6 +1,6 @@
 /**
- * Tibco rv addon directory bundle
- * Directories TibcoRV Component RUD Controller
+ * RabbitMQ plugin directory bundle
+ * Directories RabbitMQ Component RUD Controller
  * Copyright (C) 2013 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
@@ -75,20 +75,20 @@ public class RabbitmqComponentsListController implements Serializable {
         this.changedOSInstance = changedOSInstance;
     }
 
-    public void syncOSInstance(RabbitmqComponent tibcorvComponent) throws NotSupportedException, SystemException {
+    public void syncOSInstance(RabbitmqComponent rabbitmqComponent) throws NotSupportedException, SystemException {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
         try {
             for(OSInstance osInstance: OSInstancesListController.getAll()) {
-                if (osInstance.getName().equals(changedOSInstance.get(tibcorvComponent.getId()))) {
+                if (osInstance.getName().equals(changedOSInstance.get(rabbitmqComponent.getId()))) {
                     em.getTransaction().begin();
-                    tibcorvComponent = em.find(tibcorvComponent.getClass(),tibcorvComponent.getId());
+                    rabbitmqComponent = em.find(rabbitmqComponent.getClass(),rabbitmqComponent.getId());
                     osInstance = em.find(osInstance.getClass(), osInstance.getId());
-                    tibcorvComponent.setOsInstance(osInstance);
+                    rabbitmqComponent.setOsInstance(osInstance);
                     em.flush();
                     em.getTransaction().commit();
                     FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
                                                                "RabbitmqComponent updated successfully !",
-                                                               "RabbitmqComponent name : " + tibcorvComponent.getName());
+                                                               "RabbitmqComponent name : " + rabbitmqComponent.getName());
                     FacesContext.getCurrentInstance().addMessage(null, msg);
                     break;
                 }
@@ -97,7 +97,7 @@ public class RabbitmqComponentsListController implements Serializable {
             log.debug("Throwable catched !");
             t.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                       "Throwable raised while updating RabbitmqComponent " + tibcorvComponent.getName() + " !",
+                                                       "Throwable raised while updating RabbitmqComponent " + rabbitmqComponent.getName() + " !",
                                                        "Throwable message : " + t.getMessage());
             FacesContext.getCurrentInstance().addMessage(null, msg);
             if (em.getTransaction().isActive())
@@ -107,10 +107,10 @@ public class RabbitmqComponentsListController implements Serializable {
         }
     }
 
-    public String getRabbitmqComponentOSInstanceName(RabbitmqComponent tibcorvComponent) {
+    public String getRabbitmqComponentOSInstanceName(RabbitmqComponent rabbitmqComponent) {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-        tibcorvComponent = em.find(tibcorvComponent.getClass(),tibcorvComponent.getId());
-        String name = (tibcorvComponent.getOsInstance()!=null) ? tibcorvComponent.getOsInstance().getName() : "None";
+        rabbitmqComponent = em.find(rabbitmqComponent.getClass(), rabbitmqComponent.getId());
+        String name = (rabbitmqComponent.getOsInstance()!=null) ? rabbitmqComponent.getOsInstance().getName() : "None";
         em.close();
         return name;
     }
@@ -123,20 +123,20 @@ public class RabbitmqComponentsListController implements Serializable {
         this.changedSupportTeam = changedSupportTeam;
     }
 
-    public void syncSupportTeam(RabbitmqComponent tibcorvComponent) throws NotSupportedException, SystemException {
+    public void syncSupportTeam(RabbitmqComponent rabbitmqComponent) throws NotSupportedException, SystemException {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
         try {
             for(Team team: TeamsListController.getAll()) {
-                if (team.getName().equals(changedSupportTeam.get(tibcorvComponent.getId()))) {
+                if (team.getName().equals(changedSupportTeam.get(rabbitmqComponent.getId()))) {
                     em.getTransaction().begin();
-                    tibcorvComponent = em.find(tibcorvComponent.getClass(),tibcorvComponent.getId());
+                    rabbitmqComponent = em.find(rabbitmqComponent.getClass(),rabbitmqComponent.getId());
                     team = em.find(team.getClass(), team.getId());
-                    tibcorvComponent.setSupportTeam(team);
+                    rabbitmqComponent.setSupportTeam(team);
                     em.flush();
                     em.getTransaction().commit();
                     FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
                                                                "RabbitmqComponent updated successfully !",
-                                                               "RabbitmqComponent name : " + tibcorvComponent.getName());
+                                                               "RabbitmqComponent name : " + rabbitmqComponent.getName());
                     FacesContext.getCurrentInstance().addMessage(null, msg);
                     break;
                 }
@@ -145,7 +145,7 @@ public class RabbitmqComponentsListController implements Serializable {
             log.debug("Throwable catched !");
             t.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                       "Throwable raised while updating RabbitmqComponent " + tibcorvComponent.getName() + " !",
+                                                       "Throwable raised while updating RabbitmqComponent " + rabbitmqComponent.getName() + " !",
                                                        "Throwable message : " + t.getMessage());
             FacesContext.getCurrentInstance().addMessage(null, msg);
             if (em.getTransaction().isActive())
@@ -155,10 +155,10 @@ public class RabbitmqComponentsListController implements Serializable {
         }
     }
 
-    public String getRabbitmqComponentTeamName(RabbitmqComponent tibcorvComponent) {
+    public String getRabbitmqComponentTeamName(RabbitmqComponent rabbitmqComponent) {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-        tibcorvComponent = em.find(tibcorvComponent.getClass(),tibcorvComponent.getId());
-        String name = (tibcorvComponent.getSupportTeam()!=null) ? tibcorvComponent.getSupportTeam().getName() : "None";
+        rabbitmqComponent = em.find(rabbitmqComponent.getClass(), rabbitmqComponent.getId());
+        String name = (rabbitmqComponent.getSupportTeam()!=null) ? rabbitmqComponent.getSupportTeam().getName() : "None";
         em.close();
         return name;
     }
@@ -177,26 +177,26 @@ public class RabbitmqComponentsListController implements Serializable {
         }
     }
 
-    public void update(RabbitmqComponent tibcorvComponent) throws SystemException, NotSupportedException, HeuristicRollbackException, HeuristicMixedException, RollbackException {
+    public void update(RabbitmqComponent rabbitmqComponent) throws SystemException, NotSupportedException, HeuristicRollbackException, HeuristicMixedException, RollbackException {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
         try {
             em.getTransaction().begin();
-            tibcorvComponent = em.find(tibcorvComponent.getClass(), tibcorvComponent.getId()).setNameR(tibcorvComponent.getName()).
-                                                                                              setDescriptionR(tibcorvComponent.getDescription()).
-                                                                                              setPasswdR(tibcorvComponent.getPasswd()).
-                                                                                              setUrlR(tibcorvComponent.getUrl()).
-                                                                                              setUserR(tibcorvComponent.getUser());
+            rabbitmqComponent = em.find(rabbitmqComponent.getClass(), rabbitmqComponent.getId()).setNameR(rabbitmqComponent.getName()).
+                                                                                              setDescriptionR(rabbitmqComponent.getDescription()).
+                                                                                              setPasswdR(rabbitmqComponent.getPasswd()).
+                                                                                              setUrlR(rabbitmqComponent.getUrl()).
+                                                                                              setUserR(rabbitmqComponent.getUser());
             em.flush();
             em.getTransaction().commit();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
                                                        "RabbitmqComponent updated successfully !",
-                                                       "RabbitmqComponent name : " + tibcorvComponent.getName());
+                                                       "RabbitmqComponent name : " + rabbitmqComponent.getName());
             FacesContext.getCurrentInstance().addMessage(null, msg);
         } catch (Throwable t) {
             log.debug("Throwable catched !");
             t.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                       "Throwable raised while updating RabbitmqComponent " + tibcorvComponent.getName() + " !",
+                                                       "Throwable raised while updating RabbitmqComponent " + rabbitmqComponent.getName() + " !",
                                                        "Throwable message : " + t.getMessage());
             FacesContext.getCurrentInstance().addMessage(null, msg);
             if (em.getTransaction().isActive())
@@ -211,23 +211,23 @@ public class RabbitmqComponentsListController implements Serializable {
      */
     public void delete() {
         log.debug("Remove selected RabbitmqComponent !");
-        for (RabbitmqComponent tibcorvComponent: selectedRabbitmqComponentList) {
+        for (RabbitmqComponent rabbitmqComponent: selectedRabbitmqComponentList) {
             EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
             try {
                 em.getTransaction().begin();
-                tibcorvComponent = em.find(tibcorvComponent.getClass(), tibcorvComponent.getId());
-                em.remove(tibcorvComponent);
+                rabbitmqComponent = em.find(rabbitmqComponent.getClass(), rabbitmqComponent.getId());
+                em.remove(rabbitmqComponent);
                 em.flush();
                 em.getTransaction().commit();
                 FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
                                                            "RabbitmqComponent deleted successfully !",
-                                                           "RabbitmqComponent name : " + tibcorvComponent.getName());
+                                                           "RabbitmqComponent name : " + rabbitmqComponent.getName());
                 FacesContext.getCurrentInstance().addMessage(null, msg);
             } catch (Throwable t) {
                 log.debug("Throwable catched !");
                 t.printStackTrace();
                 FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                           "Throwable raised while creating RabbitmqComponent " + tibcorvComponent.getName() + " !",
+                                                           "Throwable raised while creating RabbitmqComponent " + rabbitmqComponent.getName() + " !",
                                                            "Throwable message : " + t.getMessage());
                 FacesContext.getCurrentInstance().addMessage(null, msg);
                 if(em.getTransaction().isActive())
@@ -244,7 +244,7 @@ public class RabbitmqComponentsListController implements Serializable {
      */
     public static List<RabbitmqComponent> getAll() throws SystemException, NotSupportedException {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-        log.debug("Get all TibcoRV Component from : \n\t{}\n\t{}\n\t{}\n\t{}\n\t{}\n\t{}\n\t{}",
+        log.debug("Get all RabbitMQ Component from : \n\t{}\n\t{}\n\t{}\n\t{}\n\t{}\n\t{}\n\t{}",
                          new Object[]{
                                              (Thread.currentThread().getStackTrace().length>0) ? Thread.currentThread().getStackTrace()[0].getClassName() : "",
                                              (Thread.currentThread().getStackTrace().length>1) ? Thread.currentThread().getStackTrace()[1].getClassName() : "",
@@ -266,7 +266,7 @@ public class RabbitmqComponentsListController implements Serializable {
 
     public static List<RabbitmqComponent> getAllForSelector() throws SystemException, NotSupportedException {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-        log.debug("Get all TibcoRV Component from : \n\t{}\n\t{}\n\t{}\n\t{}\n\t{}\n\t{}\n\t{}",
+        log.debug("Get all RabbitMQ Component from : \n\t{}\n\t{}\n\t{}\n\t{}\n\t{}\n\t{}\n\t{}",
                          new Object[]{
                                              (Thread.currentThread().getStackTrace().length>0) ? Thread.currentThread().getStackTrace()[0].getClassName() : "",
                                              (Thread.currentThread().getStackTrace().length>1) ? Thread.currentThread().getStackTrace()[1].getClassName() : "",
@@ -282,7 +282,7 @@ public class RabbitmqComponentsListController implements Serializable {
         criteria.select(root).orderBy(builder.asc(root.get("name")));
 
         List<RabbitmqComponent> list =  em.createQuery(criteria).getResultList();
-        list.add(0, new RabbitmqComponent().setNameR("Select TibcoRV Component"));
+        list.add(0, new RabbitmqComponent().setNameR("Select RabbitMQ Component"));
         em.close();
         return list;
     }

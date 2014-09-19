@@ -12,8 +12,8 @@
         <ui:fragment rendered="#{ccidm:isAuthenticated() and ccidm:hasPermission('dirMdwRabbitMQComponent:display')}">
         <h:form id="rabbitmqComponentTableForm">
             <p:growl id="rabbitmqComponentTableMessages" showDetail="true" />
-            <p:dataTable id="rabbitmqComponentTable" var="tibc" value="#{rabbitmqComponentsListController.lazyModel}"
-                         selectionMode="multiple" selection="#{rabbitmqComponentsListController.selectedRabbitmqComponentList}" rowKey="#{tibc.id}"
+            <p:dataTable id="rabbitmqComponentTable" var="rbmqc" value="#{rabbitmqComponentsListController.lazyModel}"
+                         selectionMode="multiple" selection="#{rabbitmqComponentsListController.selectedRabbitmqComponentList}" rowKey="#{rbmqc.id}"
                          paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                          rowsPerPageTemplate="5,10,15,20,25" lazy="true" rows="25" paginator="true">
                 <f:facet name="header">
@@ -26,16 +26,16 @@
                     <p:rowToggler/>
                 </p:column>
 
-                <p:column headerText="Name" sortBy="#{tibc.name}" filterBy="#{tibc.name}">
-                    <h:outputText value="#{tibc.name}" />
+                <p:column headerText="Name" sortBy="#{rbmqc.name}" filterBy="#{rbmqc.name}">
+                    <h:outputText value="#{rbmqc.name}" />
                 </p:column>
 
-                <p:column headerText="URL" sortBy="#{tibc.url}" filterBy="#{tibc.url}">
-                    <h:outputText value="#{tibc.url}"/>
+                <p:column headerText="URL" sortBy="#{rbmqc.url}" filterBy="#{rbmqc.url}">
+                    <h:outputText value="#{rbmqc.url}"/>
                 </p:column>
 
-                <p:column headerText="Description" sortBy="#{tibc.description}" filterBy="#{tibc.description}">
-                    <h:outputText value="#{tibc.description}" />
+                <p:column headerText="Description" sortBy="#{rbmqc.description}" filterBy="#{rbmqc.description}">
+                    <h:outputText value="#{rbmqc.description}" />
                 </p:column>
 
                 <p:rowExpansion>
@@ -43,35 +43,35 @@
                         <h:outputText value="Name : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
                             <p:inplace editor="true">
-                                <p:inputText required="true" label="text" value="#{tibc.name}"/>
-                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.update(tibc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages" />
+                                <p:inputText required="true" label="text" value="#{rbmqc.name}"/>
+                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.update(rbmqc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages" />
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{tibc.name}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
+                        <h:outputText value="#{rbmqc.name}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
 
                         <h:outputText value="URL : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
                             <p:inplace editor="true">
-                                <p:inputText required="true" label="text" value="#{tibc.url}"/>
-                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.update(tibc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages" />
+                                <p:inputText required="true" label="text" value="#{rbmqc.url}"/>
+                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.update(rbmqc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages" />
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{tibc.url}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
+                        <h:outputText value="#{rbmqc.url}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
 
                         <h:outputText value="User : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
                             <p:inplace editor="true">
-                                <p:inputText required="true" label="text" value="#{tibc.user}"/>
+                                <p:inputText required="true" label="text" value="#{rbmqc.user}"/>
                             </p:inplace>
                         </h:form>
 
                         <h:outputText value="Password : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
-                            <h:outputText value="defined - " rendered="#{tibc.passwd!=null and
-                                                                                tibc.passwd!=''}"/>
-                            <h:outputText value="none - " rendered="#{tibc.passwd==null or tibc.passwd==''}"/>
+                            <h:outputText value="defined - " rendered="#{rbmqc.passwd!=null and
+                                                                                rbmqc.passwd!=''}"/>
+                            <h:outputText value="none - " rendered="#{rbmqc.passwd==null or rbmqc.passwd==''}"/>
                             <p:inplace label="Change password" editor="true">
-                                <h:inputSecret required="true" label="text" value="#{tibc.passwd}"/>
+                                <h:inputSecret required="true" label="text" value="#{rbmqc.passwd}"/>
                             </p:inplace>
                         </h:form>
                         <h:outputText value=" - " rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
@@ -79,35 +79,35 @@
                         <h:outputText value="Description : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
                             <p:inplace editor="true">
-                                <p:inputText required="true" label="text" value="#{tibc.description}"/>
-                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.update(tibc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages" />
+                                <p:inputText required="true" label="text" value="#{rbmqc.description}"/>
+                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.update(rbmqc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages" />
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{tibc.description}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
+                        <h:outputText value="#{rbmqc.description}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
 
                         <h:outputText value="OS Instance : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
-                            <p:inplace label="#{rabbitmqComponentsListController.getRabbitmqComponentOSInstanceName(tibc)}" effectSpeed="fast" editor="true">
-                                <h:selectOneMenu value="#{rabbitmqComponentsListController.changedOSInstance[tibc.id]}">
+                            <p:inplace label="#{rabbitmqComponentsListController.getRabbitmqComponentOSInstanceName(rbmqc)}" effectSpeed="fast" editor="true">
+                                <h:selectOneMenu value="#{rabbitmqComponentsListController.changedOSInstance[rbmqc.id]}">
                                     <f:selectItems value="#{OSInstancesListController.getAllForSelector()}" var="osi"
                                                    itemLabel="#{osi.name}" itemValue="#{osi.name}"/>
                                 </h:selectOneMenu>
-                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.syncOSInstance(tibc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
+                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.syncOSInstance(rbmqc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rabbitmqComponentsListController.getRabbitmqComponentOSInstanceName(tibc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
+                        <h:outputText value="#{rabbitmqComponentsListController.getRabbitmqComponentOSInstanceName(rbmqc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
 
                         <h:outputText value="Support team : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
-                            <p:inplace label="#{rabbitmqComponentsListController.getRabbitmqComponentTeamName(tibc)}" effectSpeed="fast" editor="true">
-                                <h:selectOneMenu value="#{rabbitmqComponentsListController.changedSupportTeam[tibc.id]}">
+                            <p:inplace label="#{rabbitmqComponentsListController.getRabbitmqComponentTeamName(rbmqc)}" effectSpeed="fast" editor="true">
+                                <h:selectOneMenu value="#{rabbitmqComponentsListController.changedSupportTeam[rbmqc.id]}">
                                     <f:selectItems value="#{teamsListController.getAllForSelector()}" var="team"
                                                    itemLabel="#{team.name}" itemValue="#{team.name}"/>
                                 </h:selectOneMenu>
-                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.syncSupportTeam(tibc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
+                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.syncSupportTeam(rbmqc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rabbitmqComponentsListController.getRabbitmqComponentTeamName(tibc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
+                        <h:outputText value="#{rabbitmqComponentsListController.getRabbitmqComponentTeamName(rbmqc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
 
                     </h:panelGrid>
 
@@ -117,7 +117,7 @@
                     <p:commandButton value="Create RabbitMQ Component" icon="ui-icon-disk" onclick="rabbitmqComponentCreateDialog.show()" rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:create')}"/>
                     <p:commandButton value="Remove selected RabbitMQ Component" icon="ui-icon-closethick" onclick="rabbitmqComponentRemoveDialog.show()"
                                      update=":removerabbitmqComponentDialogForm:display" rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:remove')}"/>
-                    <p:commandButton value="Refresh table" id="tibcmpUpdate" icon="icon-refresh" styleClass="ui-priority-primary icon-large"
+                    <p:commandButton value="Refresh table" id="rbmqcmpUpdate" icon="icon-refresh" styleClass="ui-priority-primary icon-large"
                                      update=":rabbitmqComponentTableForm:rabbitmqComponentTable"/>
                 </f:facet>
             </p:dataTable>
