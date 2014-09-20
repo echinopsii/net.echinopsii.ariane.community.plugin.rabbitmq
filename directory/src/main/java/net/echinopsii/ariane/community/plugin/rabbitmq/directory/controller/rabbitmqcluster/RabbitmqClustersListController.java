@@ -20,9 +20,9 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster;
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcomponent.RabbitmqComponentsListController;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqnode.RabbitmqNodesListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.LazyDataModel;
 import org.slf4j.Logger;
@@ -59,34 +59,34 @@ public class RabbitmqClustersListController implements Serializable {
         this.selectedRabbitmqClusterList = selectedRabbitmqClusterList;
     }
 
-    private HashMap<Long,String> addedRBMQComponent                 = new HashMap<Long, String>();
-    private HashMap<Long,List<RabbitmqComponent>> removedComponents = new HashMap<Long, List<RabbitmqComponent>>();
+    private HashMap<Long,String> addedRBMQNode                 = new HashMap<Long, String>();
+    private HashMap<Long,List<RabbitmqNode>> removedNodes = new HashMap<Long, List<RabbitmqNode>>();
 
-    public HashMap<Long, String> getAddedRBMQComponent() {
-        return addedRBMQComponent;
+    public HashMap<Long, String> getAddedRBMQNode() {
+        return addedRBMQNode;
     }
 
-    public void setAddedRBMQComponent(HashMap<Long, String> addedRBMQComponent) {
-        this.addedRBMQComponent = addedRBMQComponent;
+    public void setAddedRBMQNode(HashMap<Long, String> addedRBMQNode) {
+        this.addedRBMQNode = addedRBMQNode;
     }
 
     /**
-     * Synchronize added RabbitMQ component into a RabbitMQ cluster to database
+     * Synchronize added RabbitMQ node into a RabbitMQ cluster to database
      *
      * @param cluster bean UI is working on
      */
-    public void syncAddedRBMQComponent(RabbitmqCluster cluster) {
+    public void syncAddedRBMQNode(RabbitmqCluster cluster) {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
         try {
-            for (RabbitmqComponent rbmqcomponent: RabbitmqComponentsListController.getAll()) {
-                if (rbmqcomponent.getName().equals(this.addedRBMQComponent.get(cluster.getId()))) {
+            for (RabbitmqNode rbmqnode: RabbitmqNodesListController.getAll()) {
+                if (rbmqnode.getName().equals(this.addedRBMQNode.get(cluster.getId()))) {
                     em.getTransaction().begin();
-                    rbmqcomponent = em.find(rbmqcomponent.getClass(), rbmqcomponent.getId());
+                    rbmqnode = em.find(rbmqnode.getClass(), rbmqnode.getId());
                     cluster = em.find(cluster.getClass(), cluster.getId());
-                    cluster.getNodes().add(rbmqcomponent);
-                    if (rbmqcomponent.getCluster()!=null)
-                        rbmqcomponent.getCluster().getNodes().remove(rbmqcomponent);
-                    rbmqcomponent.setCluster(cluster);
+                    cluster.getNodes().add(rbmqnode);
+                    if (rbmqnode.getCluster()!=null)
+                        rbmqnode.getCluster().getNodes().remove(rbmqnode);
+                    rbmqnode.setCluster(cluster);
                     em.flush();
                     em.getTransaction().commit();
                     FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
@@ -110,27 +110,27 @@ public class RabbitmqClustersListController implements Serializable {
         }
     }
 
-    public HashMap<Long, List<RabbitmqComponent>> getRemovedComponents() {
-        return removedComponents;
+    public HashMap<Long, List<RabbitmqNode>> getRemovedNodes() {
+        return removedNodes;
     }
 
-    public void setRemovedComponents(HashMap<Long, List<RabbitmqComponent>> removedComponents) {
-        this.removedComponents = removedComponents;
+    public void setRemovedNodes(HashMap<Long, List<RabbitmqNode>> removedNodes) {
+        this.removedNodes = removedNodes;
     }
 
     /**
-     * Synchronize removed RabbitMQ component from a RabbitMQ cluster to database
+     * Synchronize removed RabbitMQ node from a RabbitMQ cluster to database
      *
      * @param cluster bean UI is working on
      */
-    public void syncRemovedComponents(RabbitmqCluster cluster) {
+    public void syncRemovedNodes(RabbitmqCluster cluster) {
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
         try {
             em.getTransaction().begin();
             cluster = em.find(cluster.getClass(), cluster.getId());
-            List<RabbitmqComponent> rbmqcomponents2beRM = this.removedComponents.get(cluster.getId());
-            log.debug("syncRemovedComponents:{} ", new Object[]{rbmqcomponents2beRM});
-            for (RabbitmqComponent rbmqc2beRM : rbmqcomponents2beRM) {
+            List<RabbitmqNode> rbmqnodes2beRM = this.removedNodes.get(cluster.getId());
+            log.debug("syncRemovedNodes:{} ", new Object[]{rbmqnodes2beRM});
+            for (RabbitmqNode rbmqc2beRM : rbmqnodes2beRM) {
                 rbmqc2beRM = em.find(rbmqc2beRM.getClass(), rbmqc2beRM.getId());
                 cluster.getNodes().remove(rbmqc2beRM);
                 rbmqc2beRM.setCluster(null);
@@ -159,11 +159,11 @@ public class RabbitmqClustersListController implements Serializable {
         log.debug("Row Toogled : {}", new Object[]{event.getVisibility().toString()});
         RabbitmqCluster eventRabbitmqCluster = ((RabbitmqCluster) event.getData());
         if (event.getVisibility().toString().equals("HIDDEN")) {
-            addedRBMQComponent.remove(eventRabbitmqCluster.getId());
-            removedComponents.remove(eventRabbitmqCluster.getId());
+            addedRBMQNode.remove(eventRabbitmqCluster.getId());
+            removedNodes.remove(eventRabbitmqCluster.getId());
         } else {
-            addedRBMQComponent.put(eventRabbitmqCluster.getId(),"");
-            removedComponents.put(eventRabbitmqCluster.getId(), new ArrayList<RabbitmqComponent>());
+            addedRBMQNode.put(eventRabbitmqCluster.getId(),"");
+            removedNodes.put(eventRabbitmqCluster.getId(), new ArrayList<RabbitmqNode>());
         }
     }
 
@@ -203,8 +203,8 @@ public class RabbitmqClustersListController implements Serializable {
             try {
                 em.getTransaction().begin();
                 rabbitmqCluster = em.find(rabbitmqCluster.getClass(), rabbitmqCluster.getId());
-                for (RabbitmqComponent component: rabbitmqCluster.getNodes())
-                    component.setCluster(null);
+                for (RabbitmqNode node: rabbitmqCluster.getNodes())
+                    node.setCluster(null);
                 em.remove(rabbitmqCluster);
                 em.flush();
                 em.getTransaction().commit();

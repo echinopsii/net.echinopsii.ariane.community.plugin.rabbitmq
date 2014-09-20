@@ -20,9 +20,9 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster;
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcomponent.RabbitmqComponentsListController;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqnode.RabbitmqNodesListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +56,8 @@ public class RabbitmqClusterNewController implements Serializable {
     private String name;
     private String description;
 
-    private List<String>  rmqcomponentsToBind = new ArrayList<String>();
-    private Set<RabbitmqComponent> components = new HashSet<RabbitmqComponent>();
+    private List<String>  rmqnodesToBind = new ArrayList<String>();
+    private Set<RabbitmqNode> nodes = new HashSet<RabbitmqNode>();
 
     public String getName() {
         return name;
@@ -75,35 +75,35 @@ public class RabbitmqClusterNewController implements Serializable {
         this.description = description;
     }
 
-    public List<String> getRmqcomponentsToBind() {
-        return rmqcomponentsToBind;
+    public List<String> getRmqnodesToBind() {
+        return rmqnodesToBind;
     }
 
-    public void setRmqcomponentsToBind(List<String> rmqcomponentsToBind) {
-        this.rmqcomponentsToBind = rmqcomponentsToBind;
+    public void setRmqnodesToBind(List<String> rmqnodesToBind) {
+        this.rmqnodesToBind = rmqnodesToBind;
     }
 
-    public Set<RabbitmqComponent> getComponents() {
-        return components;
+    public Set<RabbitmqNode> getNodes() {
+        return nodes;
     }
 
-    public void setComponents(Set<RabbitmqComponent> components) {
-        this.components = components;
+    public void setNodes(Set<RabbitmqNode> nodes) {
+        this.nodes = nodes;
     }
 
     /**
-     * populate RabbitMQ components list through rmqcomponentsToBind list provided through UI form
+     * populate RabbitMQ nodes list through rmqnodesToBind list provided through UI form
      *
      * @throws NotSupportedException
      * @throws SystemException
      */
-    private void bindSelectedComponents() throws NotSupportedException, SystemException {
-        for (RabbitmqComponent rmqc: RabbitmqComponentsListController.getAll()) {
-            for (String rmqcToBind : rmqcomponentsToBind)
+    private void bindSelectedNodes() throws NotSupportedException, SystemException {
+        for (RabbitmqNode rmqc: RabbitmqNodesListController.getAll()) {
+            for (String rmqcToBind : rmqnodesToBind)
                 if (rmqc.getName().equals(rmqcToBind)) {
                     rmqc = em.find(rmqc.getClass(), rmqc.getId());
-                    this.components.add(rmqc);
-                    log.debug("Synced RabbitMQ components : {} {}", new Object[]{rmqc.getId(), rmqc.getName()});
+                    this.nodes.add(rmqc);
+                    log.debug("Synced RabbitMQ nodes : {} {}", new Object[]{rmqc.getId(), rmqc.getName()});
                     break;
                 }
         }
@@ -111,7 +111,7 @@ public class RabbitmqClusterNewController implements Serializable {
 
     public void save() throws SystemException, NotSupportedException, HeuristicRollbackException, HeuristicMixedException, RollbackException {
         try {
-            bindSelectedComponents();
+            bindSelectedNodes();
         } catch (Exception e) {
             e.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -124,7 +124,7 @@ public class RabbitmqClusterNewController implements Serializable {
         RabbitmqCluster rabbitmqCluster = new RabbitmqCluster();
         rabbitmqCluster.setName(name);
         rabbitmqCluster.setDescription(description);
-        rabbitmqCluster.setNodesR(this.components);
+        rabbitmqCluster.setNodesR(this.nodes);
 
         try {
             em.getTransaction().begin();

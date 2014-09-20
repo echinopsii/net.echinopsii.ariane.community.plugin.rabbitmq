@@ -54,10 +54,10 @@
                         </h:form>
                         <h:outputText value="#{rbmqc.description}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQCluster:update')}"/>
 
-                        <h:outputText value="RabbitMQ Components : " styleClass="inputTitle"/>
+                        <h:outputText value="RabbitMQ Nodes : " styleClass="inputTitle"/>
                         <h:form>
                             <p:dataTable value="#{directoryViewUtils.asList(rbmqc,'nodes')}" var="clu" styleClass="ui-widget-content grid" rowKey="#{clu.id}"
-                                         rows="5" paginator="true" selection="#{rabbitmqClustersListController.removedComponents[rbmqc.id]}" selectionMode="multiple">
+                                         rows="5" paginator="true" selection="#{rabbitmqClustersListController.removedNodes[rbmqc.id]}" selectionMode="multiple">
                                 <p:column headerText="Name" sortBy="#{clu.name}" filterBy="#{clu.name}">
                                     <h:outputText id="itemName" value="#{clu.name}"/>
                                 </p:column>
@@ -66,16 +66,16 @@
                                 </p:column>
                                 <c:if test="#{ccidm:hasPermission('dirMdwRabbitMQCluster:update')}">
                                     <f:facet name="footer">
-                                        <p:inplace label="Select RabbitMQ component to bind" effectSpeed="fast" editor="true">
-                                            <h:selectOneMenu value="#{rabbitmqClustersListController.addedRBMQComponent[rbmqc.id]}">
-                                                <f:selectItems value="#{rabbitmqComponentsListController.getAll()}" var="clu_"
+                                        <p:inplace label="Select RabbitMQ node to bind" effectSpeed="fast" editor="true">
+                                            <h:selectOneMenu value="#{rabbitmqClustersListController.addedRBMQNode[rbmqc.id]}">
+                                                <f:selectItems value="#{rabbitmqNodesListController.getAll()}" var="clu_"
                                                                itemLabel="#{clu_.name}" itemValue="#{clu_.name}"/>
                                             </h:selectOneMenu>
-                                            <p:ajax event="save" listener="#{rabbitmqClustersListController.syncAddedRBMQComponent(rbmqc)}"
+                                            <p:ajax event="save" listener="#{rabbitmqClustersListController.syncAddedRBMQNode(rbmqc)}"
                                                     update="@form,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                                         </p:inplace>
-                                        <p:commandButton value="Unbind selected RabbitMQ component" icon="ui-icon-closethick"
-                                                         process="@form" actionListener="#{rabbitmqClustersListController.syncRemovedComponents(rbmqc)}"
+                                        <p:commandButton value="Unbind selected RabbitMQ node" icon="ui-icon-closethick"
+                                                         process="@form" actionListener="#{rabbitmqClustersListController.syncRemovedNodes(rbmqc)}"
                                                          update="@form,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                                     </f:facet>
                                 </c:if>
@@ -124,19 +124,19 @@
                     <ui:include src="/templates/rabbitmqClusterNewForm.xhtml" />
                 </ui:insert>
                 <p:commandButton value="Save this RabbitMQ Cluster" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
-                                 actionListener="#{rabbitmqClusterNewController.save}" oncomplete="rabbitmqComponentCreateDialog.hide();"
+                                 actionListener="#{rabbitmqClusterNewController.save}" oncomplete="rabbitmqNodeCreateDialog.hide();"
                                  update=":rabbitmqClusterTableForm:rabbitmqClusterTable,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
             </h:form>
         </p:dialog>
 
-            <p:dialog header="Create a new RabbitMQ Component" widgetVar="rabbitmqComponentCreateDialog"
+            <p:dialog header="Create a new RabbitMQ Node" widgetVar="rabbitmqNodeCreateDialog"
                       width="450" showEffect="fade" hideEffect="explode">
-                <h:form id="createrabbitmqComponentDialogForm">
-                    <ui:insert name="createrabbitmqComponent" >
-                        <ui:include src="/templates/rabbitmqComponentNewForm.xhtml" />
+                <h:form id="createrabbitmqNodeDialogForm">
+                    <ui:insert name="createrabbitmqNode" >
+                        <ui:include src="/templates/rabbitmqNodeNewForm.xhtml" />
                     </ui:insert>
-                    <p:commandButton value="Save this RabbitMQ Component" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
-                                     actionListener="#{rabbitmqComponentNewController.save}" oncomplete="rabbitmqComponentCreateDialog.hide();"
+                    <p:commandButton value="Save this RabbitMQ Node" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{rabbitmqNodeNewController.save}" oncomplete="rabbitmqNodeCreateDialog.hide();"
                                      update=":createrabbitmqClusterDialogForm:rabbitmqClusterNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                 </h:form>
             </p:dialog>
@@ -197,7 +197,7 @@
                     </ui:insert>
                     <p:commandButton value="Save this team" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                      actionListener="#{teamNewController.save}" oncomplete="teamCreateDialog.hide();"
-                                     update=":createrabbitmqComponentDialogForm:rabbitmqComponentNewGrid,:createOSInstanceDialogForm:osInstanceNewGrid,
+                                     update=":createrabbitmqNodeDialogForm:rabbitmqNodeNewGrid,:createOSInstanceDialogForm:osInstanceNewGrid,
                                          :rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                 </h:form>
             </p:dialog>

@@ -4,6 +4,6 @@
              version="1.0">
     <persistence-unit name="ariane-directory">
         <class>net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster</class>
-        <class>net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent</class>
+        <class>net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode</class>
     </persistence-unit>
 </persistence>

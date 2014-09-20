@@ -1,2 +1,2 @@
 net.echinopsii.ariane.community.plugin.rabbitmq.directory.rest.RabbitmqClusterEndpoint
-net.echinopsii.ariane.community.plugin.rabbitmq.directory.rest.RabbitmqComponentEndpoint
+net.echinopsii.ariane.community.plugin.rabbitmq.directory.rest.RabbitmqNodeEndpoint

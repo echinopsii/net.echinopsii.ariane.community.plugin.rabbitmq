@@ -10,11 +10,11 @@
 
         <h:outputText value="RabbitMQ components : " styleClass="inputTitle"/>
         <h:panelGroup>
-            <p:commandLink onclick="rabbitmqComponentCreateDialog.show()">
-                <h:outputText value=" create new RabbitMQ component"/>
+            <p:commandLink onclick="rabbitmqNodeCreateDialog.show()">
+                <h:outputText value=" create new RabbitMQ node"/>
             </p:commandLink><br/>
-            <p:selectManyMenu id="basic" value="#{rabbitmqClusterNewController.rmqcomponentsToBind}" style="width:150px;height:100px">
-                <f:selectItems value="#{rabbitmqComponentsListController.getAll()}"  var="rbmqc"
+            <p:selectManyMenu id="basic" value="#{rabbitmqClusterNewController.rmqnodesToBind}" style="width:150px;height:100px">
+                <f:selectItems value="#{rabbitmqNodesListController.getAll()}"  var="rbmqc"
                                itemLabel="#{rbmqc.name}" itemValue="#{rbmqc.name}"/>
             </p:selectManyMenu>
         </h:panelGroup>

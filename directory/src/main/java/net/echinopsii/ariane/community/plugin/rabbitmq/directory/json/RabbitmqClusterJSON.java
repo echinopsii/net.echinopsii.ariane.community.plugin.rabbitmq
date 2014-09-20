@@ -24,7 +24,6 @@ import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

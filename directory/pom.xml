@@ -72,7 +72,7 @@
                         <Export-Package>
                             net.echinopsii.ariane.community.plugin.rabbitmq.directory.model;version=${project.version},
                             net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster;version=${project.version},
-                            net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcomponent;version=${project.version},
+                            net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqnode;version=${project.version},
                             net.echinopsii.ariane.community.plugin.rabbitmq.directory.rest;version=${project.version}
                         </Export-Package>
                         <Import-Package>

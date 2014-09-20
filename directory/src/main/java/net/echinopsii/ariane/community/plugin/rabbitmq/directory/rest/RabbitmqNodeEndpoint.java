@@ -1,6 +1,6 @@
 /**
  * RabbitMQ plugin directory bundle
- * RabbitMQ Component REST endpoint
+ * RabbitMQ Node REST endpoint
  *
  * Copyright (C) 2014 Mathilde Ffrench
  *
@@ -26,8 +26,8 @@ import net.echinopsii.ariane.community.core.directory.wat.json.ToolBox;
 import net.echinopsii.ariane.community.core.directory.wat.rest.organisational.TeamEndpoint;
 import net.echinopsii.ariane.community.core.directory.wat.rest.technical.system.OSInstanceEndpoint;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.json.RabbitmqComponentJSON;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.json.RabbitmqNodeJSON;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -45,17 +45,17 @@ import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 
-@Path("/directories/middleware/rabbitmq/components")
-public class RabbitmqComponentEndpoint {
-    private static final Logger log = LoggerFactory.getLogger(RabbitmqComponentEndpoint.class);
+@Path("/directories/middleware/rabbitmq/nodes")
+public class RabbitmqNodeEndpoint {
+    private static final Logger log = LoggerFactory.getLogger(RabbitmqNodeEndpoint.class);
     private EntityManager em;
 
-    public static Response rabbitmqComponentToJSON(RabbitmqComponent entity) {
+    public static Response rabbitmqNodeToJSON(RabbitmqNode entity) {
         Response ret = null;
         String result;
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         try {
-            RabbitmqComponentJSON.oneRabbitmqComponent2JSON(entity, outStream);
+            RabbitmqNodeJSON.oneRabbitmqNode2JSON(entity, outStream);
             result = ToolBox.getOuputStreamContent(outStream, "UTF-8");
             ret = Response.status(Status.OK).entity(result).build();
         } catch (Exception e) {
@@ -67,10 +67,10 @@ public class RabbitmqComponentEndpoint {
         return ret;
     }
 
-    public static RabbitmqComponent findRabbitmqComponentById(EntityManager em, long id) {
-        TypedQuery<RabbitmqComponent> findByIdQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam WHERE t.id = :entityId ORDER BY t.id", RabbitmqComponent.class);
+    public static RabbitmqNode findRabbitmqNodeById(EntityManager em, long id) {
+        TypedQuery<RabbitmqNode> findByIdQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqNode t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam WHERE t.id = :entityId ORDER BY t.id", RabbitmqNode.class);
         findByIdQuery.setParameter("entityId", id);
-        RabbitmqComponent entity;
+        RabbitmqNode entity;
         try {
             entity = findByIdQuery.getSingleResult();
         } catch (NoResultException nre) {
@@ -79,10 +79,10 @@ public class RabbitmqComponentEndpoint {
         return entity;
     }
 
-    public static RabbitmqComponent findRabbitmqComponentByName(EntityManager em, String name) {
-        TypedQuery<RabbitmqComponent> findByNameQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam WHERE t.name = :entityName ORDER BY t.name", RabbitmqComponent.class);
+    public static RabbitmqNode findRabbitmqNodeByName(EntityManager em, String name) {
+        TypedQuery<RabbitmqNode> findByNameQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqNode t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam WHERE t.name = :entityName ORDER BY t.name", RabbitmqNode.class);
         findByNameQuery.setParameter("entityName", name);
-        RabbitmqComponent entity;
+        RabbitmqNode entity;
         try {
             entity = findByNameQuery.getSingleResult();
         } catch (NoResultException nre) {
@@ -93,20 +93,20 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/{id:[0-9][0-9]*}")
-    public Response displayRabbitmqComponent(@PathParam("id") Long id) {
+    public Response displayRabbitmqNode(@PathParam("id") Long id) {
         Subject subject = SecurityUtils.getSubject();
         log.debug("[{}-{}] get rabbitmq component : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id});
-        if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQComponent:display") ||
+        if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQNode:display") ||
                     subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
         {
             em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-            RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+            RabbitmqNode entity = findRabbitmqNodeById(em, id);
             if (entity == null) {
                 em.close();
                 return Response.status(Status.NOT_FOUND).build();
             }
 
-            Response ret = rabbitmqComponentToJSON(entity);
+            Response ret = rabbitmqNodeToJSON(entity);
             em.close();
             return ret;
         } else {
@@ -115,20 +115,20 @@ public class RabbitmqComponentEndpoint {
     }
 
     @GET
-    public Response displayAllRabbitmqComponents() {
+    public Response displayAllRabbitmqNodes() {
         Subject subject = SecurityUtils.getSubject();
-        log.debug("[{}-{}] get rabbitmq components", new Object[]{Thread.currentThread().getId(), subject.getPrincipal()});
-        if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQComponent:display") ||
+        log.debug("[{}-{}] get rabbitmq nodes", new Object[]{Thread.currentThread().getId(), subject.getPrincipal()});
+        if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQNode:display") ||
                     subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
         {
             em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-            final HashSet<RabbitmqComponent> results = new HashSet(em.createQuery("SELECT DISTINCT t FROM RabbitmqComponent t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam ORDER BY t.id", RabbitmqComponent.class).getResultList());
+            final HashSet<RabbitmqNode> results = new HashSet(em.createQuery("SELECT DISTINCT t FROM RabbitmqNode t LEFT JOIN FETCH t.osInstance LEFT JOIN FETCH t.supportTeam ORDER BY t.id", RabbitmqNode.class).getResultList());
 
             Response ret = null;
             String result;
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             try {
-                RabbitmqComponentJSON.manyRabbitmqComponents2JSON(results, outStream);
+                RabbitmqNodeJSON.manyRabbitmqNodes2JSON(results, outStream);
                 result = ToolBox.getOuputStreamContent(outStream, "UTF-8");
                 ret = Response.status(Status.OK).entity(result).build();
             } catch (Exception e) {
@@ -141,34 +141,34 @@ public class RabbitmqComponentEndpoint {
                 return ret;
             }
         } else {
-            return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to display rabbitmq components. Contact your administrator.").build();
+            return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to display rabbitmq nodes. Contact your administrator.").build();
         }
     }
 
     @GET
     @Path("/get")
-    public Response getRabbitmqComponent(@QueryParam("name")String name, @QueryParam("id")long id) {
+    public Response getRabbitmqNode(@QueryParam("name")String name, @QueryParam("id")long id) {
         if (id!=0) {
-            return displayRabbitmqComponent(id);
+            return displayRabbitmqNode(id);
         } else if (name!=null) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] get rabbitmq component : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), name});
-            if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQComponent:display") ||
+            log.debug("[{}-{}] get rabbitmq node : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), name});
+            if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQNode:display") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentByName(em, name);
+                RabbitmqNode entity = findRabbitmqNodeByName(em, name);
                 if (entity == null) {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
 
-                Response ret = rabbitmqComponentToJSON(entity);
+                Response ret = rabbitmqNodeToJSON(entity);
                 em.close();
                 return ret;
 
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to display rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to display rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and name are not defined. You must define one of these parameters.").build();
@@ -177,24 +177,24 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/create")
-    public Response createRabbitmqComponent(@QueryParam("name")String name, @QueryParam("url")String url, @QueryParam("user")String user, @QueryParam("password")String password,
+    public Response createRabbitmqNode(@QueryParam("name")String name, @QueryParam("url")String url, @QueryParam("user")String user, @QueryParam("password")String password,
                                            @QueryParam("osInstance")Long osiID, @QueryParam("supportTeam")Long teamID, @QueryParam("type")String type,
                                            @QueryParam("description")String description) {
         if (name!=null && url!=null && user!=null && osiID!=0 && teamID!=0 && type!=null) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] create rabbitmq component : ({},{},{},{},{},{},{},{})", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), name,
+            log.debug("[{}-{}] create rabbitmq node : ({},{},{},{},{},{},{},{})", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), name,
                                                                                                 url, user, password, osiID, teamID, type, description});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:create") ||
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:create") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentByName(em, name);
+                RabbitmqNode entity = findRabbitmqNodeByName(em, name);
                 if (entity == null) {
                     OSInstance osInstance = OSInstanceEndpoint.findOSInstanceById(em, osiID);
                     if (osInstance!=null) {
                         Team team = TeamEndpoint.findTeamById(em, teamID);
                         if (team!=null) {
-                            entity = new RabbitmqComponent().setNameR(name).setUrlR(url).setUserR(user).setPasswdR(password).setOsInstanceR(osInstance).
+                            entity = new RabbitmqNode().setNameR(name).setUrlR(url).setUserR(user).setPasswdR(password).setOsInstanceR(osInstance).
                                                              setSupportTeamR(team).setDescriptionR(description);
                             try {
                                 em.getTransaction().begin();
@@ -204,7 +204,7 @@ public class RabbitmqComponentEndpoint {
                                 if(em.getTransaction().isActive())
                                     em.getTransaction().rollback();
                                 em.close();
-                                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while creating rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while creating rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                             }
                         } else {
                             em.close();
@@ -216,11 +216,11 @@ public class RabbitmqComponentEndpoint {
                     }
                 }
 
-                Response ret = rabbitmqComponentToJSON(entity);
+                Response ret = rabbitmqNodeToJSON(entity);
                 em.close();
                 return ret;
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to create rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to create rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: name and/or url and/or user and/or osInstance and/or supportTeam and/or type are not defined." +
@@ -230,34 +230,34 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/delete")
-    public Response deleteRabbitmqComponent(@QueryParam("id")Long id) {
+    public Response deleteRabbitmqNode(@QueryParam("id")Long id) {
         if (id!=0) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] delete rabbitmq component : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:delete") ||
+            log.debug("[{}-{}] delete rabbitmq node : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:delete") ||
                 subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+                RabbitmqNode entity = findRabbitmqNodeById(em, id);
                 if (entity!=null) {
                     try {
                         em.getTransaction().begin();
                         em.remove(entity);
                         em.getTransaction().commit();
                         em.close();
-                        return Response.status(Status.OK).entity("Rabbitmq component " + id + " has been successfully deleted").build();
+                        return Response.status(Status.OK).entity("Rabbitmq node " + id + " has been successfully deleted").build();
                     } catch (Throwable t) {
                         if(em.getTransaction().isActive())
                             em.getTransaction().rollback();
                         em.close();
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                     }
                 } else {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id is not defined. You must define this parameter.").build();
@@ -266,34 +266,34 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/update/name")
-    public Response updateRabbitmqComponentName(@QueryParam("id")Long id, @QueryParam("name")String name) {
+    public Response updateRabbitmqNodeName(@QueryParam("id")Long id, @QueryParam("name")String name) {
         if (id!=0 && name!=null) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] update rabbitmq component {} with name : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, name});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:update") ||
+            log.debug("[{}-{}] update rabbitmq node {} with name : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, name});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:update") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+                RabbitmqNode entity = findRabbitmqNodeById(em, id);
                 if (entity!=null) {
                     try {
                         em.getTransaction().begin();
                         entity.setName(name);
                         em.getTransaction().commit();
                         em.close();
-                        return Response.status(Status.OK).entity("Rabbitmq component " + id + " has been successfully updated with name " + name).build();
+                        return Response.status(Status.OK).entity("Rabbitmq node " + id + " has been successfully updated with name " + name).build();
                     } catch (Throwable t) {
                         if(em.getTransaction().isActive())
                             em.getTransaction().rollback();
                         em.close();
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                     }
                 } else {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or name are not defined. You must define these parameters.").build();
@@ -302,34 +302,34 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/update/url")
-    public Response updateRabbitmqComponentURL(@QueryParam("id")Long id, @QueryParam("url")String url) {
+    public Response updateRabbitmqNodeURL(@QueryParam("id")Long id, @QueryParam("url")String url) {
         if (id!=0 && url!=null) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] update rabbitmq component {} with url : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, url});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:update") ||
+            log.debug("[{}-{}] update rabbitmq node {} with url : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, url});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:update") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+                RabbitmqNode entity = findRabbitmqNodeById(em, id);
                 if (entity!=null) {
                     try {
                         em.getTransaction().begin();
                         entity.setUrl(url);
                         em.getTransaction().commit();
                         em.close();
-                        return Response.status(Status.OK).entity("Rabbitmq component " + id + " has been successfully updated with url " + url).build();
+                        return Response.status(Status.OK).entity("Rabbitmq node " + id + " has been successfully updated with url " + url).build();
                     } catch (Throwable t) {
                         if(em.getTransaction().isActive())
                             em.getTransaction().rollback();
                         em.close();
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                     }
                 } else {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or url are not defined. You must define these parameters.").build();
@@ -338,34 +338,34 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/update/user")
-    public Response updateRabbitmqComponentUser(@QueryParam("id")Long id, @QueryParam("user")String user) {
+    public Response updateRabbitmqNodeUser(@QueryParam("id")Long id, @QueryParam("user")String user) {
         if (id!=0 && user!=null) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] update rabbitmq component {} with user : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, user});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:update") ||
+            log.debug("[{}-{}] update rabbitmq node {} with user : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, user});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:update") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+                RabbitmqNode entity = findRabbitmqNodeById(em, id);
                 if (entity!=null) {
                     try {
                         em.getTransaction().begin();
                         entity.setUser(user);
                         em.getTransaction().commit();
                         em.close();
-                        return Response.status(Status.OK).entity("Rabbitmq component " + id + " has been successfully updated with user " + user).build();
+                        return Response.status(Status.OK).entity("Rabbitmq node " + id + " has been successfully updated with user " + user).build();
                     } catch (Throwable t) {
                         if(em.getTransaction().isActive())
                             em.getTransaction().rollback();
                         em.close();
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                     }
                 } else {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or user are not defined. You must define these parameters.").build();
@@ -374,34 +374,34 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/update/password")
-    public Response updateRabbitmqComponentPassword(@QueryParam("id")Long id, @QueryParam("password")String password) {
+    public Response updateRabbitmqNodePassword(@QueryParam("id")Long id, @QueryParam("password")String password) {
         if (id!=0) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] update rabbitmq component {} with password : *****", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:update") ||
+            log.debug("[{}-{}] update rabbitmq node {} with password : *****", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:update") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+                RabbitmqNode entity = findRabbitmqNodeById(em, id);
                 if (entity!=null) {
                     try {
                         em.getTransaction().begin();
                         entity.setPasswd(password);
                         em.getTransaction().commit();
                         em.close();
-                        return Response.status(Status.OK).entity("Rabbitmq component " + id + " has been successfully updated with password " + password).build();
+                        return Response.status(Status.OK).entity("Rabbitmq node " + id + " has been successfully updated with password " + password).build();
                     } catch (Throwable t) {
                         if(em.getTransaction().isActive())
                             em.getTransaction().rollback();
                         em.close();
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                     }
                 } else {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id is not defined. You must define this parameter.").build();
@@ -410,15 +410,15 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/update/osInstance")
-    public Response udpateRabbitmqComponentOSInstance(@QueryParam("id")Long id, @QueryParam("osInstance")Long osiID) {
+    public Response udpateRabbitmqNodeOSInstance(@QueryParam("id")Long id, @QueryParam("osInstance")Long osiID) {
         if (id!=0 && osiID!=0) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] update rabbitmq component {} with os instance : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, osiID});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:update") ||
+            log.debug("[{}-{}] update rabbitmq node {} with os instance : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, osiID});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:update") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+                RabbitmqNode entity = findRabbitmqNodeById(em, id);
                 if (entity!=null) {
                     OSInstance osInstance = OSInstanceEndpoint.findOSInstanceById(em, osiID);
                     if (osInstance!=null) {
@@ -427,12 +427,12 @@ public class RabbitmqComponentEndpoint {
                             entity.setOsInstance(osInstance);
                             em.getTransaction().commit();
                             em.close();
-                            return Response.status(Status.OK).entity("Rabbitmq component " + id + " has been successfully updated with os instance " + osiID).build();
+                            return Response.status(Status.OK).entity("Rabbitmq node " + id + " has been successfully updated with os instance " + osiID).build();
                         } catch (Throwable t) {
                             if(em.getTransaction().isActive())
                                 em.getTransaction().rollback();
                             em.close();
-                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                         }
                     } else {
                         em.close();
@@ -440,10 +440,10 @@ public class RabbitmqComponentEndpoint {
                     }
                 } else {
                     em.close();
-                    return Response.status(Status.NOT_FOUND).entity("Rabbitmq component " + id + " not found.").build();
+                    return Response.status(Status.NOT_FOUND).entity("Rabbitmq node " + id + " not found.").build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or osInstance are not defined. You must define these parameters.").build();
@@ -452,15 +452,15 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/update/supportTeam")
-    public Response updateRabbitmqComponentSupportTeam(@QueryParam("id")Long id, @QueryParam("supportTeam")Long teamID) {
+    public Response updateRabbitmqNodeSupportTeam(@QueryParam("id")Long id, @QueryParam("supportTeam")Long teamID) {
         if (id!=0 && teamID!=0) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] update rabbitmq component {} with team : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, teamID});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:update") ||
+            log.debug("[{}-{}] update rabbitmq node {} with team : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, teamID});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:update") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+                RabbitmqNode entity = findRabbitmqNodeById(em, id);
                 if (entity!=null) {
                     Team team = TeamEndpoint.findTeamById(em, teamID);
                     if (team!=null) {
@@ -469,12 +469,12 @@ public class RabbitmqComponentEndpoint {
                             entity.setSupportTeam(team);
                             em.getTransaction().commit();
                             em.close();
-                            return Response.status(Status.OK).entity("Rabbitmq component " + id + " has been successfully updated with support team " + teamID).build();
+                            return Response.status(Status.OK).entity("Rabbitmq node " + id + " has been successfully updated with support team " + teamID).build();
                         } catch (Throwable t) {
                             if(em.getTransaction().isActive())
                                 em.getTransaction().rollback();
                             em.close();
-                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                         }
                     } else {
                         em.close();
@@ -482,10 +482,10 @@ public class RabbitmqComponentEndpoint {
                     }
                 } else {
                     em.close();
-                    return Response.status(Status.NOT_FOUND).entity("Rabbitmq component " + id + " not found.").build();
+                    return Response.status(Status.NOT_FOUND).entity("Rabbitmq node " + id + " not found.").build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or supportTeam are not defined. You must define these parameters.").build();
@@ -494,34 +494,34 @@ public class RabbitmqComponentEndpoint {
 
     @GET
     @Path("/update/description")
-    public Response updateRabbitmqComponentDescription(@QueryParam("id")Long id, @QueryParam("description")String description) {
+    public Response updateRabbitmqNodeDescription(@QueryParam("id")Long id, @QueryParam("description")String description) {
         if (id!=0 && description!=null) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] update rabbitmq component {} with description : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, description});
-            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQComponent:update") ||
+            log.debug("[{}-{}] update rabbitmq node {} with description : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, description});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQNode:update") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
                 em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-                RabbitmqComponent entity = findRabbitmqComponentById(em, id);
+                RabbitmqNode entity = findRabbitmqNodeById(em, id);
                 if (entity!=null) {
                     try {
                         em.getTransaction().begin();
                         entity.setDescription(description);
                         em.getTransaction().commit();
                         em.close();
-                        return Response.status(Status.OK).entity("Rabbitmq component " + id + " has been successfully updated with description " + description).build();
+                        return Response.status(Status.OK).entity("Rabbitmq node " + id + " has been successfully updated with description " + description).build();
                     } catch (Throwable t) {
                         if(em.getTransaction().isActive())
                             em.getTransaction().rollback();
                         em.close();
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq component " + entity.getName() + " : " + t.getMessage()).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq node " + entity.getName() + " : " + t.getMessage()).build();
                     }
                 } else {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq components. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq nodes. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or description are not defined. You must define these parameters.").build();

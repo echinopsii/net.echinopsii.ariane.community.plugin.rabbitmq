@@ -1,6 +1,6 @@
 /**
  * Tibco rv addon directory bundle
- * Directories TibcoRV Component Create controller
+ * Directories TibcoRV Node Create controller
  * Copyright (C) 2013 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcomponent;
+package net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqnode;
 
 import net.echinopsii.ariane.community.core.directory.base.model.organisational.Team;
 import net.echinopsii.ariane.community.core.directory.base.model.technical.system.OSInstance;
@@ -26,7 +26,7 @@ import net.echinopsii.ariane.community.core.directory.wat.controller.technical.s
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster.RabbitmqClustersListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +37,9 @@ import javax.persistence.EntityManager;
 import javax.transaction.*;
 import java.io.Serializable;
 
-public class RabbitmqComponentNewController implements Serializable {
+public class RabbitmqNodeNewController implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final Logger log = LoggerFactory.getLogger(RabbitmqComponentNewController.class);
+    private static final Logger log = LoggerFactory.getLogger(RabbitmqNodeNewController.class);
 
     private EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
 
@@ -209,37 +209,37 @@ public class RabbitmqComponentNewController implements Serializable {
         } catch (Exception e) {
             e.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                       "Exception raise while creating RabbitMQComponent " + name + " !",
+                                                       "Exception raise while creating RabbitMQNode " + name + " !",
                                                        "Exception message : " + e.getMessage());
             FacesContext.getCurrentInstance().addMessage(null, msg);
             return;
         }
 
-        RabbitmqComponent rabbitmqComponent = new RabbitmqComponent();
-        rabbitmqComponent.setName(name);
-        rabbitmqComponent.setUser(user);
-        rabbitmqComponent.setPasswd(password);
-        rabbitmqComponent.setUrl(url);
-        rabbitmqComponent.setCluster(cluster);
-        rabbitmqComponent.setDescription(description);
-        rabbitmqComponent.setOsInstance(osInt);
-        rabbitmqComponent.setSupportTeam(suppTeam);
+        RabbitmqNode rabbitmqNode = new RabbitmqNode();
+        rabbitmqNode.setName(name);
+        rabbitmqNode.setUser(user);
+        rabbitmqNode.setPasswd(password);
+        rabbitmqNode.setUrl(url);
+        rabbitmqNode.setCluster(cluster);
+        rabbitmqNode.setDescription(description);
+        rabbitmqNode.setOsInstance(osInt);
+        rabbitmqNode.setSupportTeam(suppTeam);
 
         try {
             em.getTransaction().begin();
-            em.persist(rabbitmqComponent);
+            em.persist(rabbitmqNode);
             em.flush();
             em.getTransaction().commit();
-            log.debug("Save new RabbitmqComponent {} !", new Object[]{name});
+            log.debug("Save new RabbitmqNode {} !", new Object[]{name});
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
-                                                       "RabbitmqComponent created successfully !",
-                                                       "RabbitmqComponent name : " + rabbitmqComponent.getName());
+                                                       "RabbitmqNode created successfully !",
+                                                       "RabbitmqNode name : " + rabbitmqNode.getName());
             FacesContext.getCurrentInstance().addMessage(null, msg);
         } catch (Throwable t) {
             log.debug("Throwable catched !");
             t.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                       "Throwable raised while creating RabbitmqComponent " + rabbitmqComponent.getName() + " !",
+                                                       "Throwable raised while creating RabbitmqNode " + rabbitmqNode.getName() + " !",
                                                        "Throwable message : " + t.getMessage());
             FacesContext.getCurrentInstance().addMessage(null, msg);
 

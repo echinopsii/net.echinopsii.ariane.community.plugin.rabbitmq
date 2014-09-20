@@ -4,25 +4,25 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <ui:composition>
-    <h:panelGrid id="rabbitmqComponentNewGrid" columns="2" columnClasses="colStyle25,colStyle75" cellpadding="5" styleClass="ui-widget-content grid">
+    <h:panelGrid id="rabbitmqNodeNewGrid" columns="2" columnClasses="colStyle25,colStyle75" cellpadding="5" styleClass="ui-widget-content grid">
         <h:outputText value="Name : " styleClass="inputTitle"/>
-        <p:inputText id="name" label="Name" required="true" value="#{rabbitmqComponentNewController.name}"/>
+        <p:inputText id="name" label="Name" required="true" value="#{rabbitmqNodeNewController.name}"/>
 
         <h:outputText value="URL : " styleClass="inputTitle"/>
-        <p:inputText id="url" label="URL" required="true" value="#{rabbitmqComponentNewController.url}"/>
+        <p:inputText id="url" label="URL" required="true" value="#{rabbitmqNodeNewController.url}"/>
 
         <h:outputText value="User : " styleClass="inputTitle"/>
-        <p:inputText id="user" label="User" required="true" value="#{rabbitmqComponentNewController.user}"/>
+        <p:inputText id="user" label="User" required="true" value="#{rabbitmqNodeNewController.user}"/>
 
         <h:outputText value="Password : " styleClass="inputTitle"/>
-        <h:inputSecret id="password" label="Password" value="#{rabbitmqComponentNewController.password}"/>
+        <h:inputSecret id="password" label="Password" value="#{rabbitmqNodeNewController.password}"/>
 
         <h:outputText value="RabbitMQ cluster : " styleClass="inputTitle"/>
         <h:panelGroup>
             <p:commandLink onclick="rabbitmqClusterCreateDialog.show()">
                 <h:outputText value=" create new RabbitMQ cluster"/>
             </p:commandLink><br/>
-            <h:selectOneMenu label="Select the RabbitMQ cluster" value="#{rabbitmqComponentNewController.rbmqCluster}">
+            <h:selectOneMenu label="Select the RabbitMQ cluster" value="#{rabbitmqNodeNewController.rbmqCluster}">
                 <f:selectItems value="#{rabbitmqClustersListController.getAllForSelector()}"  var="clu"
                                itemLabel="#{clu.name}" itemValue="#{clu.name}"/>
             </h:selectOneMenu>
@@ -33,7 +33,7 @@
             <p:commandLink onclick="osInstanceCreateDialog.show()">
                 <h:outputText value=" create new OS Instance"/>
             </p:commandLink><br/>
-            <h:selectOneMenu label="Select the OS Instance" value="#{rabbitmqComponentNewController.osInstance}">
+            <h:selectOneMenu label="Select the OS Instance" value="#{rabbitmqNodeNewController.osInstance}">
                 <f:selectItems value="#{OSInstancesListController.getAllForSelector()}"  var="osi"
                                itemLabel="#{osi.name}" itemValue="#{osi.name}"/>
             </h:selectOneMenu>
@@ -44,14 +44,14 @@
             <p:commandLink onclick="teamCreateDialog.show()">
                 <h:outputText value=" create new team"/>
             </p:commandLink><br/>
-            <h:selectOneMenu label="Select the support team" value="#{rabbitmqComponentNewController.supportTeam}">
+            <h:selectOneMenu label="Select the support team" value="#{rabbitmqNodeNewController.supportTeam}">
                 <f:selectItems value="#{teamsListController.getAllForSelector()}"  var="team"
                                itemLabel="#{team.name}" itemValue="#{team.name}"/>
             </h:selectOneMenu>
         </h:panelGroup>
 
         <h:outputText value="Description : " styleClass="inputTitle"/>
-        <p:inputText id="description" label="Description" required="true" value="#{rabbitmqComponentNewController.description}"/>
+        <p:inputText id="description" label="Description" required="true" value="#{rabbitmqNodeNewController.description}"/>
 
     </h:panelGrid>
 </ui:composition>

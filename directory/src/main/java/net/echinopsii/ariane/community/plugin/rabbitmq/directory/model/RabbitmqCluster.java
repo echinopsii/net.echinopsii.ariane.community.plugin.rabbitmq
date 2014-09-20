@@ -19,8 +19,6 @@
 
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory.model;
 
-import net.echinopsii.ariane.community.core.directory.base.model.organisational.Team;
-import net.echinopsii.ariane.community.core.directory.base.model.technical.system.OSInstance;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.slf4j.Logger;
@@ -110,17 +108,17 @@ public class RabbitmqCluster implements Serializable {
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Fetch(FetchMode.SUBSELECT)
-    private Set<RabbitmqComponent> nodes = new HashSet<RabbitmqComponent>();
+    private Set<RabbitmqNode> nodes = new HashSet<RabbitmqNode>();
 
-    public Set<RabbitmqComponent> getNodes() {
+    public Set<RabbitmqNode> getNodes() {
         return nodes;
     }
 
-    public void setNodes(Set<RabbitmqComponent> nodes) {
+    public void setNodes(Set<RabbitmqNode> nodes) {
         this.nodes = nodes;
     }
 
-    public RabbitmqCluster setNodesR(Set<RabbitmqComponent> nodes) {
+    public RabbitmqCluster setNodesR(Set<RabbitmqNode> nodes) {
         this.nodes = nodes;
         return this;
     }

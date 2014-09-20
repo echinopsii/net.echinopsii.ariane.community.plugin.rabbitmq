@@ -1,6 +1,6 @@
 /**
  * RabbitMQ plugin directory bundle
- * Directories RabbitMQ Component
+ * Directories RabbitMQ Node
  * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,11 +32,11 @@ import java.util.HashMap;
 
 @Entity
 @XmlRootElement
-@Table(name="rabbitmqComponent",uniqueConstraints = @UniqueConstraint(columnNames = {"rabbitmqComponentName","rabbitmqComponentURL"}))
-public class RabbitmqComponent implements Serializable {
+@Table(name="rabbitmqNode",uniqueConstraints = @UniqueConstraint(columnNames = {"rabbitmqNodeName","rabbitmqNodeURL"}))
+public class RabbitmqNode implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private static final Logger log = LoggerFactory.getLogger(RabbitmqComponent.class);
+    private static final Logger log = LoggerFactory.getLogger(RabbitmqNode.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -54,7 +54,7 @@ public class RabbitmqComponent implements Serializable {
         this.id = id;
     }
 
-    public RabbitmqComponent setIdR(Long id) {
+    public RabbitmqNode setIdR(Long id) {
         this.id = id;
         return this;
     }
@@ -67,15 +67,15 @@ public class RabbitmqComponent implements Serializable {
         this.version = version;
     }
 
-    public RabbitmqComponent setVersionR(int version) {
+    public RabbitmqNode setVersionR(int version) {
         this.version = version;
         return this;
     }
 
-    @Column(name="rabbitmqComponentName",unique=true)
+    @Column(name="rabbitmqNodeName",unique=true)
     @NotNull
     private String name = null;
-    @Column(name="rabbitmqComponentURL",unique=true)
+    @Column(name="rabbitmqNodeURL",unique=true)
     @NotNull
     private String url = null;
     @Column
@@ -94,7 +94,7 @@ public class RabbitmqComponent implements Serializable {
         this.name = name;
     }
 
-    public RabbitmqComponent setNameR(String name) {
+    public RabbitmqNode setNameR(String name) {
         this.name = name;
         return this;
     }
@@ -107,7 +107,7 @@ public class RabbitmqComponent implements Serializable {
         this.user = user;
     }
 
-    public RabbitmqComponent setUserR(String user) {
+    public RabbitmqNode setUserR(String user) {
         this.user = user;
         return this;
     }
@@ -120,7 +120,7 @@ public class RabbitmqComponent implements Serializable {
         this.passwd = passwd;
     }
 
-    public RabbitmqComponent setPasswdR(String passwd) {
+    public RabbitmqNode setPasswdR(String passwd) {
         this.passwd = passwd;
         return this;
     }
@@ -133,7 +133,7 @@ public class RabbitmqComponent implements Serializable {
         this.url = url;
     }
 
-    public RabbitmqComponent setUrlR(String url) {
+    public RabbitmqNode setUrlR(String url) {
         this.url = url;
         return this;
     }
@@ -146,7 +146,7 @@ public class RabbitmqComponent implements Serializable {
         this.description = description;
     }
 
-    public RabbitmqComponent setDescriptionR(String description) {
+    public RabbitmqNode setDescriptionR(String description) {
         this.description = description;
         return this;
     }
@@ -170,7 +170,7 @@ public class RabbitmqComponent implements Serializable {
         this.osInstance = osInstance;
     }
 
-    public RabbitmqComponent setOsInstanceR(OSInstance osInstance) {
+    public RabbitmqNode setOsInstanceR(OSInstance osInstance) {
         this.osInstance = osInstance;
         return this;
     }
@@ -183,7 +183,7 @@ public class RabbitmqComponent implements Serializable {
         this.supportTeam = supportTeam;
     }
 
-    public RabbitmqComponent setSupportTeamR(Team supportTeam) {
+    public RabbitmqNode setSupportTeamR(Team supportTeam) {
         this.supportTeam = supportTeam;
         return this;
     }
@@ -195,7 +195,7 @@ public class RabbitmqComponent implements Serializable {
     public void setCluster(RabbitmqCluster cluster) {
         this.cluster = cluster;
     }
-    public RabbitmqComponent setClusterR(RabbitmqCluster cluster) {
+    public RabbitmqNode setClusterR(RabbitmqCluster cluster) {
         this.cluster = cluster;
         return this;
     }
@@ -210,7 +210,7 @@ public class RabbitmqComponent implements Serializable {
             return false;
         }
 
-        RabbitmqComponent tmp = (RabbitmqComponent) o;
+        RabbitmqNode tmp = (RabbitmqNode) o;
         if (this.url == null) {
             return super.equals(o);
         }
@@ -222,8 +222,8 @@ public class RabbitmqComponent implements Serializable {
         return this.url != null ? this.url.hashCode() : super.hashCode();
     }
 
-    public RabbitmqComponent clone() {
-        return new RabbitmqComponent().setIdR(id).setVersionR(version).setNameR(name).setUrlR(url).setUserR(user).setPasswdR(passwd).setClusterR(cluster.clone()).
+    public RabbitmqNode clone() {
+        return new RabbitmqNode().setIdR(id).setVersionR(version).setNameR(name).setUrlR(url).setUserR(user).setPasswdR(passwd).setClusterR(cluster.clone()).
                                        setDescriptionR(description).setOsInstanceR(osInstance.clone()).setSupportTeamR(supportTeam.clone());
     }
 
