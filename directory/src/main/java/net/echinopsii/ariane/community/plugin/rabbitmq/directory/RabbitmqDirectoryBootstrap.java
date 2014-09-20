@@ -48,7 +48,7 @@ import java.net.URL;
 @Instantiate
 public class RabbitmqDirectoryBootstrap implements FaceletsResourceResolverService {
     private static final Logger log = LoggerFactory.getLogger(RabbitmqDirectoryBootstrap.class);
-    private static final String RBMQ_DIRECTORY_PLUGIN = "Ariane RabbitMQ Plugin Directory Link To Core";
+    private static final String RBMQ_DIRECTORY_PLUGIN = "Ariane RabbitMQ Plugin Directory";
 
     private static final String basePath = "/META-INF";
     private static final String FACES_CONFIG_FILE_PATH= basePath + "/faces-config.xml";

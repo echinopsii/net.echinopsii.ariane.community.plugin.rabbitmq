@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class RabbitmqClusterJSON {
     public final static String RMQC_VERSION     = "rbmqClusterVersion";
     public final static String RMQC_NAME        = "rbmqClusterName";
     public final static String RMQC_DESCRIPTION = "rbmqClusterDescription";
+    public final static String RMQC_NODES_ID    = "rbmqClusterNodesID";
 
     public final static void rabbitmqCluster2JSON(RabbitmqCluster cluster, JsonGenerator jgenerator) throws IOException {
         jgenerator.writeStartObject();
@@ -46,6 +48,10 @@ public class RabbitmqClusterJSON {
         jgenerator.writeNumberField(RMQC_VERSION, cluster.getVersion());
         jgenerator.writeStringField(RMQC_NAME, cluster.getName());
         jgenerator.writeStringField(RMQC_DESCRIPTION, cluster.getDescription());
+        jgenerator.writeArrayFieldStart(RMQC_NODES_ID);
+        for (RabbitmqNode node : cluster.getNodes())
+            jgenerator.writeNumber(node.getId());
+        jgenerator.writeEndArray();
         jgenerator.writeEndObject();
     }
 

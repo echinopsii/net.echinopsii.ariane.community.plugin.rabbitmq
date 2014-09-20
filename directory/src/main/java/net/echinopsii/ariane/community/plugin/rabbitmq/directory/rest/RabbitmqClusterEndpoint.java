@@ -22,12 +22,13 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.directory.rest;
 
 import net.echinopsii.ariane.community.core.directory.base.model.organisational.Team;
 import net.echinopsii.ariane.community.core.directory.base.model.technical.system.OSInstance;
-import net.echinopsii.ariane.community.core.directory.wat.json.ToolBox;
 import net.echinopsii.ariane.community.core.directory.wat.rest.organisational.TeamEndpoint;
 import net.echinopsii.ariane.community.core.directory.wat.rest.technical.system.OSInstanceEndpoint;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.json.RabbitmqClusterJSON;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.json.ToolBox;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 
-@Path("/directories/middleware/rabbitmq/clusters")
+@Path("directories/middleware/rabbitmq/clusters")
 public class RabbitmqClusterEndpoint {
     private static final Logger log = LoggerFactory.getLogger(RabbitmqClusterEndpoint.class);
     private EntityManager em;
@@ -68,7 +69,7 @@ public class RabbitmqClusterEndpoint {
     }
 
     public static RabbitmqCluster findRabbitmqClusterById(EntityManager em, long id) {
-        TypedQuery<RabbitmqCluster> findByIdQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqCluster t WHERE t.id = :entityId ORDER BY t.id", RabbitmqCluster.class);
+        TypedQuery<RabbitmqCluster> findByIdQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqCluster t LEFT JOIN FETCH t.nodes WHERE t.id = :entityId ORDER BY t.id", RabbitmqCluster.class);
         findByIdQuery.setParameter("entityId", id);
         RabbitmqCluster entity;
         try {
@@ -80,7 +81,7 @@ public class RabbitmqClusterEndpoint {
     }
 
     public static RabbitmqCluster findRabbitmqClusterByName(EntityManager em, String name) {
-        TypedQuery<RabbitmqCluster> findByNameQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqCluster t WHERE t.name = :entityName ORDER BY t.name", RabbitmqCluster.class);
+        TypedQuery<RabbitmqCluster> findByNameQuery = em.createQuery("SELECT DISTINCT t FROM RabbitmqCluster t LEFT JOIN FETCH t.nodes WHERE t.name = :entityName ORDER BY t.name", RabbitmqCluster.class);
         findByNameQuery.setParameter("entityName", name);
         RabbitmqCluster entity;
         try {
@@ -95,9 +96,9 @@ public class RabbitmqClusterEndpoint {
     @Path("/{id:[0-9][0-9]*}")
     public Response displayRabbitmqCluster(@PathParam("id") Long id) {
         Subject subject = SecurityUtils.getSubject();
-        log.debug("[{}-{}] get rabbitmq component : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id});
+        log.debug("[{}-{}] get rabbitmq cluster : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id});
         if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQCluster:display") ||
-                    subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
+            subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
         {
             em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
             RabbitmqCluster entity = findRabbitmqClusterById(em, id);
@@ -110,19 +111,19 @@ public class RabbitmqClusterEndpoint {
             em.close();
             return ret;
         } else {
-            return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to display rabbitmq components. Contact your administrator.").build();
+            return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to display rabbitmq clusters. Contact your administrator.").build();
         }
     }
 
     @GET
     public Response displayAllRabbitmqClusters() {
         Subject subject = SecurityUtils.getSubject();
-        log.debug("[{}-{}] get rabbitmq components", new Object[]{Thread.currentThread().getId(), subject.getPrincipal()});
+        log.debug("[{}-{}] get rabbitmq clusters", new Object[]{Thread.currentThread().getId(), subject.getPrincipal()});
         if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQCluster:display") ||
                     subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
         {
             em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-            final HashSet<RabbitmqCluster> results = new HashSet(em.createQuery("SELECT DISTINCT t FROM RabbitmqCluster t ORDER BY t.id", RabbitmqCluster.class).getResultList());
+            final HashSet<RabbitmqCluster> results = new HashSet(em.createQuery("SELECT DISTINCT t FROM RabbitmqCluster t LEFT JOIN FETCH t.nodes ORDER BY t.id", RabbitmqCluster.class).getResultList());
 
             Response ret = null;
             String result;
@@ -141,7 +142,7 @@ public class RabbitmqClusterEndpoint {
                 return ret;
             }
         } else {
-            return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to display rabbitmq components. Contact your administrator.").build();
+            return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to display rabbitmq clusters. Contact your administrator.").build();
         }
     }
 
@@ -152,7 +153,7 @@ public class RabbitmqClusterEndpoint {
             return displayRabbitmqCluster(id);
         } else if (name!=null) {
             Subject subject = SecurityUtils.getSubject();
-            log.debug("[{}-{}] get rabbitmq component : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), name});
+            log.debug("[{}-{}] get rabbitmq cluster : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), name});
             if (subject.hasRole("mdwrabbitadmin") || subject.hasRole("mdwrabbitreviewer") || subject.isPermitted("dirMdwRabbitMQCluster:display") ||
                         subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
             {
@@ -285,14 +286,14 @@ public class RabbitmqClusterEndpoint {
                         if(em.getTransaction().isActive())
                             em.getTransaction().rollback();
                         em.close();
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq cluster " + entity.getName() + " : " + t.getMessage()).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while updating rabbitmq cluster " + entity.getName() + " : " + t.getMessage()).build();
                     }
                 } else {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq clusters. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to update rabbitmq clusters. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or name are not defined. You must define these parameters.").build();
@@ -321,17 +322,103 @@ public class RabbitmqClusterEndpoint {
                         if(em.getTransaction().isActive())
                             em.getTransaction().rollback();
                         em.close();
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while deleting rabbitmq cluster " + entity.getName() + " : " + t.getMessage()).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while updating rabbitmq cluster " + entity.getName() + " : " + t.getMessage()).build();
                     }
                 } else {
                     em.close();
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } else {
-                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to delete rabbitmq clusters. Contact your administrator.").build();
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to update rabbitmq clusters. Contact your administrator.").build();
             }
         } else {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or description are not defined. You must define these parameters.").build();
+        }
+    }
+
+    @GET
+    @Path("/update/nodes/add")
+    public Response updateRabbitmqClusterAddNode(@QueryParam("id")Long id, @QueryParam("nodeID")Long nodeID) {
+        if (id!=0 && nodeID!=null) {
+            Subject subject = SecurityUtils.getSubject();
+            log.debug("[{}-{}] update rabbitmq cluster {} by adding node : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, nodeID});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQCluster:update") ||
+                        subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
+            {
+                em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+                RabbitmqCluster entity = findRabbitmqClusterById(em, id);
+                if (entity!=null) {
+                    RabbitmqNode node = RabbitmqNodeEndpoint.findRabbitmqNodeById(em, nodeID);
+                    if (node!=null) {
+                        try {
+                            em.getTransaction().begin();
+                            node.setCluster(entity);
+                            entity.getNodes().add(node);
+                            em.getTransaction().commit();
+                            em.close();
+                            return Response.status(Status.OK).entity("RabbitMQ cluster " + id + " has been successfully updated by adding node " + nodeID).build();
+                        } catch (Throwable t) {
+                            if(em.getTransaction().isActive())
+                                em.getTransaction().rollback();
+                            em.close();
+                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while updating RabbitMQ cluster " + entity.getName() + " : " + t.getMessage()).build();
+                        }
+                    } else {
+                        em.close();
+                        return Response.status(Status.NOT_FOUND).entity("RabbitMQ node " + nodeID + " not found.").build();
+                    }
+                } else {
+                    em.close();
+                    return Response.status(Status.NOT_FOUND).entity("RabbitMQ cluster " + id + " not found.").build();
+                }
+            } else {
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to update RabbitMQ cluster. Contact your administrator.").build();
+            }
+        } else {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or name are not defined. You must define these parameters.").build();
+        }
+    }
+
+    @GET
+    @Path("/update/nodes/delete")
+    public Response updateRabbitmqClusterDeleteNode(@QueryParam("id")Long id, @QueryParam("nodeID")Long nodeID) {
+        if (id!=0 && nodeID!=null) {
+            Subject subject = SecurityUtils.getSubject();
+            log.debug("[{}-{}] update RabbitMQ cluster {} by deleting node : {}", new Object[]{Thread.currentThread().getId(), subject.getPrincipal(), id, nodeID});
+            if (subject.hasRole("mdwrabbitadmin") || subject.isPermitted("dirMdwRabbitMQCluster:update") ||
+                        subject.hasRole("Jedi") || subject.isPermitted("ccuniverse:zeone"))
+            {
+                em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+                RabbitmqCluster entity = findRabbitmqClusterById(em, id);
+                if (entity!=null) {
+                    RabbitmqNode node = RabbitmqNodeEndpoint.findRabbitmqNodeById(em, nodeID);
+                    if (node!=null) {
+                        try {
+                            em.getTransaction().begin();
+                            node.setCluster(null);
+                            entity.getNodes().remove(node);
+                            em.getTransaction().commit();
+                            em.close();
+                            return Response.status(Status.OK).entity("RabbitMQ Cluster " + id + " has been successfully updated by removing node " + nodeID).build();
+                        } catch (Throwable t) {
+                            if(em.getTransaction().isActive())
+                                em.getTransaction().rollback();
+                            em.close();
+                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Throwable raised while updating RabbitMQ Cluster " + entity.getName() + " : " + t.getMessage()).build();
+                        }
+                    } else {
+                        em.close();
+                        return Response.status(Status.NOT_FOUND).entity("Node " + nodeID + " not found.").build();
+                    }
+                } else {
+                    em.close();
+                    return Response.status(Status.NOT_FOUND).entity("RabbitMQ Cluster " + id + " not found.").build();
+                }
+            } else {
+                return Response.status(Status.UNAUTHORIZED).entity("You're not authorized to update RabbitMQ Clusters. Contact your administrator.").build();
+            }
+        } else {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Request error: id and/or name are not defined. You must define these parameters.").build();
         }
     }
 }

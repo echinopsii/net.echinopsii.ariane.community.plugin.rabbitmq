@@ -35,27 +35,32 @@ import java.util.HashSet;
  *  - we still want to have references to linked objects through IDs (and so we don't want @XmlTransient or @JsonIgnore)
  */
 public class RabbitmqNodeJSON {
-    public final static String RMQC_ID          = "rbmqNodeID";
-    public final static String RMQC_VERSION     = "rbmqNodeVersion";
-    public final static String RMQC_NAME        = "rbmqNodeName";
-    public final static String RMQC_URL         = "rbmqNodeURL";
-    public final static String RMQC_USER        = "rbmqNodeUser";
-    public final static String RMQC_PASSWD      = "rbmqNodeIsPasswordDefined";
-    public final static String RMQC_DESCRIPTION = "rbmqNodeDescription";
-    public final static String RMQC_OSINSTANCE  = "rbmqNodeOSinstanceID";
-    public final static String RMQC_SPT_TEAM    = "rbmqNodeSupportTeamID";
+    public final static String RMQN_ID          = "rbmqNodeID";
+    public final static String RMQN_VERSION     = "rbmqNodeVersion";
+    public final static String RMQN_NAME        = "rbmqNodeName";
+    public final static String RMQN_URL         = "rbmqNodeURL";
+    public final static String RMQN_USER        = "rbmqNodeUser";
+    public final static String RMQN_PASSWD      = "rbmqNodeIsPasswordDefined";
+    public final static String RMQN_DESCRIPTION = "rbmqNodeDescription";
+    public final static String RMQN_CLUSTER     = "rbmqNodeClusterID";
+    public final static String RMQN_OSINSTANCE  = "rbmqNodeOSinstanceID";
+    public final static String RMQN_SPT_TEAM    = "rbmqNodeSupportTeamID";
 
     public final static void rabbitmqNode2JSON(RabbitmqNode node, JsonGenerator jgenerator) throws IOException {
         jgenerator.writeStartObject();
-        jgenerator.writeNumberField(RMQC_ID, node.getId());
-        jgenerator.writeNumberField(RMQC_VERSION, node.getVersion());
-        jgenerator.writeStringField(RMQC_NAME, node.getName());
-        jgenerator.writeStringField(RMQC_URL, node.getUrl());
-        jgenerator.writeStringField(RMQC_USER, node.getUser());
-        jgenerator.writeBooleanField(RMQC_PASSWD, node.getPasswd() != null);
-        jgenerator.writeStringField(RMQC_DESCRIPTION, node.getDescription());
-        jgenerator.writeNumberField(RMQC_OSINSTANCE, node.getOsInstance().getId());
-        jgenerator.writeNumberField(RMQC_SPT_TEAM, node.getSupportTeam().getId());
+        jgenerator.writeNumberField(RMQN_ID, node.getId());
+        jgenerator.writeNumberField(RMQN_VERSION, node.getVersion());
+        jgenerator.writeStringField(RMQN_NAME, node.getName());
+        jgenerator.writeStringField(RMQN_URL, node.getUrl());
+        jgenerator.writeStringField(RMQN_USER, node.getUser());
+        jgenerator.writeBooleanField(RMQN_PASSWD, node.getPasswd() != null);
+        jgenerator.writeStringField(RMQN_DESCRIPTION, node.getDescription());
+        if (node.getCluster()!=null)
+            jgenerator.writeNumberField(RMQN_CLUSTER, node.getCluster().getId());
+        else
+            jgenerator.writeNumberField(RMQN_CLUSTER, -1);
+        jgenerator.writeNumberField(RMQN_OSINSTANCE, node.getOsInstance().getId());
+        jgenerator.writeNumberField(RMQN_SPT_TEAM, node.getSupportTeam().getId());
         jgenerator.writeEndObject();
     }
 
