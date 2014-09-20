@@ -24,6 +24,8 @@ import net.echinopsii.ariane.community.core.directory.base.model.technical.syste
 import net.echinopsii.ariane.community.core.directory.wat.controller.organisational.team.TeamsListController;
 import net.echinopsii.ariane.community.core.directory.wat.controller.technical.system.OSInstance.OSInstancesListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster.RabbitmqClustersListController;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,9 @@ public class RabbitmqComponentNewController implements Serializable {
     private String user;
     private String password;
     private String description;
+
+    private String rbmqCluster;
+    private RabbitmqCluster cluster;
 
     private String osInstance;
     private OSInstance osInt ;
@@ -101,6 +106,37 @@ public class RabbitmqComponentNewController implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getRbmqCluster() {
+        return rbmqCluster;
+    }
+
+    public void setRbmqCluster(String rbmqCluster) {
+        this.rbmqCluster = rbmqCluster;
+    }
+
+    public RabbitmqCluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(RabbitmqCluster cluster) {
+        this.cluster = cluster;
+    }
+
+    private void syncCluster() throws NotSupportedException, SystemException {
+        RabbitmqCluster finalCluster = null;
+        for (RabbitmqCluster rabbitmqCluster : RabbitmqClustersListController.getAll()) {
+            if (rabbitmqCluster.getName().equals(this.rbmqCluster)) {
+                rabbitmqCluster = em.find(rabbitmqCluster.getClass(), rabbitmqCluster.getId());
+                finalCluster = rabbitmqCluster;
+                break;
+            }
+        }
+        if (finalCluster!=null) {
+            this.cluster = finalCluster;
+            log.debug("Synced RabbitMQ cluster : {} {}", new Object[]{this.cluster.getId(), this.cluster.getName()});
+        }
     }
 
     public String getOsInstance() {
@@ -167,6 +203,7 @@ public class RabbitmqComponentNewController implements Serializable {
 
     public void save() throws SystemException, NotSupportedException, HeuristicRollbackException, HeuristicMixedException, RollbackException {
         try {
+            syncCluster();
             syncOSIntance();
             syncSupportTeam();
         } catch (Exception e) {
@@ -183,6 +220,7 @@ public class RabbitmqComponentNewController implements Serializable {
         rabbitmqComponent.setUser(user);
         rabbitmqComponent.setPasswd(password);
         rabbitmqComponent.setUrl(url);
+        rabbitmqComponent.setCluster(cluster);
         rabbitmqComponent.setDescription(description);
         rabbitmqComponent.setOsInstance(osInt);
         rabbitmqComponent.setSupportTeam(suppTeam);

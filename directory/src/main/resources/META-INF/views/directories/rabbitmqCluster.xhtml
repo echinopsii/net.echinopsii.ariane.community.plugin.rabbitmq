@@ -13,11 +13,11 @@
         <h:form id="rabbitmqClusterTableForm">
             <p:growl id="rabbitmqClusterTableMessages" showDetail="true" />
             <p:dataTable id="rabbitmqClusterTable" var="rbmqc" value="#{rabbitmqClustersListController.lazyModel}"
-                         selectionMode="multiple" selection="#{rabbitmqClustersListController.selectedRabbitmqComponentList}" rowKey="#{rbmqc.id}"
+                         selectionMode="multiple" selection="#{rabbitmqClustersListController.selectedRabbitmqClusterList}" rowKey="#{rbmqc.id}"
                          paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                          rowsPerPageTemplate="5,10,15,20,25" lazy="true" rows="25" paginator="true">
                 <f:facet name="header">
-                    Tibco RV Components
+                    RabbitMQ Cluster
                 </f:facet>
 
                 <p:ajax event="rowToggle" listener="#{rabbitmqClustersListController.onRowToggle}" />
@@ -54,13 +54,41 @@
                         </h:form>
                         <h:outputText value="#{rbmqc.description}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQCluster:update')}"/>
 
+                        <h:outputText value="RabbitMQ Components : " styleClass="inputTitle"/>
+                        <h:form>
+                            <p:dataTable value="#{directoryViewUtils.asList(rbmqc,'nodes')}" var="clu" styleClass="ui-widget-content grid" rowKey="#{clu.id}"
+                                         rows="5" paginator="true" selection="#{rabbitmqClustersListController.removedComponents[rbmqc.id]}" selectionMode="multiple">
+                                <p:column headerText="Name" sortBy="#{clu.name}" filterBy="#{clu.name}">
+                                    <h:outputText id="itemName" value="#{clu.name}"/>
+                                </p:column>
+                                <p:column headerText="Description" sortBy="#{clu.description}" filterBy="#{clu.description}">
+                                    <h:outputText id="itemDescription" value="#{clu.description}"/>
+                                </p:column>
+                                <c:if test="#{ccidm:hasPermission('dirMdwRabbitMQCluster:update')}">
+                                    <f:facet name="footer">
+                                        <p:inplace label="Select RabbitMQ component to bind" effectSpeed="fast" editor="true">
+                                            <h:selectOneMenu value="#{rabbitmqClustersListController.addedRBMQComponent[rbmqc.id]}">
+                                                <f:selectItems value="#{rabbitmqComponentsListController.getAll()}" var="clu_"
+                                                               itemLabel="#{clu_.name}" itemValue="#{clu_.name}"/>
+                                            </h:selectOneMenu>
+                                            <p:ajax event="save" listener="#{rabbitmqClustersListController.syncAddedRBMQComponent(rbmqc)}"
+                                                    update="@form,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                                        </p:inplace>
+                                        <p:commandButton value="Unbind selected RabbitMQ component" icon="ui-icon-closethick"
+                                                         process="@form" actionListener="#{rabbitmqClustersListController.syncRemovedComponents(rbmqc)}"
+                                                         update="@form,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                                    </f:facet>
+                                </c:if>
+                            </p:dataTable>
+                        </h:form>
+
                     </h:panelGrid>
 
                 </p:rowExpansion>
 
                 <f:facet name="footer">
-                    <p:commandButton value="Create RabbitMQ Component" icon="ui-icon-disk" onclick="rabbitmqClusterCreateDialog.show()" rendered="#{ccidm:hasPermission('dirMdwRabbitMQCluster:create')}"/>
-                    <p:commandButton value="Remove selected RabbitMQ Component" icon="ui-icon-closethick" onclick="rabbitmqClusterRemoveDialog.show()"
+                    <p:commandButton value="Create RabbitMQ Cluster" icon="ui-icon-disk" onclick="rabbitmqClusterCreateDialog.show()" rendered="#{ccidm:hasPermission('dirMdwRabbitMQCluster:create')}"/>
+                    <p:commandButton value="Remove selected RabbitMQ Cluster" icon="ui-icon-closethick" onclick="rabbitmqClusterRemoveDialog.show()"
                                      update=":removerabbitmqClusterDialogForm:display" rendered="#{ccidm:hasPermission('dirMdwRabbitMQCluster:remove')}"/>
                     <p:commandButton value="Refresh table" id="rbmqcmpUpdate" icon="icon-refresh" styleClass="ui-priority-primary icon-large"
                                      update=":rabbitmqClusterTableForm:rabbitmqClusterTable"/>
@@ -71,35 +99,156 @@
         <p:dialog header="Confirm your remove order !" widgetVar="rabbitmqClusterRemoveDialog"
                   width="500" showEffect="fade" hideEffect="explode">
             <h:form id="removerabbitmqClusterDialogForm">
-                <h:outputText value="Are you sure you want delete following Tibco RV Component ?" styleClass="inputTitle"/><br/>
+                <h:outputText value="Are you sure you want delete following RabbitMQ cluster ?" styleClass="inputTitle"/><br/>
                 <p:commandButton value="Yes" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                  actionListener="#{rabbitmqClustersListController.delete}" oncomplete="rabbitmqClusterRemoveDialog.hide();"
                                  update=":rabbitmqClusterTableForm:rabbitmqClusterTable,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                 <p:commandButton value="No" styleClass="ui-confirmdialog-no" icon="ui-icon-close" onclick="rabbitmqClusterRemoveDialog.hide();"/>
                 <p:separator/>
                 <p:dataList id="display"
-                            value="#{rabbitmqClustersListController.selectedRabbitmqComponentList}"
-                            var="selectedRabbitmqComponent" type="definition">
+                            value="#{rabbitmqClustersListController.selectedRabbitmqClusterList}"
+                            var="selectedRabbitmqCluster" type="definition">
                     <h:panelGrid columns="2" cellpadding="5">
                         <h:outputText value="Name : " styleClass="inputTitle"/>
-                        <h:outputText value="#{selectedRabbitmqComponent.name}"/>
+                        <h:outputText value="#{selectedRabbitmqCluster.name}"/>
                     </h:panelGrid>
                     <p:separator/>
                 </p:dataList>
             </h:form>
         </p:dialog>
 
-        <p:dialog header="Create a new RabbitMQ Component" widgetVar="rabbitmqClusterCreateDialog"
+        <p:dialog header="Create a new RabbitMQ Cluster" widgetVar="rabbitmqClusterCreateDialog"
                   width="450" showEffect="fade" hideEffect="explode">
             <h:form id="createrabbitmqClusterDialogForm">
                 <ui:insert name="createrabbitmqCluster" >
                     <ui:include src="/templates/rabbitmqClusterNewForm.xhtml" />
                 </ui:insert>
-                <p:commandButton value="Save this Tibco RV Component" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
-                                 actionListener="#{rabbitmqClusterNewController.save}" oncomplete="rabbitmqClusterCreateDialog.hide();"
+                <p:commandButton value="Save this RabbitMQ Cluster" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                 actionListener="#{rabbitmqClusterNewController.save}" oncomplete="rabbitmqComponentCreateDialog.hide();"
                                  update=":rabbitmqClusterTableForm:rabbitmqClusterTable,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
             </h:form>
         </p:dialog>
+
+            <p:dialog header="Create a new RabbitMQ Component" widgetVar="rabbitmqComponentCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createrabbitmqComponentDialogForm">
+                    <ui:insert name="createrabbitmqComponent" >
+                        <ui:include src="/templates/rabbitmqComponentNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this RabbitMQ Component" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{rabbitmqComponentNewController.save}" oncomplete="rabbitmqComponentCreateDialog.hide();"
+                                     update=":createrabbitmqClusterDialogForm:rabbitmqClusterNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new OS Instance" widgetVar="osInstanceCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createOSInstanceDialogForm">
+                    <ui:insert name="createOSInstance" >
+                        <ui:include src="/templates/osInstanceNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this OS Instance" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{OSInstanceNewController.save}" oncomplete="osInstanceCreateDialog.hide();"
+                                     update=":createrabbitmqClusterDialogForm:rabbitmqClusterNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new OS Type" widgetVar="osTypeCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createOSTypeDialogForm">
+                    <ui:insert name="createOSType" >
+                        <ui:include src="/templates/osTypeNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this OS Type" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{OSTypeNewController.save}" oncomplete="osTypeCreateDialog.hide();"
+                                     update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new environment" widgetVar="environmentCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createEnvironmentDialogForm">
+                    <ui:insert name="createEnvironment" >
+                        <ui:include src="/templates/environmentNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this environment" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{environmentNewController.save}" oncomplete="environmentCreateDialog.hide();"
+                                     update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new application" widgetVar="appCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createApplicationDialogForm">
+                    <ui:insert name="createApplication" >
+                        <ui:include src="/templates/applicationNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this application" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{applicationNewController.save}" oncomplete="appCreateDialog.hide();"
+                                     update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new team" widgetVar="teamCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createTeamDialogForm">
+                    <ui:insert name="createTeam" >
+                        <ui:include src="/templates/teamNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this team" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{teamNewController.save}" oncomplete="teamCreateDialog.hide();"
+                                     update=":createrabbitmqComponentDialogForm:rabbitmqComponentNewGrid,:createOSInstanceDialogForm:osInstanceNewGrid,
+                                         :rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new company" widgetVar="companyCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createCompanyDialogForm">
+                    <ui:insert name="createCompany" >
+                        <ui:include src="/templates/companyNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this company" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{companyNewController.save}" oncomplete="companyCreateDialog.hide();"
+                                     update=":createOSTypeDialogForm:osTypeNewGrid,:createApplicationDialogForm:applicationNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new subnet" widgetVar="subnetCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createSubnetDialogForm">
+                    <ui:insert name="createSubnet" >
+                        <ui:include src="/templates/subnetNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this subnet" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{subnetNewController.save}" oncomplete="subnetCreateDialog.hide();"
+                                     update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new multicast area" widgetVar="mareaCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="createMareaDialogForm">
+                    <ui:insert name="createMulticastArea" >
+                        <ui:include src="/templates/multicastAreaNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this multicast area" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{multicastAreaNewController.save}" oncomplete="mareaCreateDialog.hide();"
+                                     update=":createSubnetDialogForm:subnetNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Create a new datacenter" widgetVar="dcCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode">
+                <h:form id="creatDCDialogForm">
+                    <ui:insert name="createDatacenter" >
+                        <ui:include src="/templates/dcNewForm.xhtml" />
+                    </ui:insert>
+                    <p:commandButton value="Save this datacenter" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                     actionListener="#{datacenterNewController.save}" oncomplete="dcCreateDialog.hide();"
+                                     update=":createSubnetDialogForm:subnetNewGrid,:createMareaDialogForm:mareaNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                </h:form>
+            </p:dialog>
         </ui:fragment>
     </ui:define>
 </ui:composition>

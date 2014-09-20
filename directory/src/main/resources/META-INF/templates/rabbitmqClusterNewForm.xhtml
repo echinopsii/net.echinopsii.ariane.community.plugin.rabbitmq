@@ -4,12 +4,23 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <ui:composition>
-    <h:panelGrid id="rabbitmqComponentNewGrid" columns="2" columnClasses="colStyle25,colStyle75" cellpadding="5" styleClass="ui-widget-content grid">
+    <h:panelGrid id="rabbitmqClusterNewGrid" columns="2" columnClasses="colStyle25,colStyle75" cellpadding="5" styleClass="ui-widget-content grid">
         <h:outputText value="Name : " styleClass="inputTitle"/>
-        <p:inputText id="name" label="Name" required="true" value="#{rabbitmqComponentNewController.name}"/>
+        <p:inputText id="name" label="Name" required="true" value="#{rabbitmqClusterNewController.name}"/>
+
+        <h:outputText value="RabbitMQ components : " styleClass="inputTitle"/>
+        <h:panelGroup>
+            <p:commandLink onclick="rabbitmqComponentCreateDialog.show()">
+                <h:outputText value=" create new RabbitMQ component"/>
+            </p:commandLink><br/>
+            <p:selectManyMenu id="basic" value="#{rabbitmqClusterNewController.rmqcomponentsToBind}" style="width:150px;height:100px">
+                <f:selectItems value="#{rabbitmqComponentsListController.getAll()}"  var="rbmqc"
+                               itemLabel="#{rbmqc.name}" itemValue="#{rbmqc.name}"/>
+            </p:selectManyMenu>
+        </h:panelGroup>
 
         <h:outputText value="Description : " styleClass="inputTitle"/>
-        <p:inputText id="description" label="Description" required="true" value="#{rabbitmqComponentNewController.description}"/>
+        <p:inputText id="description" label="Description" required="true" value="#{rabbitmqClusterNewController.description}"/>
 
     </h:panelGrid>
 </ui:composition>

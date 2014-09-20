@@ -19,11 +19,8 @@
 
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster;
 
-import net.echinopsii.ariane.community.core.directory.base.model.organisational.Team;
-import net.echinopsii.ariane.community.core.directory.base.model.technical.system.OSInstance;
-import net.echinopsii.ariane.community.core.directory.wat.controller.organisational.team.TeamsListController;
-import net.echinopsii.ariane.community.core.directory.wat.controller.technical.system.OSInstance.OSInstancesListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcomponent.RabbitmqComponentsListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
 import org.slf4j.Logger;
@@ -35,6 +32,10 @@ import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 import javax.transaction.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class RabbitmqClusterNewController implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -53,16 +54,10 @@ public class RabbitmqClusterNewController implements Serializable {
     }
 
     private String name;
-    private String url;
-    private String user;
-    private String password;
     private String description;
 
-    private String osInstance;
-    private OSInstance osInt ;
-
-    private String supportTeam;
-    private Team   suppTeam;
+    private List<String>  rmqcomponentsToBind = new ArrayList<String>();
+    private Set<RabbitmqComponent> components = new HashSet<RabbitmqComponent>();
 
     public String getName() {
         return name;
@@ -80,27 +75,72 @@ public class RabbitmqClusterNewController implements Serializable {
         this.description = description;
     }
 
+    public List<String> getRmqcomponentsToBind() {
+        return rmqcomponentsToBind;
+    }
+
+    public void setRmqcomponentsToBind(List<String> rmqcomponentsToBind) {
+        this.rmqcomponentsToBind = rmqcomponentsToBind;
+    }
+
+    public Set<RabbitmqComponent> getComponents() {
+        return components;
+    }
+
+    public void setComponents(Set<RabbitmqComponent> components) {
+        this.components = components;
+    }
+
+    /**
+     * populate RabbitMQ components list through rmqcomponentsToBind list provided through UI form
+     *
+     * @throws NotSupportedException
+     * @throws SystemException
+     */
+    private void bindSelectedComponents() throws NotSupportedException, SystemException {
+        for (RabbitmqComponent rmqc: RabbitmqComponentsListController.getAll()) {
+            for (String rmqcToBind : rmqcomponentsToBind)
+                if (rmqc.getName().equals(rmqcToBind)) {
+                    rmqc = em.find(rmqc.getClass(), rmqc.getId());
+                    this.components.add(rmqc);
+                    log.debug("Synced RabbitMQ components : {} {}", new Object[]{rmqc.getId(), rmqc.getName()});
+                    break;
+                }
+        }
+    }
 
     public void save() throws SystemException, NotSupportedException, HeuristicRollbackException, HeuristicMixedException, RollbackException {
-        RabbitmqCluster rabbitmqComponent = new RabbitmqCluster();
-        rabbitmqComponent.setName(name);
-        rabbitmqComponent.setDescription(description);
+        try {
+            bindSelectedComponents();
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                                       "Exception raise while creating rabbitmq cluster " + name + " !",
+                                                       "Exception message : " + e.getMessage());
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+            return;
+        }
+
+        RabbitmqCluster rabbitmqCluster = new RabbitmqCluster();
+        rabbitmqCluster.setName(name);
+        rabbitmqCluster.setDescription(description);
+        rabbitmqCluster.setNodesR(this.components);
 
         try {
             em.getTransaction().begin();
-            em.persist(rabbitmqComponent);
+            em.persist(rabbitmqCluster);
             em.flush();
             em.getTransaction().commit();
             log.debug("Save new RabbitmqCluster {} !", new Object[]{name});
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
                                                        "RabbitmqCluster created successfully !",
-                                                       "RabbitmqCluster name : " + rabbitmqComponent.getName());
+                                                       "RabbitmqCluster name : " + rabbitmqCluster.getName());
             FacesContext.getCurrentInstance().addMessage(null, msg);
         } catch (Throwable t) {
             log.debug("Throwable catched !");
             t.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                       "Throwable raised while creating RabbitmqCluster " + rabbitmqComponent.getName() + " !",
+                                                       "Throwable raised while creating RabbitmqCluster " + rabbitmqCluster.getName() + " !",
                                                        "Throwable message : " + t.getMessage());
             FacesContext.getCurrentInstance().addMessage(null, msg);
 

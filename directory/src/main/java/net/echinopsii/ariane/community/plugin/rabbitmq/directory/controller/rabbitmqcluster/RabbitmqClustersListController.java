@@ -20,7 +20,10 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster;
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcomponent.RabbitmqComponentsListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
+import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.LazyDataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +36,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class RabbitmqClustersListController implements Serializable {
@@ -52,6 +57,114 @@ public class RabbitmqClustersListController implements Serializable {
 
     public void setSelectedRabbitmqClusterList(RabbitmqCluster[] selectedRabbitmqClusterList) {
         this.selectedRabbitmqClusterList = selectedRabbitmqClusterList;
+    }
+
+    private HashMap<Long,String> addedRBMQComponent                 = new HashMap<Long, String>();
+    private HashMap<Long,List<RabbitmqComponent>> removedComponents = new HashMap<Long, List<RabbitmqComponent>>();
+
+    public HashMap<Long, String> getAddedRBMQComponent() {
+        return addedRBMQComponent;
+    }
+
+    public void setAddedRBMQComponent(HashMap<Long, String> addedRBMQComponent) {
+        this.addedRBMQComponent = addedRBMQComponent;
+    }
+
+    /**
+     * Synchronize added RabbitMQ component into a RabbitMQ cluster to database
+     *
+     * @param cluster bean UI is working on
+     */
+    public void syncAddedRBMQComponent(RabbitmqCluster cluster) {
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+        try {
+            for (RabbitmqComponent rbmqcomponent: RabbitmqComponentsListController.getAll()) {
+                if (rbmqcomponent.getName().equals(this.addedRBMQComponent.get(cluster.getId()))) {
+                    em.getTransaction().begin();
+                    rbmqcomponent = em.find(rbmqcomponent.getClass(), rbmqcomponent.getId());
+                    cluster = em.find(cluster.getClass(), cluster.getId());
+                    cluster.getNodes().add(rbmqcomponent);
+                    if (rbmqcomponent.getCluster()!=null)
+                        rbmqcomponent.getCluster().getNodes().remove(rbmqcomponent);
+                    rbmqcomponent.setCluster(cluster);
+                    em.flush();
+                    em.getTransaction().commit();
+                    FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+                                                               "RabbitMQ cluster updated successfully !",
+                                                               "RabbitMQ cluster name : " + cluster.getName());
+                    FacesContext.getCurrentInstance().addMessage(null, msg);
+                    break;
+                }
+            }
+        } catch (Throwable t) {
+            log.debug("Throwable catched !");
+            t.printStackTrace();
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                                       "Throwable raised while updating RabbitMQ cluster " + cluster.getName() + " !",
+                                                       "Throwable message : " + t.getMessage());
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+        } finally {
+            em.close();
+        }
+    }
+
+    public HashMap<Long, List<RabbitmqComponent>> getRemovedComponents() {
+        return removedComponents;
+    }
+
+    public void setRemovedComponents(HashMap<Long, List<RabbitmqComponent>> removedComponents) {
+        this.removedComponents = removedComponents;
+    }
+
+    /**
+     * Synchronize removed RabbitMQ component from a RabbitMQ cluster to database
+     *
+     * @param cluster bean UI is working on
+     */
+    public void syncRemovedComponents(RabbitmqCluster cluster) {
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+        try {
+            em.getTransaction().begin();
+            cluster = em.find(cluster.getClass(), cluster.getId());
+            List<RabbitmqComponent> rbmqcomponents2beRM = this.removedComponents.get(cluster.getId());
+            log.debug("syncRemovedComponents:{} ", new Object[]{rbmqcomponents2beRM});
+            for (RabbitmqComponent rbmqc2beRM : rbmqcomponents2beRM) {
+                rbmqc2beRM = em.find(rbmqc2beRM.getClass(), rbmqc2beRM.getId());
+                cluster.getNodes().remove(rbmqc2beRM);
+                rbmqc2beRM.setCluster(null);
+            }
+            em.flush();
+            em.getTransaction().commit();
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+                                                       "RabbitMQ cluster updated successfully !",
+                                                       "RabbitMQ cluster name : " + cluster.getName());
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+        } catch (Throwable t) {
+            log.debug("Throwable catched !");
+            t.printStackTrace();
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                                       "Throwable raised while updating RabbitMQ cluster " + cluster.getName() + " !",
+                                                       "Throwable message : " + t.getMessage());
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+        } finally {
+            em.close();
+        }
+    }
+
+    public void onRowToggle(ToggleEvent event) throws CloneNotSupportedException {
+        log.debug("Row Toogled : {}", new Object[]{event.getVisibility().toString()});
+        RabbitmqCluster eventRabbitmqCluster = ((RabbitmqCluster) event.getData());
+        if (event.getVisibility().toString().equals("HIDDEN")) {
+            addedRBMQComponent.remove(eventRabbitmqCluster.getId());
+            removedComponents.remove(eventRabbitmqCluster.getId());
+        } else {
+            addedRBMQComponent.put(eventRabbitmqCluster.getId(),"");
+            removedComponents.put(eventRabbitmqCluster.getId(), new ArrayList<RabbitmqComponent>());
+        }
     }
 
     public void update(RabbitmqCluster rabbitmqCluster) throws SystemException, NotSupportedException, HeuristicRollbackException, HeuristicMixedException, RollbackException {
@@ -90,6 +203,8 @@ public class RabbitmqClustersListController implements Serializable {
             try {
                 em.getTransaction().begin();
                 rabbitmqCluster = em.find(rabbitmqCluster.getClass(), rabbitmqCluster.getId());
+                for (RabbitmqComponent component: rabbitmqCluster.getNodes())
+                    component.setCluster(null);
                 em.remove(rabbitmqCluster);
                 em.flush();
                 em.getTransaction().commit();

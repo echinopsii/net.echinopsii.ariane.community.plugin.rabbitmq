@@ -144,10 +144,8 @@ public class RabbitmqDirectoryBootstrap implements FaceletsResourceResolverServi
 
     @Override
     public URL resolveURL(String path) {
-        log.error("Resolve {} from rabbitmq directory...", new Object[]{path});
-        URL url = RabbitmqDirectoryBootstrap.class.getResource(basePath + path);
-        log.error("url: " + ((url!=null)?url.getPath():"null"));
-        return url;
+        log.debug("Resolve {} from rabbitmq directory...", new Object[]{path});
+        return RabbitmqDirectoryBootstrap.class.getResource(basePath + path);
     }
 
     private static JsonFactory jFactory = new JsonFactory();
@@ -238,25 +236,33 @@ public class RabbitmqDirectoryBootstrap implements FaceletsResourceResolverServi
             rootDirectoryRegistry.getLinkedMainMenuEntity().getDisplayRoles().add("mdwrabbitadmin");
             rootDirectoryRegistry.getLinkedMainMenuEntity().getDisplayRoles().add("mdwrabbitreviewer");
             rootDirectoryRegistry.getLinkedMainMenuEntity().getDisplayPermissions().add("dirMdwRabbitMQComponent:display");
+            rootDirectoryRegistry.getLinkedMainMenuEntity().getDisplayPermissions().add("dirMdwRabbitMQCluster:display");
 
             TreeMenuEntity middlewareRootTreeMenuEntity = rootDirectoryRegistry.getTreeMenuEntityFromValue("Middleware");
             if (middlewareRootTreeMenuEntity == null) {
                 middlewareRootTreeMenuEntity = new TreeMenuEntity().setId("mdwDir").setValue("Middleware").setType(MenuEntityType.TYPE_MENU_SUBMENU);
                 rootDirectoryRegistry.registerTreeMenuRootEntity(middlewareRootTreeMenuEntity);
             }
-            middlewareRootTreeMenuEntity.addDisplayRole("mdwrabbitadmin").addDisplayRole("mdwrabbitreviewer").addDisplayPermission("dirMdwRabbitMQComponent:display");
+            middlewareRootTreeMenuEntity.addDisplayRole("mdwrabbitadmin").addDisplayRole("mdwrabbitreviewer").
+                                         addDisplayPermission("dirMdwRabbitMQComponent:display").addDisplayPermission("dirMdwRabbitMQCluster:display");
 
             rabbitmqTreeMenuEntity = new TreeMenuEntity().setId("rabbitMQDir").setValue("RabbitMQ").
                                                          setType(MenuEntityType.TYPE_MENU_SUBMENU).setParentTreeMenuEntity(middlewareRootTreeMenuEntity).
-                                                         addDisplayRole("mdwrabbitmqadmin").
-                                                         addDisplayPermission("dirMdwRabbitMQComponent:display");
+                                                         addDisplayRole("mdwrabbitmqadmin").addDisplayRole("mdwrabbitreviewer").
+                                                         addDisplayPermission("dirMdwRabbitMQComponent:display").addDisplayPermission("dirMdwRabbitMQCluster:display");
             middlewareRootTreeMenuEntity.addChildTreeMenuEntity(rabbitmqTreeMenuEntity);
             rabbitmqTreeMenuEntity.addChildTreeMenuEntity(new TreeMenuEntity().setId("rabbitMQComponentTreeID").setValue("RabbitMQ Component").
                                                                                setParentTreeMenuEntity(rabbitmqTreeMenuEntity).setIcon("icon-cogs").
                                                                                setType(MenuEntityType.TYPE_MENU_ITEM).setContextAddress(MAIN_MENU_DIRECTORY_CONTEXT + "views/directories/rabbitmqComponent.jsf").
                                                                                setDescription("Your RabbitMQ Component definitions").
-                                                                               addDisplayRole("mdwrabbitadmin").
+                                                                               addDisplayRole("mdwrabbitadmin").addDisplayRole("mdwrabbitreviewer").
                                                                                addDisplayPermission("dirMdwRabbitMQComponent:display"));
+            rabbitmqTreeMenuEntity.addChildTreeMenuEntity(new TreeMenuEntity().setId("rabbitMQClusterTreeID").setValue("RabbitMQ Cluster").
+                                                                               setParentTreeMenuEntity(rabbitmqTreeMenuEntity).setIcon("icon-sitemap").
+                                                                               setType(MenuEntityType.TYPE_MENU_ITEM).setContextAddress(MAIN_MENU_DIRECTORY_CONTEXT + "views/directories/rabbitmqCluster.jsf").
+                                                                               setDescription("Your RabbitMQ Cluster definitions").
+                                                                               addDisplayRole("mdwrabbitadmin").addDisplayRole("mdwrabbitreviewer").
+                                                                               addDisplayPermission("dirMdwRabbitMQCluster:display"));
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -270,10 +276,13 @@ public class RabbitmqDirectoryBootstrap implements FaceletsResourceResolverServi
                 rootDirectoryRegistry.unregisterTreeMenuRootEntity(middlewareRootTreeMenuEntity);
             else
                 middlewareRootTreeMenuEntity.removeDisplayRole("mdwrabbitadmin").
+                                             removeDisplayRole("mdwrabbitreviewer").
+                                             removeDisplayPermission("dirMdwRabbitMQCluster:display").
                                              removeDisplayPermission("dirMdwRabbitMQComponent:display");
 
             rootDirectoryRegistry.getLinkedMainMenuEntity().getDisplayRoles().remove("mdwrabbitadmin");
             rootDirectoryRegistry.getLinkedMainMenuEntity().getDisplayRoles().remove("mdwrabbitreviewer");
+            rootDirectoryRegistry.getLinkedMainMenuEntity().getDisplayPermissions().remove("dirMdwRabbitMQCluster:display");
             rootDirectoryRegistry.getLinkedMainMenuEntity().getDisplayPermissions().remove("dirMdwRabbitMQComponent:display");
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

@@ -17,6 +17,17 @@
         <h:outputText value="Password : " styleClass="inputTitle"/>
         <h:inputSecret id="password" label="Password" value="#{rabbitmqComponentNewController.password}"/>
 
+        <h:outputText value="RabbitMQ cluster : " styleClass="inputTitle"/>
+        <h:panelGroup>
+            <p:commandLink onclick="rabbitmqClusterCreateDialog.show()">
+                <h:outputText value=" create new RabbitMQ cluster"/>
+            </p:commandLink><br/>
+            <h:selectOneMenu label="Select the RabbitMQ cluster" value="#{rabbitmqComponentNewController.rbmqCluster}">
+                <f:selectItems value="#{rabbitmqClustersListController.getAllForSelector()}"  var="clu"
+                               itemLabel="#{clu.name}" itemValue="#{clu.name}"/>
+            </h:selectOneMenu>
+        </h:panelGroup>
+
         <h:outputText value="OS Instance : " styleClass="inputTitle"/>
         <h:panelGroup>
             <p:commandLink onclick="osInstanceCreateDialog.show()">

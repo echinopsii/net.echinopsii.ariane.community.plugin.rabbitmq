@@ -24,6 +24,8 @@ import net.echinopsii.ariane.community.core.directory.base.model.technical.syste
 import net.echinopsii.ariane.community.core.directory.wat.controller.organisational.team.TeamsListController;
 import net.echinopsii.ariane.community.core.directory.wat.controller.technical.system.OSInstance.OSInstancesListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryBootstrap;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster.RabbitmqClustersListController;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqComponent;
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.LazyDataModel;
@@ -48,9 +50,9 @@ public class RabbitmqComponentsListController implements Serializable {
     private LazyDataModel<RabbitmqComponent> lazyModel = new RabbitmqComponentLazyModel();
     private RabbitmqComponent[]              selectedRabbitmqComponentList ;
 
-    private HashMap<Long, String> changedOSInstance    = new HashMap<Long, String>();
-    private HashMap<Long, String> changedSupportTeam   = new HashMap<Long,String>();
-    private HashMap<Long, String> changedComponentType = new HashMap<Long,String>();
+    private HashMap<Long, String> changedOSInstance      = new HashMap<Long, String>();
+    private HashMap<Long, String> changedSupportTeam     = new HashMap<Long,String>();
+    private HashMap<Long, String> changedRabbitmqCluster = new HashMap<Long, String>();
 
     public LazyDataModel<RabbitmqComponent> getLazyModel() {
         return lazyModel;
@@ -87,8 +89,8 @@ public class RabbitmqComponentsListController implements Serializable {
                     em.flush();
                     em.getTransaction().commit();
                     FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
-                                                               "RabbitmqComponent updated successfully !",
-                                                               "RabbitmqComponent name : " + rabbitmqComponent.getName());
+                                                        "RabbitmqComponent updated successfully !",
+                                                        "RabbitmqComponent name : " + rabbitmqComponent.getName());
                     FacesContext.getCurrentInstance().addMessage(null, msg);
                     break;
                 }
@@ -97,8 +99,8 @@ public class RabbitmqComponentsListController implements Serializable {
             log.debug("Throwable catched !");
             t.printStackTrace();
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                                       "Throwable raised while updating RabbitmqComponent " + rabbitmqComponent.getName() + " !",
-                                                       "Throwable message : " + t.getMessage());
+                                                "Throwable raised while updating RabbitmqComponent " + rabbitmqComponent.getName() + " !",
+                                                "Throwable message : " + t.getMessage());
             FacesContext.getCurrentInstance().addMessage(null, msg);
             if (em.getTransaction().isActive())
                 em.getTransaction().rollback();
@@ -163,17 +165,65 @@ public class RabbitmqComponentsListController implements Serializable {
         return name;
     }
 
+    public HashMap<Long, String> getChangedRabbitmqCluster() {
+        return changedRabbitmqCluster;
+    }
+
+    public void setChangedRabbitmqCluster(HashMap<Long, String> changedRabbitmqCluster) {
+        this.changedRabbitmqCluster = changedRabbitmqCluster;
+    }
+
+    public void syncRabbitmqComponentCluster(RabbitmqComponent rabbitmqComponent) throws NotSupportedException, SystemException {
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+        try {
+            for(RabbitmqCluster cluster: RabbitmqClustersListController.getAll()) {
+                if (cluster.getName().equals(changedRabbitmqCluster.get(rabbitmqComponent.getId()))) {
+                    em.getTransaction().begin();
+                    rabbitmqComponent = em.find(rabbitmqComponent.getClass(),rabbitmqComponent.getId());
+                    cluster = em.find(cluster.getClass(), cluster.getId());
+                    rabbitmqComponent.setCluster(cluster);
+                    em.flush();
+                    em.getTransaction().commit();
+                    FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+                                                               "RabbitmqComponent updated successfully !",
+                                                               "RabbitmqComponent name : " + rabbitmqComponent.getName());
+                    FacesContext.getCurrentInstance().addMessage(null, msg);
+                    break;
+                }
+            }
+        } catch (Throwable t) {
+            log.debug("Throwable catched !");
+            t.printStackTrace();
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                                       "Throwable raised while updating RabbitmqComponent " + rabbitmqComponent.getName() + " !",
+                                                       "Throwable message : " + t.getMessage());
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+        } finally {
+            em.close();
+        }
+    }
+
+    public String getRabbitmqComponentClusterName(RabbitmqComponent rabbitmqComponent) {
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+        rabbitmqComponent = em.find(rabbitmqComponent.getClass(), rabbitmqComponent.getId());
+        String name = (rabbitmqComponent.getCluster()!=null) ? rabbitmqComponent.getCluster().getName() : "None";
+        em.close();
+        return name;
+    }
+
     public void onRowToggle(ToggleEvent event) throws CloneNotSupportedException {
         log.debug("Row Toogled : {}", new Object[]{event.getVisibility().toString()});
         RabbitmqComponent eventRabbitmqComponent = ((RabbitmqComponent) event.getData());
         if (event.getVisibility().toString().equals("HIDDEN")) {
             changedOSInstance.remove(eventRabbitmqComponent.getId());
             changedSupportTeam.remove(eventRabbitmqComponent.getId());
-            changedComponentType.remove(eventRabbitmqComponent.getId());
+            changedRabbitmqCluster.remove(eventRabbitmqComponent.getId());
         } else {
             changedOSInstance.put(eventRabbitmqComponent.getId(),"");
             changedSupportTeam.put(eventRabbitmqComponent.getId(),"");
-            changedComponentType.put(eventRabbitmqComponent.getId(),"");
+            changedRabbitmqCluster.put(eventRabbitmqComponent.getId(),"");
         }
     }
 
@@ -216,6 +266,8 @@ public class RabbitmqComponentsListController implements Serializable {
             try {
                 em.getTransaction().begin();
                 rabbitmqComponent = em.find(rabbitmqComponent.getClass(), rabbitmqComponent.getId());
+                if (rabbitmqComponent.getCluster()!=null)
+                    rabbitmqComponent.getCluster().getNodes().remove(rabbitmqComponent);
                 em.remove(rabbitmqComponent);
                 em.flush();
                 em.getTransaction().commit();

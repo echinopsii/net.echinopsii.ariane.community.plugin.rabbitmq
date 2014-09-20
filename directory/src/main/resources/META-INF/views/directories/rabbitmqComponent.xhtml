@@ -17,7 +17,7 @@
                          paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                          rowsPerPageTemplate="5,10,15,20,25" lazy="true" rows="25" paginator="true">
                 <f:facet name="header">
-                    Tibco RV Components
+                    RabbitMQ Components
                 </f:facet>
 
                 <p:ajax event="rowToggle" listener="#{rabbitmqComponentsListController.onRowToggle}" />
@@ -57,6 +57,18 @@
                             </p:inplace>
                         </h:form>
                         <h:outputText value="#{rbmqc.url}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQComponent:update')}"/>
+
+                        <h:outputText value="Cluster : " styleClass="inputTitle"/>
+                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
+                            <p:inplace label="#{rabbitmqComponentsListController.getRabbitmqComponentClusterName(rbmqc)}" effectSpeed="fast" editor="true">
+                                <h:selectOneMenu value="#{rabbitmqComponentsListController.changedRabbitmqCluster[rbmqc.id]}">
+                                    <f:selectItems value="#{rabbitmqClustersListController.getAllForSelector()}"  var="clu"
+                                                   itemLabel="#{clu.name}" itemValue="#{clu.name}"/>
+                                </h:selectOneMenu>
+                                <p:ajax event="save" listener="#{rabbitmqComponentsListController.syncRabbitmqComponentCluster(rbmqc)}" update="@form,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
+                            </p:inplace>
+                        </h:form>
+                        <h:outputText value="#{rabbitmqComponentsListController.getRabbitmqComponentClusterName(rbmqc)}" rendered="#{!(ccidm:hasPermission('dirMdwRabbitMQComponent:update'))}"/>
 
                         <h:outputText value="User : " styleClass="inputTitle"/>
                         <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQComponent:update')}">
@@ -126,7 +138,7 @@
         <p:dialog header="Confirm your remove order !" widgetVar="rabbitmqComponentRemoveDialog"
                   width="500" showEffect="fade" hideEffect="explode">
             <h:form id="removerabbitmqComponentDialogForm">
-                <h:outputText value="Are you sure you want delete following Tibco RV Component ?" styleClass="inputTitle"/><br/>
+                <h:outputText value="Are you sure you want delete following RabbitMQ Component ?" styleClass="inputTitle"/><br/>
                 <p:commandButton value="Yes" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                  actionListener="#{rabbitmqComponentsListController.delete}" oncomplete="rabbitmqComponentRemoveDialog.hide();"
                                  update=":rabbitmqComponentTableForm:rabbitmqComponentTable,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
@@ -145,14 +157,26 @@
         </p:dialog>
 
         <p:dialog header="Create a new RabbitMQ Component" widgetVar="rabbitmqComponentCreateDialog"
-                  width="450" showEffect="fade" hideEffect="explode">
+                  width="600" showEffect="fade" hideEffect="explode">
             <h:form id="createrabbitmqComponentDialogForm">
                 <ui:insert name="createrabbitmqComponent" >
                     <ui:include src="/templates/rabbitmqComponentNewForm.xhtml" />
                 </ui:insert>
-                <p:commandButton value="Save this Tibco RV Component" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                <p:commandButton value="Save this RabbitMQ Component" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                  actionListener="#{rabbitmqComponentNewController.save}" oncomplete="rabbitmqComponentCreateDialog.hide();"
                                  update=":rabbitmqComponentTableForm:rabbitmqComponentTable,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Create a new RabbitMQ Cluster" widgetVar="rabbitmqClusterCreateDialog"
+                  width="450" showEffect="fade" hideEffect="explode">
+            <h:form id="createrabbitmqClusterDialogForm">
+                <ui:insert name="createrabbitmqCluster" >
+                    <ui:include src="/templates/rabbitmqClusterNewForm.xhtml" />
+                </ui:insert>
+                <p:commandButton value="Save this RabbitMQ Cluster" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                 actionListener="#{rabbitmqClusterNewController.save}" oncomplete="rabbitmqComponentCreateDialog.hide();"
+                                 update=":createrabbitmqComponentDialogForm:rabbitmqComponentNewGrid,:rabbitmqComponentTableForm:rabbitmqComponentTableMessages"/>
             </h:form>
         </p:dialog>
 
