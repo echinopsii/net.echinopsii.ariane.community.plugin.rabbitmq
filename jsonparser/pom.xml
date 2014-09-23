@@ -21,6 +21,12 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.echinopsii.ariane.community.core.directory</groupId>
+            <artifactId>net.echinopsii.ariane.community.core.directory.base</artifactId>
+            <version>${version.net.echinopsii.ariane.community.core.directory}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
