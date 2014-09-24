@@ -30,7 +30,7 @@ class NodeFromRabbitRESTTest {
         node.setCluster(cluster);
 
         try {
-            rclient = RabbitRESTClient.getRESTClientFromCluster(cluster);
+            rclient = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         } catch (Exception e) {
             System.err.println("No local rabbit to test");
             rclient = null;

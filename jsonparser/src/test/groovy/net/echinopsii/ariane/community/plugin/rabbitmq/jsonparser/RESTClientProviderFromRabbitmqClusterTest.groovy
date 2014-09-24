@@ -9,7 +9,7 @@ import org.junit.Test
 
 import static org.junit.Assert.assertTrue
 
-class RabbitmqRESTClientTest {
+class RESTClientProviderFromRabbitmqClusterTest {
 
     static RabbitmqCluster cluster;
     static RESTClient      rclient;
@@ -28,7 +28,7 @@ class RabbitmqRESTClientTest {
         cluster = new RabbitmqCluster().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing rabbit").setNodesR(nodes);
         node.setCluster(cluster);
         try {
-            rclient = RabbitRESTClient.getRESTClientFromCluster(cluster);
+            rclient = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         } catch (Exception e) {
             System.err.println("No local rabbit to test");
             rclient = null;
