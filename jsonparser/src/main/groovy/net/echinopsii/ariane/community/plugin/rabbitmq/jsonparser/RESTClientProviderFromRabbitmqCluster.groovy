@@ -4,14 +4,21 @@ import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode
+import org.apache.http.NoHttpResponseException
+import org.apache.http.conn.HttpHostConnectException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class RESTClientProviderFromRabbitmqCluster {
 
-    public final static int NODE_OK         = 0;
-    public final static int NODE_URL_ERROR  = 1;
-    public final static int NODE_AUTH_ERROR = 2;
+    private static final Logger log = LoggerFactory.getLogger(RESTClientProviderFromRabbitmqCluster.class);
 
-    private static Map<String, Map<String, Integer>> clustersErrors = new HashMap<String, Map<String, Integer>>();
+    public final static int NODE_OK          = 0;
+    public final static int NODE_SOME_ERROR  = -1;
+    public final static int NODE_URL_ERROR   = -2;
+    public final static int NODE_NO_RESPONSE = -3;
+    public final static int NODE_AUTH_ERROR  = 401;
+
 
     static RESTClient getRESTClientFromCluster(RabbitmqCluster cluster) {
         RESTClient ret = null;
@@ -21,33 +28,14 @@ class RESTClientProviderFromRabbitmqCluster {
             switch(status) {
                 case NODE_OK:
                     ret = test;
-                    removeClusterError(cluster.getName(), node.getName());
+                    cluster.getErrors().remove(node.getName());
                     break;
-                case NODE_URL_ERROR:
-                case NODE_AUTH_ERROR:
-                    addClusterError(cluster.getName(), node.getName(), status);
+                default:
+                    cluster.getErrors().put(node.getName(), status)
                     break;
             }
         }
         return ret;
-    }
-
-    static Map<String, Integer> getClusterErrors(String clusterName) {
-        return clustersErrors.get(clusterName);
-    }
-
-    private static removeClusterError(String clusterName, String nodeName) {
-        if (clustersErrors.get(clusterName)!=null)
-            clustersErrors.get(clusterName).remove(nodeName)
-    }
-
-    private static addClusterError(String clusterName, String nodeName, int error) {
-        if (clustersErrors.get(clusterName)==null) {
-            Map<String, Integer> clusterErrors = new HashMap<String, Integer>();
-            clustersErrors.put(clusterName, clusterErrors);
-        }
-
-        clustersErrors.get(clusterName).put(nodeName,error);
     }
 
     private static RESTClient getRESTClientFromNode(RabbitmqNode node) {
@@ -57,14 +45,21 @@ class RESTClientProviderFromRabbitmqCluster {
     }
 
     private static int checkRabbitRESTClient(RESTClient client) {
-        def test;
         int ret = NODE_OK;
         try {
             client.get(path : '/api/overview')
         } catch (UnknownHostException urlpb) {
             ret = NODE_URL_ERROR;
+        } catch (NoHttpResponseException noHttpResponseException) {
+            ret = NODE_NO_RESPONSE;
+        } catch (HttpHostConnectException httpHostConnectException) {
+            ret = NODE_NO_RESPONSE;
         } catch (HttpResponseException httpResponseException) {
-            ret = NODE_AUTH_ERROR;
+            ret = httpResponseException.statusCode;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            //e.printStackTrace();
+            ret = NODE_SOME_ERROR;
         }
 
         return ret;

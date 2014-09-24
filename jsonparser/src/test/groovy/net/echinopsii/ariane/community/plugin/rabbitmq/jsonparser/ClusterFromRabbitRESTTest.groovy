@@ -8,6 +8,7 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
+import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertTrue
 
 class ClusterFromRabbitRESTTest {
@@ -16,6 +17,7 @@ class ClusterFromRabbitRESTTest {
     static RabbitmqCluster validCluster;
     static RabbitmqCluster invalidURLCluster;
     static RabbitmqCluster invalidAUTHCluster;
+    static RabbitmqCluster stoppedNodeCluster;
     static RESTClient      rclient;
 
     @BeforeClass
@@ -40,12 +42,21 @@ class ClusterFromRabbitRESTTest {
         invalidURLNode.setCluster(invalidURLCluster);
 
 
+        System.err.println("rabbit@"+hostname);
         RabbitmqNode invalidauthNode = new RabbitmqNode().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing invalid AUTH rabbit").
                                                           setUrlR("http://localhost:15672/").setUserR("toto").setPasswdR("toto");
         Set<RabbitmqNode> iauthnodes = new HashSet<RabbitmqNode>();
         iauthnodes.add(invalidauthNode);
         invalidAUTHCluster = new RabbitmqCluster().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing invalid AUTH rabbit").setNodesR(iauthnodes);
         invalidauthNode.setCluster(invalidAUTHCluster);
+
+
+        RabbitmqNode stoppedNode = new RabbitmqNode().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing stopped rabbit").
+                setUrlR("http://localhost:25672/").setUserR("toto").setPasswdR("toto");
+        Set<RabbitmqNode> stoppednodes = new HashSet<RabbitmqNode>();
+        stoppednodes.add(stoppedNode);
+        stoppedNodeCluster = new RabbitmqCluster().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing invalid AUTH rabbit").setNodesR(stoppednodes);
+        stoppedNode.setCluster(stoppedNodeCluster);
 
 
         try {
@@ -68,18 +79,29 @@ class ClusterFromRabbitRESTTest {
             assertTrue(clu.getName().startsWith("rabbit@"))
             assertTrue(clu.getNodes().size()>=1)
             assertTrue(clu.getRunningNodes().size()>=1)
+            assertNull(validCluster.getErrors().get("rabbit@"+hostname));
         }
     }
 
     @Test
     public void parseInvalidURLCluster() {
         ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidURLCluster).parse();
-        assertTrue(clu.getErrs().get("rabbit@toto")==RESTClientProviderFromRabbitmqCluster.NODE_URL_ERROR);
+        assertTrue(invalidURLCluster.getErrors().get("rabbit@toto")==RESTClientProviderFromRabbitmqCluster.NODE_URL_ERROR);
     }
 
     @Test
     public void parseInvalidAUTHCluster() {
-        ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidAUTHCluster).parse();
-        assertTrue(clu.getErrs().get("rabbit@"+hostname)==RESTClientProviderFromRabbitmqCluster.NODE_AUTH_ERROR);
+        if (rclient!=null) {
+            ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidAUTHCluster).parse();
+            System.out.println(invalidAUTHCluster.getErrors().toString());
+            assertTrue(invalidAUTHCluster.getErrors().get("rabbit@"+hostname)==RESTClientProviderFromRabbitmqCluster.NODE_AUTH_ERROR);
+        }
+    }
+
+    @Test
+    public void parseStoppedNodeCluster() {
+        ClusterFromRabbitREST clu = new ClusterFromRabbitREST(stoppedNodeCluster).parse();
+        System.out.println(stoppedNodeCluster.getErrors().toString());
+        assertTrue(stoppedNodeCluster.getErrors().get("rabbit@"+hostname)==RESTClientProviderFromRabbitmqCluster.NODE_NO_RESPONSE);
     }
 }

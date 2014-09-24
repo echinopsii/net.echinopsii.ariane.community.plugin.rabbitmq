@@ -149,6 +149,13 @@ public class RabbitmqCluster implements Serializable {
     }
 
     @Transient
+    HashMap<String, Integer> errors = new HashMap<String, Integer>();
+
+    public HashMap<String, Integer> getErrors() {
+        return errors;
+    }
+
+    @Transient
     HashMap<String, Object> properties = null;
 
     @Transient

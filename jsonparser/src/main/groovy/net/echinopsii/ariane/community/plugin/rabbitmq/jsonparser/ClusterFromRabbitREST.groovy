@@ -10,7 +10,6 @@ class ClusterFromRabbitREST implements Serializable {
     RabbitmqCluster cluster = null;
 
     String       name;
-    Map<String, Integer> errs = null;
     List<String> nodes        = new ArrayList<String>();
     List<String> runningNodes = new ArrayList<String>();
 
@@ -34,8 +33,6 @@ class ClusterFromRabbitREST implements Serializable {
                 }
             }
         }
-
-        this.errs = RESTClientProviderFromRabbitmqCluster.getClusterErrors(this.cluster.getName());
 
         return this;
     }
