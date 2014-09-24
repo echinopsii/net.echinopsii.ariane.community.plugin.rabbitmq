@@ -1,10 +1,15 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode
 
 import javax.persistence.Transient
 
 class ClusterFromRabbitREST implements Serializable {
+
+    public static final int REST_CLU_INVALID_ID_NAME   = -11;
+    public static final int REST_CLU_NODE_NOT_DEFINED  = -12;
+    public static final int REST_CLU_DEF_NODE_INVALID  = -13;
 
     @Transient
     RabbitmqCluster cluster = null;
@@ -32,6 +37,39 @@ class ClusterFromRabbitREST implements Serializable {
                         runningNodes.add((String)node.name)
                 }
             }
+
+            /*
+             * some compliance between Ariane RabbitMQ Dir and real cluster definitions
+             */
+            if (!this.cluster.getName().equals(this.name))
+                this.cluster.getErrors().put(this.cluster.getName(), REST_CLU_INVALID_ID_NAME)
+
+            HashSet<RabbitmqNode> invalidNodes = new HashSet<RabbitmqNode>(this.cluster.getNodes());
+
+            for (String clusterNodeName : nodes) {
+                boolean isDefinedCorrectly = false;
+                for (RabbitmqNode node : this.cluster.getNodes()) {
+                    node.getErrors().clear();
+                    if (node.getName().equals(clusterNodeName)) {
+                        isDefinedCorrectly = true;
+                        invalidNodes.remove(node);
+                        break;
+                    }
+                }
+                if (!isDefinedCorrectly)
+                    this.cluster.getErrors().put(clusterNodeName, REST_CLU_NODE_NOT_DEFINED);
+            }
+
+            for (RabbitmqNode node : invalidNodes) {
+                this.cluster.getErrors().put(this.cluster.getName()+"-"+node.getName(), REST_CLU_DEF_NODE_INVALID);
+                node.getErrors().put(NodeFromRabbitREST.REST_NODE_INVALID_ID_NAME_OR_CLUSTER);
+            }
+
+            for (String error : this.cluster.getErrors().keySet())
+                if (!error.contains(this.cluster.getName()))
+                    for (RabbitmqNode node : this.cluster.getNodes())
+                        if (node.getName().equals(error))
+                            node.getErrors().add(this.cluster.getErrors().get(error));
         }
 
         return this;

@@ -28,7 +28,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Entity
 @XmlRootElement
@@ -225,6 +227,13 @@ public class RabbitmqNode implements Serializable {
     public RabbitmqNode clone() {
         return new RabbitmqNode().setIdR(id).setVersionR(version).setNameR(name).setUrlR(url).setUserR(user).setPasswdR(passwd).setClusterR(cluster.clone()).
                                        setDescriptionR(description).setOsInstanceR(osInstance.clone()).setSupportTeamR(supportTeam.clone());
+    }
+
+    @Transient
+    List<Integer> errors = new ArrayList<Integer>();
+
+    public List<Integer> getErrors() {
+        return errors;
     }
 
     @Transient

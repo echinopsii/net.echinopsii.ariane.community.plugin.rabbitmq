@@ -1,6 +1,5 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
 
-import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode
@@ -86,7 +85,7 @@ class ClusterFromRabbitRESTTest {
     @Test
     public void parseInvalidURLCluster() {
         ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidURLCluster).parse();
-        assertTrue(invalidURLCluster.getErrors().get("rabbit@toto")==RESTClientProviderFromRabbitmqCluster.NODE_URL_ERROR);
+        assertTrue(invalidURLCluster.getErrors().get("rabbit@toto")==RESTClientProviderFromRabbitmqCluster.REST_CLI_NODE_URL_ERROR);
     }
 
     @Test
@@ -94,7 +93,7 @@ class ClusterFromRabbitRESTTest {
         if (rclient!=null) {
             ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidAUTHCluster).parse();
             System.out.println(invalidAUTHCluster.getErrors().toString());
-            assertTrue(invalidAUTHCluster.getErrors().get("rabbit@"+hostname)==RESTClientProviderFromRabbitmqCluster.NODE_AUTH_ERROR);
+            assertTrue(invalidAUTHCluster.getErrors().get("rabbit@"+hostname)==RESTClientProviderFromRabbitmqCluster.REST_CLI_NODE_AUTH_ERROR);
         }
     }
 
@@ -102,6 +101,6 @@ class ClusterFromRabbitRESTTest {
     public void parseStoppedNodeCluster() {
         ClusterFromRabbitREST clu = new ClusterFromRabbitREST(stoppedNodeCluster).parse();
         System.out.println(stoppedNodeCluster.getErrors().toString());
-        assertTrue(stoppedNodeCluster.getErrors().get("rabbit@"+hostname)==RESTClientProviderFromRabbitmqCluster.NODE_NO_RESPONSE);
+        assertTrue(stoppedNodeCluster.getErrors().get("rabbit@"+hostname)==RESTClientProviderFromRabbitmqCluster.REST_CLI_NODE_NO_RESPONSE);
     }
 }

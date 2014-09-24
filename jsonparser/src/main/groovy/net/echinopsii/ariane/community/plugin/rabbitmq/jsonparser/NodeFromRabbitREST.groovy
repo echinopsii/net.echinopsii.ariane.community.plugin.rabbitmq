@@ -8,6 +8,8 @@ import javax.persistence.Transient
 
 class NodeFromRabbitREST implements Serializable {
 
+    public static final int REST_NODE_INVALID_ID_NAME_OR_CLUSTER = -21;
+
     private static final Logger log = LoggerFactory.getLogger(NodeFromRabbitREST.class);
 
     @Transient

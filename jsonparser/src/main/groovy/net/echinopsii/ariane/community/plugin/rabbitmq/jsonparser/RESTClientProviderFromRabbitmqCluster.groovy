@@ -13,12 +13,11 @@ class RESTClientProviderFromRabbitmqCluster {
 
     private static final Logger log = LoggerFactory.getLogger(RESTClientProviderFromRabbitmqCluster.class);
 
-    public final static int NODE_OK          = 0;
-    public final static int NODE_SOME_ERROR  = -1;
-    public final static int NODE_URL_ERROR   = -2;
-    public final static int NODE_NO_RESPONSE = -3;
-    public final static int NODE_AUTH_ERROR  = 401;
-
+    public final static int REST_CLI_NODE_OK          = 0;
+    public final static int REST_CLI_NODE_SOME_ERROR  = -1;
+    public final static int REST_CLI_NODE_URL_ERROR   = -2;
+    public final static int REST_CLI_NODE_NO_RESPONSE = -3;
+    public final static int REST_CLI_NODE_AUTH_ERROR  = 401;
 
     static RESTClient getRESTClientFromCluster(RabbitmqCluster cluster) {
         RESTClient ret = null;
@@ -26,7 +25,7 @@ class RESTClientProviderFromRabbitmqCluster {
             RESTClient test = getRESTClientFromNode(node);
             int status = checkRabbitRESTClient(test);
             switch(status) {
-                case NODE_OK:
+                case REST_CLI_NODE_OK:
                     ret = test;
                     cluster.getErrors().remove(node.getName());
                     break;
@@ -45,21 +44,21 @@ class RESTClientProviderFromRabbitmqCluster {
     }
 
     private static int checkRabbitRESTClient(RESTClient client) {
-        int ret = NODE_OK;
+        int ret = REST_CLI_NODE_OK;
         try {
             client.get(path : '/api/overview')
         } catch (UnknownHostException urlpb) {
-            ret = NODE_URL_ERROR;
+            ret = REST_CLI_NODE_URL_ERROR;
         } catch (NoHttpResponseException noHttpResponseException) {
-            ret = NODE_NO_RESPONSE;
+            ret = REST_CLI_NODE_NO_RESPONSE;
         } catch (HttpHostConnectException httpHostConnectException) {
-            ret = NODE_NO_RESPONSE;
+            ret = REST_CLI_NODE_NO_RESPONSE;
         } catch (HttpResponseException httpResponseException) {
             ret = httpResponseException.statusCode;
         } catch (Exception e) {
             log.error(e.getMessage());
             //e.printStackTrace();
-            ret = NODE_SOME_ERROR;
+            ret = REST_CLI_NODE_SOME_ERROR;
         }
 
         return ret;
