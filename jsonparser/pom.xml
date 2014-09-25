@@ -27,6 +27,12 @@
             <version>${version.net.echinopsii.ariane.community.core.directory}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>3.3.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
