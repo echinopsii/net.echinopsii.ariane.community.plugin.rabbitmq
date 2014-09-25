@@ -8,9 +8,8 @@ class RabbitRESTTools {
         List<String> ret = new ArrayList<String>()
         def connections_list_req = client.get(path : '/api/connections')
         if (connections_list_req.status == 200 && connections_list_req.data != null) {
-            connections_list_req.data.each { key, value ->
-                if (key.equals("name"))
-                    ret.add((String)value);
+            connections_list_req.data.each { aconnection ->
+                ret.add((String)aconnection.name)
             }
         }
         return ret;
@@ -20,9 +19,8 @@ class RabbitRESTTools {
         List<String> ret = new ArrayList<String>()
         def channels_list_req = client.get(path : '/api/channels')
         if (channels_list_req.status == 200 && channels_list_req.data != null) {
-            channels_list_req.data.each { key, value ->
-                if (key.equals("name"))
-                    ret.add((String)value);
+            channels_list_req.data.each { achannel ->
+                ret.add((String) achannel.name);
             }
         }
         return ret;
@@ -32,22 +30,18 @@ class RabbitRESTTools {
         List<String> ret = new ArrayList<String>()
         def exchanges_list_req = client.get(path : '/api/exchanges')
         if (exchanges_list_req.status == 200 && exchanges_list_req.data != null) {
-            exchanges_list_req.data.each { key, value ->
-                if (key.equals("name"))
-                    ret.add((String)value);
+            exchanges_list_req.data.each { anexchange ->
+                ret.add((String)anexchange.name);
             }
         }
         return ret;
     }
 
-    static List<String> getBindingNames(RESTClient client) {
-        List<String> ret = new ArrayList<String>()
+    static List<Map<String,String>> getBindings(RESTClient client) {
+        List<Map<String,String>> ret = null;
         def bindings_list_req = client.get(path : '/api/bindings')
         if (bindings_list_req.status == 200 && bindings_list_req.data != null) {
-            bindings_list_req.data.each { key, value ->
-                if (key.equals("name"))
-                    ret.add((String)value);
-            }
+            ret = bindings_list_req.data
         }
         return ret;
     }
@@ -56,9 +50,8 @@ class RabbitRESTTools {
         List<String> ret = new ArrayList<String>()
         def queues_list_req = client.get(path : '/api/queues')
         if (queues_list_req.status == 200 && queues_list_req.data != null) {
-            queues_list_req.data.each { key, value ->
-                if (key.equals("name"))
-                    ret.add((String)value);
+            queues_list_req.data.each { aqueue ->
+                ret.add((String) aqueue.name);
             }
         }
         return ret;
@@ -68,9 +61,8 @@ class RabbitRESTTools {
         List<String> ret = new ArrayList<String>()
         def vhosts_list_req = client.get(path : '/api/vhosts')
         if (vhosts_list_req.status == 200 && vhosts_list_req.data != null) {
-            vhosts_list_req.data.each { key, value ->
-                if (key.equals("name"))
-                    ret.add((String)value);
+            vhosts_list_req.data.each { avhost ->
+                ret.add((String)avhost.name);
             }
         }
         return ret;
