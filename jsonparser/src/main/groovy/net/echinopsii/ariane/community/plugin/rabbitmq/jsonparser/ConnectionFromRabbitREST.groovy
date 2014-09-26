@@ -4,7 +4,7 @@ import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqC
 
 import javax.persistence.Transient
 
-class ConnectionFromRabbitREST {
+class ConnectionFromRabbitREST implements Serializable {
 
     @Transient
     RabbitmqCluster cluster;
