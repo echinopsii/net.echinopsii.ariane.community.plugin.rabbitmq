@@ -10,7 +10,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     public void testConnectionsList() {
         if (rclient!=null) {
             List<String> connectionsList = RabbitRESTTools.getConnectionNames(validCluster)
-            assertTrue(connectionsList.size() == 1)
+            assertTrue(connectionsList.size() > 0)
         }
     }
 
@@ -18,15 +18,17 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     public void testChannelsList() {
         if (rclient!=null) {
             List<String> list = RabbitRESTTools.getChannelNames(validCluster)
-            assertTrue(list.size() == 1)
+            assertTrue(list.size() > 0)
         }
     }
 
     @Test
     public void testExchangesList() {
         if (rclient!=null) {
-            List<String> list = RabbitRESTTools.getExchangeNames(validCluster)
-            assertTrue(list.size() == 9)
+            Map<String,List<String>> map = RabbitRESTTools.getExchangeNames(validCluster)
+            assertTrue(map.size() > 0)
+            for (List<String> listOnVhost: map.values())
+                assertTrue(listOnVhost.size() > 0)
         }
     }
 
@@ -34,7 +36,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     public void testQueueList() {
         if (rclient!=null) {
             List<String> list = RabbitRESTTools.getQueueNames(validCluster)
-            assertTrue(list.size()==1)
+            assertTrue(list.size() > 0)
         }
     }
 
@@ -42,7 +44,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     public void testBindingsList() {
         if (rclient!=null) {
             List<Map<String,String>> list = RabbitRESTTools.getBindings(validCluster)
-            assertTrue(list.size()==2)
+            assertTrue(list.size() > 0)
         }
     }
 
@@ -50,7 +52,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     public void testVhostsList() {
         if (rclient!=null) {
             List<String> list = RabbitRESTTools.getVhostNames(validCluster)
-            assertTrue(list.size()==1)
+            assertTrue(list.size() > 0)
         }
     }
 }

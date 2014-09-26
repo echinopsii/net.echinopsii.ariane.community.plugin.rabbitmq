@@ -29,13 +29,17 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<String> getExchangeNames(RabbitmqCluster cluster) {
+    static Map<String,List<String>> getExchangeNames(RabbitmqCluster cluster) {
         RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
-        List<String> ret = new ArrayList<String>()
+        Map<String,List<String>> ret = new HashMap<String,List<String>>()
         def exchanges_list_req = client.get(path : '/api/exchanges')
         if (exchanges_list_req.status == 200 && exchanges_list_req.data != null) {
             exchanges_list_req.data.each { anexchange ->
-                ret.add((String)anexchange.name);
+                if (ret.get(anexchange.vhost)==null)
+                    ret.put((String)anexchange.vhost, new ArrayList<String>())
+            }
+            exchanges_list_req.data.each { anexchange ->
+                ret.get((String)anexchange.vhost).add((String)anexchange.name)
             }
         }
         return ret;
