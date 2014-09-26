@@ -1,10 +1,12 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
 
 import groovyx.net.http.RESTClient
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
 
 class RabbitRESTTools {
 
-    static List<String> getConnectionNames(RESTClient client) {
+    static List<String> getConnectionNames(RabbitmqCluster cluster) {
+        RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<String> ret = new ArrayList<String>()
         def connections_list_req = client.get(path : '/api/connections')
         if (connections_list_req.status == 200 && connections_list_req.data != null) {
@@ -15,7 +17,8 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<String> getChannelNames(RESTClient client) {
+    static List<String> getChannelNames(RabbitmqCluster cluster) {
+        RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<String> ret = new ArrayList<String>()
         def channels_list_req = client.get(path : '/api/channels')
         if (channels_list_req.status == 200 && channels_list_req.data != null) {
@@ -26,7 +29,8 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<String> getExchangeNames(RESTClient client) {
+    static List<String> getExchangeNames(RabbitmqCluster cluster) {
+        RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<String> ret = new ArrayList<String>()
         def exchanges_list_req = client.get(path : '/api/exchanges')
         if (exchanges_list_req.status == 200 && exchanges_list_req.data != null) {
@@ -37,7 +41,8 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<Map<String,String>> getBindings(RESTClient client) {
+    static List<Map<String,String>> getBindings(RabbitmqCluster cluster) {
+        RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<Map<String,String>> ret = null;
         def bindings_list_req = client.get(path : '/api/bindings')
         if (bindings_list_req.status == 200 && bindings_list_req.data != null) {
@@ -46,7 +51,8 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<String> getQueueNames(RESTClient client) {
+    static List<String> getQueueNames(RabbitmqCluster cluster) {
+        RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<String> ret = new ArrayList<String>()
         def queues_list_req = client.get(path : '/api/queues')
         if (queues_list_req.status == 200 && queues_list_req.data != null) {
@@ -57,7 +63,8 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<String> getVhostNames(RESTClient client) {
+    static List<String> getVhostNames(RabbitmqCluster cluster) {
+        RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<String> ret = new ArrayList<String>()
         def vhosts_list_req = client.get(path : '/api/vhosts')
         if (vhosts_list_req.status == 200 && vhosts_list_req.data != null) {

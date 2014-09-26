@@ -1,15 +1,5 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
 
-import com.rabbitmq.client.Channel
-import com.rabbitmq.client.Connection
-import com.rabbitmq.client.ConnectionFactory
-import groovyx.net.http.RESTClient
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode
-import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.rabbitTestTools.Rreceiver
-import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.rabbitTestTools.Rsender
-import org.junit.AfterClass
-import org.junit.BeforeClass
 import org.junit.Test
 
 import static org.junit.Assert.assertTrue
@@ -19,7 +9,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     @Test
     public void testConnectionsList() {
         if (rclient!=null) {
-            List<String> connectionsList = RabbitRESTTools.getConnectionNames(rclient)
+            List<String> connectionsList = RabbitRESTTools.getConnectionNames(validCluster)
             assertTrue(connectionsList.size() == 1)
         }
     }
@@ -27,7 +17,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     @Test
     public void testChannelsList() {
         if (rclient!=null) {
-            List<String> list = RabbitRESTTools.getChannelNames(rclient)
+            List<String> list = RabbitRESTTools.getChannelNames(validCluster)
             assertTrue(list.size() == 1)
         }
     }
@@ -35,7 +25,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     @Test
     public void testExchangesList() {
         if (rclient!=null) {
-            List<String> list = RabbitRESTTools.getExchangeNames(rclient)
+            List<String> list = RabbitRESTTools.getExchangeNames(validCluster)
             assertTrue(list.size() == 9)
         }
     }
@@ -43,7 +33,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     @Test
     public void testQueueList() {
         if (rclient!=null) {
-            List<String> list = RabbitRESTTools.getQueueNames(rclient)
+            List<String> list = RabbitRESTTools.getQueueNames(validCluster)
             assertTrue(list.size()==1)
         }
     }
@@ -51,7 +41,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     @Test
     public void testBindingsList() {
         if (rclient!=null) {
-            List<Map<String,String>> list = RabbitRESTTools.getBindings(rclient)
+            List<Map<String,String>> list = RabbitRESTTools.getBindings(validCluster)
             assertTrue(list.size()==2)
         }
     }
@@ -59,7 +49,7 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     @Test
     public void testVhostsList() {
         if (rclient!=null) {
-            List<String> list = RabbitRESTTools.getVhostNames(rclient)
+            List<String> list = RabbitRESTTools.getVhostNames(validCluster)
             assertTrue(list.size()==1)
         }
     }
