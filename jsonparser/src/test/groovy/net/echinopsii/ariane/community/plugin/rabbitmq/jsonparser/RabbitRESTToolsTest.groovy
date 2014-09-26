@@ -14,70 +14,7 @@ import org.junit.Test
 
 import static org.junit.Assert.assertTrue
 
-class RabbitRESTToolsTest {
-
-    static RabbitmqCluster cluster;
-    static RESTClient      rclient;
-
-    static String testExchange = "testE"
-    static String testQueue    = "testQ"
-    static Connection connection;
-    static Channel channel;
-    static sender
-    static receiver
-
-    @BeforeClass
-    public static void testSetup() {
-        BufferedReader cmdReader = new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec("hostname").getInputStream()));
-        String hostname = cmdReader.readLine();
-
-        RabbitmqNode node = new RabbitmqNode().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing rabbit").
-                                               setUrlR("http://localhost:15672/").setUserR("guest").setPasswdR("guest");
-
-        Set<RabbitmqNode> nodes = new HashSet<RabbitmqNode>();
-        nodes.add(node);
-
-        cluster = new RabbitmqCluster().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing rabbit").setNodesR(nodes);
-        node.setCluster(cluster);
-        try {
-            rclient = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
-
-            ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("localhost");
-            factory.setPort(5672);
-
-            connection = factory.newConnection();
-
-            channel = connection.createChannel();
-            channel.exchangeDeclare(testExchange, "direct");
-            channel.queueDeclare(testQueue, false, false, true, null);
-            channel.queueBind(testQueue, testExchange, testQueue);
-
-            receiver = new Rreceiver(channel, testExchange, testQueue)
-            sender = new Rsender(channel, testExchange, testQueue)
-
-            new Thread(receiver).start()
-            new Thread(sender).start()
-
-            System.out.println("Local test ready !")
-
-        } catch (Exception e) {
-            e.printStackTrace()
-            System.err.println("No local rabbit to test");
-            rclient = null;
-        }
-
-    }
-
-    @AfterClass
-    public static void testCleanup() {
-        if (rclient!=null) {
-            sender.stop()
-            receiver.stop()
-            channel.close()
-            connection.close()
-        }
-    }
+class RabbitRESTToolsTest extends RabbitRESTTestSetup {
 
     @Test
     public void testConnectionsList() {

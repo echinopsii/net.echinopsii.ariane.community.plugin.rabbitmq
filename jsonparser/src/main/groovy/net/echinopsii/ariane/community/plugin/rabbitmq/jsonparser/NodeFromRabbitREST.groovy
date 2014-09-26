@@ -16,7 +16,7 @@ class NodeFromRabbitREST implements Serializable {
     RabbitmqCluster cluster;
 
     String name;
-    Map<String, Object> properties = new HashMap<String, Object>();
+    Map<String, Object> properties
 
     NodeFromRabbitREST(String name, RabbitmqCluster cluster) {
         this.name = name;
@@ -28,12 +28,9 @@ class NodeFromRabbitREST implements Serializable {
 
         String node_req_path =  '/api/nodes/' + this.name;
         def node_req = restClient.get(path : node_req_path)
-        if (node_req.status == 200 && node_req.data != null) {
-            node_req.data.each { key, value ->
-                if (!key.equals("name"))
-                    properties.put((String)key, value);
-            }
-        }
+        if (node_req.status == 200 && node_req.data != null)
+            properties = node_req.data
+        properties.remove("name")
 
         return this;
     }
