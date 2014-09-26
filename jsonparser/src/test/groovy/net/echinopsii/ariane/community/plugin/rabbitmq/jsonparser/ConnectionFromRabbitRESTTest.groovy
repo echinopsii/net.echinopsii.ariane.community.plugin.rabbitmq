@@ -9,7 +9,7 @@ class ConnectionFromRabbitRESTTest extends RabbitRESTTestSetup {
     @Test
     public void testParser() {
         if (rclient!=null) {
-            for (String connectionName : RabbitRESTTools.getConnectionNames(rclient)) {
+            for (String connectionName : RabbitRESTTools.getConnectionNames(validCluster)) {
                 ConnectionFromRabbitREST rconn = new ConnectionFromRabbitREST(connectionName, validCluster).parse()
                 assertTrue(rconn.getName().equals(connectionName))
                 assertTrue(rconn.getCluster().equals(validCluster))
