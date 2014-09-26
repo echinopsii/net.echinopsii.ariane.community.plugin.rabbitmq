@@ -55,13 +55,17 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<String> getQueueNames(RabbitmqCluster cluster) {
+    static Map<String,List<String>> getQueueNames(RabbitmqCluster cluster) {
         RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
-        List<String> ret = new ArrayList<String>()
+        Map<String,List<String>> ret = new HashMap<String, List<String>>()
         def queues_list_req = client.get(path : '/api/queues')
         if (queues_list_req.status == 200 && queues_list_req.data != null) {
             queues_list_req.data.each { aqueue ->
-                ret.add((String) aqueue.name);
+                if (ret.get(aqueue.vhost)==null)
+                    ret.put((String)aqueue.vhost, new ArrayList<String>())
+            }
+            queues_list_req.data.each { aqueue ->
+                ret.get((String)aqueue.vhost).add((String)aqueue.name)
             }
         }
         return ret;

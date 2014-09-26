@@ -35,8 +35,10 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     @Test
     public void testQueueList() {
         if (rclient!=null) {
-            List<String> list = RabbitRESTTools.getQueueNames(validCluster)
-            assertTrue(list.size() > 0)
+            Map<String,List<String>> map = RabbitRESTTools.getQueueNames(validCluster)
+            assertTrue(map.size() > 0)
+            for (List<String> listOnVhost : map.values())
+                assertTrue(listOnVhost.size() > 0)
         }
     }
 
