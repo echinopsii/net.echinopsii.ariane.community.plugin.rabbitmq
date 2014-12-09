@@ -57,4 +57,12 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
             assertTrue(list.size() > 0)
         }
     }
+
+    @Test
+    public void testOverview() {
+        if (rclient!=null) {
+            def test = rclient.get(path : '/api/overview')
+            assertTrue(test.status == 200);
+        }
+    }
 }

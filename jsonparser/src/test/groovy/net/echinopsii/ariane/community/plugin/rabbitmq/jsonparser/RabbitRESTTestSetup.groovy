@@ -108,12 +108,4 @@ class RabbitRESTTestSetup {
             connection.close()
         }
     }
-
-    @Test
-    public void testOverview() {
-        if (rclient!=null) {
-            def test = rclient.get(path : '/api/overview')
-            assertTrue(test.status == 200);
-        }
-    }
 }

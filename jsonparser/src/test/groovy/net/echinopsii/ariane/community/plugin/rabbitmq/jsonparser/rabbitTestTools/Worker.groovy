@@ -10,9 +10,8 @@ abstract class Worker implements Runnable {
     void run() {
         init()
         isRunning = true;
-        while(isRunning) {
+        while(isRunning)
             work()
-        }
     }
 
     void stop() {
