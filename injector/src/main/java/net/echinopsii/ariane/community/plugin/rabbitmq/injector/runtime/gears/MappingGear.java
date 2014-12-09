@@ -17,56 +17,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.echinopsii.ariane.community.rabbitmq.injector.runtime.gears;
+package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears;
 
 import net.echinopsii.ariane.community.core.injector.base.model.AbstractAkkaGear;
-import net.echinopsii.ariane.community.rabbitmq.injector.RabbitmqInjectorBootstrap;
-import net.echinopsii.ariane.community.rabbitmq.injector.runtime.actors.DirectoryActor;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.actors.MappingActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
-public class DirectoryGear extends AbstractAkkaGear implements Serializable {
+public class MappingGear extends AbstractAkkaGear implements Serializable {
 
-    private static final Logger log = LoggerFactory.getLogger(DirectoryGear.class);
+    private static final Logger log = LoggerFactory.getLogger(MappingGear.class);
 
-    public static final String SUBNAME = "_DirectoryGear_";
+    public static final String SUBNAME = "_MappingGear_";
 
-    private int directorySniffInterval ;
-
-    private int defaultComponentSniffInterval ;
-
-    public DirectoryGear(int dirSniffInterval, int componentSniffInterval) {
+    public MappingGear() {
         super();
-        this.directorySniffInterval = dirSniffInterval;
-        this.defaultComponentSniffInterval = componentSniffInterval;
-        super.setGearId(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+SUBNAME);
-        super.setGearName("Ariane RabbitMQ Plugin Injector Directory Gear");
-        super.setGearDescription("Init RabbitMQ gears from Tibco RV directory. Start and stop mapping and RabbitMQ gears.");
+        super.setGearId(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH + SUBNAME);
+        super.setGearName("Ariane RabbitMQ Plugin Injector Mapping Gear");
+        super.setGearDescription("Get RabbitMQ entities data from its queue and inject into mapping DB");
     }
-
-    public int getDefaultComponentSniffInterval() {
-        return defaultComponentSniffInterval;
-    }
-
-    public void refresh() {
-        super.tell(DirectoryActor.MSG_REFRESH);
-    }
-
 
     @Override
     public void start() {
-        super.setGearActor(super.getGearActorRefFactory().actorOf(DirectoryActor.props(this), super.getGearId()));
-        super.scheduleMessage(DirectoryActor.MSG_REFRESH, directorySniffInterval*1000);
+        super.setGearActor(super.getGearActorRefFactory().actorOf(MappingActor.props(this), super.getGearId()));
         super.setRunning(true);
-        refresh();
         log.info("{} is started", super.getGearName());
     }
 
     @Override
     public void stop() {
-        super.cancelMessagesScheduling();
         super.getGearActorRefFactory().stop(super.getGearActor());
         while(!super.getGearActor().isTerminated())
             try {
@@ -87,8 +69,8 @@ public class DirectoryGear extends AbstractAkkaGear implements Serializable {
             return false;
         }
 
-        DirectoryGear that = (DirectoryGear) o;
-        return super.getGearId().equals(that.getGearId());
+        MappingGear mappingSimpleGear = (MappingGear) o;
+        return super.getGearId().equals(mappingSimpleGear.getGearId());
     }
 
     @Override

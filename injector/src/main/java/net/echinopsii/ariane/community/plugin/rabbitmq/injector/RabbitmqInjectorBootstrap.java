@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.echinopsii.ariane.community.rabbitmq.injector;
+package net.echinopsii.ariane.community.plugin.rabbitmq.injector;
 
 import net.echinopsii.ariane.community.core.injector.base.registry.InjectorComponentsRegistry;
 import net.echinopsii.ariane.community.core.injector.base.registry.InjectorGearsRegistry;
@@ -28,9 +28,9 @@ import net.echinopsii.ariane.community.core.portal.base.plugin.FaceletsResourceR
 import net.echinopsii.ariane.community.core.portal.base.plugin.FacesMBeanRegistry;
 import net.echinopsii.ariane.community.core.portal.base.plugin.TreeMenuRootsRegistry;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryService;
-import net.echinopsii.ariane.community.rabbitmq.injector.runtime.config.RabbitmqInjectorMainCfgLoader;
-import net.echinopsii.ariane.community.rabbitmq.injector.runtime.gears.DirectoryGear;
-import net.echinopsii.ariane.community.rabbitmq.injector.runtime.gears.MappingGear;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.config.RabbitmqInjectorMainCfgLoader;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears.DirectoryGear;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears.MappingGear;
 import org.apache.felix.ipojo.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -191,7 +191,7 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
     private final static void start() throws IOException, InterruptedException {
         if (!isStarted) {
             while(config==null) {
-                log.info("Config is missing to load Tibco RV Injector. Sleep some times...");
+                log.info("Config is missing to load RabbitMQ Injector. Sleep some times...");
                 Thread.sleep(1000);
             }
 
@@ -345,11 +345,11 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
             }
             mappingMdwInjectorMenuEntity.addDisplayRole("mdwrabbitadmin").addDisplayRole("mdwrabbitreviewer").addDisplayPermission("injMapMdwRabbitMQ:display");
             mappingMdwInjectorMenuEntity.addChildTreeMenuEntity(new TreeMenuEntity().setId("rabbitmqMapTreeID").setValue("RabbitMQ").setParentTreeMenuEntity(mappingMdwInjectorMenuEntity).
-                                                                                                                                                                                                         setIcon("icon-asterisk").setType(MenuEntityType.TYPE_MENU_ITEM).
-                                                                                                                                                                                                                                                                                setContextAddress(MAIN_MENU_INJECTOR_CONTEXT + "views/injectors/tibcorv.jsf").
-                                                                                                                                                                                                                                                                                                                                                                     setDescription("Inject data from your local Tibco RV infrastructure to Ariane mapping").
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    addDisplayRole("mdwtibrvadmin").addDisplayRole("mdwtibrvreviewer").
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              addDisplayPermission("injMapMdwTibRV:display"));
+                                                                                     setIcon("icon-asterisk").setType(MenuEntityType.TYPE_MENU_ITEM).
+                                                                                     setContextAddress(MAIN_MENU_INJECTOR_CONTEXT + "views/injectors/rabbitmq.jsf").
+                                                                                     setDescription("Inject data from your local RabbitMQ infrastructure to Ariane mapping").
+                                                                                     addDisplayRole("mdwrabbitmqadmin").addDisplayRole("mdwrabbitmqreviewer").
+                                                                                     addDisplayPermission("injMapMdwRabbitMQ:display"));
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

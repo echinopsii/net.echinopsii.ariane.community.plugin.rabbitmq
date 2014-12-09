@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.echinopsii.ariane.community.rabbitmq.injector.runtime.config;
+package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

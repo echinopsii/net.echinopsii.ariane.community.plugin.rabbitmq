@@ -1,7 +1,9 @@
 /**
- * RabbitMQ plugin addon injector bundle
- * Cache Gears Configuration controller
+ * RabbitMQ plugin injector bundle
+ * Components Cache Configuration controller
  * Copyright (C) 2014 Mathilde Ffrench
+ *
+ * Copyright (C) 2014  Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,9 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.echinopsii.ariane.community.rabbitmq.injector.controller;
+package net.echinopsii.ariane.community.plugin.rabbitmq.injector.controller;
 
-import net.echinopsii.ariane.community.rabbitmq.injector.RabbitmqInjectorBootstrap;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
@@ -28,18 +30,18 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
-public class ConfigurationGearsCache implements Serializable {
+public class ConfigurationComponentsCache implements Serializable {
 
-    private Properties gearsCacheConf;
+    private Properties componentsCacheConf;
     private List<String> keys ;
 
     @PostConstruct
     public void init() {
-        gearsCacheConf = RabbitmqInjectorBootstrap.getGearsRegisry().getConfiguration();
+        componentsCacheConf = RabbitmqInjectorBootstrap.getComponentsRegistry().getConfiguration();
 
         keys = new ArrayList<String>();
         TreeSet<Object> sortedKeys = new TreeSet<Object>();
-        sortedKeys.addAll(gearsCacheConf.keySet());
+        sortedKeys.addAll(componentsCacheConf.keySet());
         for (Object key: sortedKeys) {
             if (key instanceof String)
                 keys.add((String)key);
@@ -50,7 +52,7 @@ public class ConfigurationGearsCache implements Serializable {
         return keys;
     }
 
-    public String getGearsCacheConf(String key) {
-        return gearsCacheConf.get(key).toString();
+    public String getComponentsCacheConf(String key) {
+        return componentsCacheConf.get(key).toString();
     }
 }

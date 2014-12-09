@@ -17,13 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.echinopsii.ariane.community.rabbitmq.injector.runtime.gears;
+package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears;
 
 import net.echinopsii.ariane.community.core.injector.base.model.AbstractAkkaGear;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
-import net.echinopsii.ariane.community.rabbitmq.injector.RabbitmqInjectorBootstrap;
-import net.echinopsii.ariane.community.rabbitmq.injector.cache.RabbitmqCachedComponent;
-import net.echinopsii.ariane.community.rabbitmq.injector.runtime.actors.ComponentActor;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.cache.RabbitmqCachedComponent;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.actors.ComponentActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

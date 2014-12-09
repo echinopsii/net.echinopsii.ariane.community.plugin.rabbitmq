@@ -17,12 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.echinopsii.ariane.community.rabbitmq.injector.runtime.actors;
+package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.actors;
 
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
-import net.echinopsii.ariane.community.rabbitmq.injector.runtime.gears.MappingGear;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears.MappingGear;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
