@@ -81,4 +81,15 @@ public interface RabbitmqDirectoryService {
      * @param cluster
      */
     public void updateCluster(RabbitmqCluster cluster);
+
+    /**
+     * Get cluster from node. If no cluster is defined for this node return
+     * a fake cluster with the node in the cluster node list.
+     *
+     * @param node
+     * @return
+     */
+    public RabbitmqCluster getClusterFromNode(RabbitmqNode node);
+
+    public RabbitmqNode refreshRabbitmqNode(RabbitmqNode node);
 }

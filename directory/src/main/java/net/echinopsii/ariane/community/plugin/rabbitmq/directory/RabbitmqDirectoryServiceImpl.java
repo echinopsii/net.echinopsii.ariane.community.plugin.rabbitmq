@@ -19,6 +19,10 @@
 
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory;
 
+import net.echinopsii.ariane.community.core.directory.base.model.organisational.Team;
+import net.echinopsii.ariane.community.core.directory.base.model.technical.network.Datacenter;
+import net.echinopsii.ariane.community.core.directory.base.model.technical.network.Subnet;
+import net.echinopsii.ariane.community.core.directory.base.model.technical.system.OSInstance;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster.RabbitmqClustersListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqnode.RabbitmqNodesListController;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
@@ -28,9 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @Provides
@@ -177,5 +188,57 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         em.getTransaction().commit();
         log.debug("Close entity manager...");
         em.close();
+    }
+
+    @Override
+    public RabbitmqCluster getClusterFromNode(RabbitmqNode node) {
+        RabbitmqCluster ret = null;
+        if (RabbitmqDirectoryBootstrap.getDirectoryJPAProvider()==null) {
+            log.error("Directory JPA provider has been unbounded !");
+            return null ;
+        }
+
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+        RabbitmqNode persistedNode = em.find(RabbitmqNode.class, node.getId());
+        if (persistedNode!=null)
+            ret = persistedNode.getCluster();
+        if (ret!=null)
+            ret.getNodes();
+        else {
+            Set<RabbitmqNode> vnodes = new HashSet<RabbitmqNode>();
+            vnodes.add(node);
+            ret = new RabbitmqCluster().setIdR((long) 0).setVersionR(1).setNameR("rabbit@" + node.getName()).setDescriptionR("fake rabbit cluster").setNodesR(vnodes);
+        }
+        em.close();
+
+        return ret;
+    }
+
+    @Override
+    public RabbitmqNode refreshRabbitmqNode(RabbitmqNode node) {
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+        RabbitmqNode freshRabbitmqNode = em.find(RabbitmqNode.class, node.getId());
+
+        HashMap<String, Object> props = new HashMap<>();
+        if (freshRabbitmqNode!=null) {
+            HashSet<Datacenter> dcs = new HashSet<>();
+            HashSet<Subnet> subnets = new HashSet<>();
+            for (Subnet subnet : freshRabbitmqNode.getOsInstance().getNetworkSubnets()) {
+                for(Datacenter datacenter : subnet.getDatacenters()) if (!dcs.contains(datacenter)) dcs.add(datacenter);
+                if (!subnets.contains(subnet)) subnets.add(subnet);
+            }
+            for (Datacenter datacenter : dcs) props.put(Datacenter.DC_MAPPING_PROPERTIES,datacenter.toMappingProperties());
+            for (Subnet subnet : subnets) {
+                HashMap<String, Object> subnetProps = subnet.toMappingProperties();
+                props.put(Subnet.SUBNET_MAPPING_PROPERTIES, subnetProps);
+            }
+            props.put(OSInstance.OSI_MAPPING_PROPERTIES, freshRabbitmqNode.getOsInstance().toMappingProperties());
+            props.put(Team.TEAM_SUPPORT_MAPPING_PROPERTIES, freshRabbitmqNode.getSupportTeam().toMappingProperties());
+            freshRabbitmqNode.setProperties(props);
+        }
+
+        log.debug("Close entity manager ...");
+        em.close();
+        return freshRabbitmqNode;
     }
 }
