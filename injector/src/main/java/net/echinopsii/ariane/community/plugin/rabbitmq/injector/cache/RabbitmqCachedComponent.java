@@ -20,12 +20,15 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.injector.cache;
 
 import net.echinopsii.ariane.community.core.injector.base.model.AbstractComponent;
+import net.echinopsii.ariane.community.core.injector.base.model.Component;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 
 public class RabbitmqCachedComponent extends AbstractComponent implements Serializable {
@@ -36,20 +39,22 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
 
 
     /*
-     * TibcorvCachedComponent cache part implementation
+     * RabbitmqCachedComponent cache part implementation
      */
     private Long componentDirectoryID;
     private String componentId;
     private String componentName;
     private String componentURL;
     private transient HashMap<String,Object> componentProperties;
+    private transient RabbitmqNode rabbitmqNode;
 
-    public RabbitmqCachedComponent setRabbitmqComponentFields(RabbitmqNode tibcorvComponent) {
-        this.componentDirectoryID = tibcorvComponent.getId();
-        this.componentId = RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+"_"+tibcorvComponent.getName()+"_";
-        this.componentName = tibcorvComponent.getName();
-        this.componentURL = tibcorvComponent.getUrl();
-        this.componentProperties = tibcorvComponent.getProperties();
+    public RabbitmqCachedComponent setRabbitmqComponentFields(RabbitmqNode rabbitmqComponent) {
+        this.componentDirectoryID = rabbitmqComponent.getId();
+        this.componentId = RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+"_"+rabbitmqComponent.getName()+"_";
+        this.componentName = rabbitmqComponent.getName();
+        this.componentURL = rabbitmqComponent.getUrl();
+        this.componentProperties = rabbitmqComponent.getProperties();
+        this.rabbitmqNode = rabbitmqComponent;
         return this;
     }
 
@@ -74,12 +79,38 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
 
     @Override
     public String getComponentType() {
-        return null;
+        return "RabbitMQ Server";
     }
 
     @Override
     public void refresh() {
+        super.setRefreshing(true);
+        log.debug("Refresh component : " + this.componentURL);
+        this.rabbitmqNode = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().refreshRabbitmqNode(this.rabbitmqNode);
+        if (this.rabbitmqNode!=null) {
+            setRabbitmqComponentFields(this.rabbitmqNode);
+            super.setNextAction(Component.ACTION_CREATE);
+        } else {
+            super.setNextAction(Component.ACTION_DELETE);
+        }
+        log.debug("nextAction for {} : {}", componentName, super.getNextAction());
 
+        RabbitmqCluster nodeCluster = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getClusterFromNode(this.rabbitmqNode);
+        switch (super.getNextAction()) {
+            case Component.ACTION_UPDATE:
+                break;
+            case Component.ACTION_CREATE:
+                break;
+            case Component.ACTION_DELETE:
+                break;
+            default:
+                log.error("Unknown entity refresh !");
+                break;
+        }
+
+        super.setLastRefresh(new Date());
+        RabbitmqInjectorBootstrap.getComponentsRegistry().putEntityToCache(this);
+        super.setRefreshing(false);
     }
 
     @Override
