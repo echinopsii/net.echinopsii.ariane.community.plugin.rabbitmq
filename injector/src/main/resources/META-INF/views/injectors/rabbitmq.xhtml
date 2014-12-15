@@ -11,12 +11,12 @@
             <div>
                 <div style="width:49%; float:left;">
                     <p:fieldset id="cacheGearConfpnl" legend="Gears cache configuration" collapsed="true" toggleable="true" toggleSpeed="500">
-                        <h:dataTable var="key" value="#{configurationGearsCache.keys}">
+                        <h:dataTable var="key" value="#{rabbitmqConfigurationGearsCache.keys}">
                             <h:column>
                                 <h:outputText value="#{key} : " styleClass="inputTitle"/>
                             </h:column>
                             <h:column>
-                                <h:outputText value="#{configurationGearsCache.getGearsCacheConf(key)}"/>
+                                <h:outputText value="#{rabbitmqConfigurationGearsCache.getGearsCacheConf(key)}"/>
                             </h:column>
                         </h:dataTable>
                     </p:fieldset>
@@ -29,16 +29,16 @@
                                 <h:panelGrid columns="2" cellpadding="5">
                                     <h:outputText value="RabbitMQ directory query period (second): " styleClass="inputTitle"/>
                                     <p:inplace editor="true">
-                                        <p:inputText required="true" label="text" value="#{configurationScheduling.directoryQueryPeriod}"/>
+                                        <p:inputText required="true" label="text" value="#{rabbitmqConfigurationScheduling.directoryQueryPeriod}"/>
                                     </p:inplace>
 
                                     <h:outputText value="RabbitMQ entities sniffing period (second): " styleClass="inputTitle"/>
                                     <p:inplace editor="true">
-                                        <p:inputText required="true" label="text" value="#{configurationScheduling.rvComponentSniffPeriod}"/>
+                                        <p:inputText required="true" label="text" value="#{rabbitmqConfigurationScheduling.rvComponentSniffPeriod}"/>
                                     </p:inplace>
                                 </h:panelGrid>
                                 <p:commandButton value="Apply changes and restart" id="confApply" icon="icon-power-off icon-large" update="@form"
-                                                 actionListener="#{configurationScheduling.apply}" styleClass="ui-priority-primary icon-large"
+                                                 actionListener="#{rabbitmqConfigurationScheduling.apply}" styleClass="ui-priority-primary icon-large"
                                                  rendered="#{ccidm:hasPermission('injMapMdwRabbitMQ:action')}"/>
                             </h:panelGrid>
                         </h:form>
@@ -48,7 +48,7 @@
                     <p:fieldset id="gearpnl" legend="Gears" toggleable="true" toggleSpeed="500">
                         <h:form id="rabbitmqGearsTableForm">
                             <p:growl id="rabbitmqGearsTableMessages" showDetail="true" />
-                            <p:dataTable id="rabbitmqGearsTable" var="gear" value="#{cacheGears.gearList}" filteredValue="#{cacheGears.filteredGearList}"
+                            <p:dataTable id="rabbitmqGearsTable" var="gear" value="#{rabbitmqCacheGears.gearList}" filteredValue="#{rabbitmqCacheGears.filteredGearList}"
                                          paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                                          rowsPerPageTemplate="5,10,15,20,25" rows="10" paginator="true">
                                 <f:facet name="header">
@@ -60,17 +60,17 @@
                                 </p:column>
 
                                 <p:column headerText="Status" sortBy="#{gears.isRunning(gear)}" filterBy="#{gears.isRunning(gear)}"
-                                          filterOptions="#{cacheGears.statusSelectOptions}" filterMatchMode="exact">
-                                    <h:outputText value="#{cacheGears.isRunning(gear)}" style="background-color:\##{cacheGears.statusColor(gear)};font-weight:bold"/>
+                                          filterOptions="#{rabbitmqCacheGears.statusSelectOptions}" filterMatchMode="exact">
+                                    <h:outputText value="#{rabbitmqCacheGears.isRunning(gear)}" style="background-color:\##{rabbitmqCacheGears.statusColor(gear)};font-weight:bold"/>
                                 </p:column>
 
                                 <p:column headerText="Action" rendered="#{ccidm:hasPermission('injMapMdwRabbitMQ:action')}">
                                     <p:commandButton value="Stop this gear" id="stopGear" icon="icon-power-off icon-large"
                                                      rendered="#{gear.isRunning()}" update="@form"
-                                                     actionListener="#{cacheGears.stop(gear)}" styleClass="ui-priority-primary icon-large"/>
+                                                     actionListener="#{rabbitmqCacheGears.stop(gear)}" styleClass="ui-priority-primary icon-large"/>
                                     <p:commandButton value="Start this gear" id="startGear" icon="icon-power-off icon-large"
                                                      rendered="#{!gear.isRunning()}" update="@form"
-                                                     actionListener="#{cacheGears.start(gear)}" styleClass="ui-priority-primary icon-large"/>
+                                                     actionListener="#{rabbitmqCacheGears.start(gear)}" styleClass="ui-priority-primary icon-large"/>
                                 </p:column>
                             </p:dataTable>
                             <p:poll update="@form" interval="10"/>
@@ -79,12 +79,12 @@
                 </div>
                 <div style="width:49%; float:right;">
                     <p:fieldset id="cacheComponentConfpnl" legend="Components cache configuration" collapsed="true" toggleable="true" toggleSpeed="500">
-                        <h:dataTable var="key" value="#{configurationComponentsCache.keys}">
+                        <h:dataTable var="key" value="#{rabbitmqConfigurationComponentsCache.keys}">
                             <h:column>
                                 <h:outputText value="#{key} : " styleClass="inputTitle"/>
                             </h:column>
                             <h:column>
-                                <h:outputText value="#{configurationComponentsCache.getComponentsCacheConf(key)}"/>
+                                <h:outputText value="#{rabbitmqConfigurationComponentsCache.getComponentsCacheConf(key)}"/>
                             </h:column>
                         </h:dataTable>
                     </p:fieldset>
@@ -93,28 +93,28 @@
                     <p:fieldset id="cachepnl" legend="Components" toggleable="true" toggleSpeed="500">
                         <h:form id="rabbitmqCacheTableForm">
                             <p:growl id="rabbitmqCacheTableMessages" showDetail="true" />
-                            <p:dataTable id="rabbitmqCacheTable" var="entity" value="#{cacheComponents.cachedEntityList}" filteredValue="#{cacheComponents.filteredCachedEntityList}"
+                            <p:dataTable id="rabbitmqCacheTable" var="entity" value="#{rabbitmqCacheComponents.cachedEntityList}" filteredValue="#{rabbitmqCacheComponents.filteredCachedEntityList}"
                                          paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                                          rowsPerPageTemplate="5,10,15,20,25" rows="20" paginator="true">
                                 <f:facet name="header">
                                     RabbitMQ injector components
                                 </f:facet>
 
-                                <p:column headerText="Name" sortBy="#{cacheComponents.getEntityName(entity)}" filterBy="#{cacheComponents.getEntityName(entity)}" filterMatchMode="contains">
-                                    <h:outputText value="#{cacheComponents.getEntityName(entity)}" />
+                                <p:column headerText="Name" sortBy="#{rabbitmqCacheComponents.getEntityName(entity)}" filterBy="#{rabbitmqCacheComponents.getEntityName(entity)}" filterMatchMode="contains">
+                                    <h:outputText value="#{rabbitmqCacheComponents.getEntityName(entity)}" />
                                 </p:column>
 
-                                <p:column headerText="Type" sortBy="#{cacheComponents.getEntityType(entity)}" filterBy="#{cacheComponents.getEntityType(entity)}" filterMatchMode="contains">
-                                    <h:outputText value="#{cacheComponents.getEntityType(entity)}" />
+                                <p:column headerText="Type" sortBy="#{rabbitmqCacheComponents.getEntityType(entity)}" filterBy="#{rabbitmqCacheComponents.getEntityType(entity)}" filterMatchMode="contains">
+                                    <h:outputText value="#{rabbitmqCacheComponents.getEntityType(entity)}" />
                                 </p:column>
 
-                                <p:column headerText="Last refresh" sortBy="#{cacheComponents.getEntityLastRefresh(entity)}" filterBy="#{cacheComponents.getEntityLastRefresh(entity)}" filterMatchMode="contains">
-                                    <h:outputText value="#{cacheComponents.getEntityLastRefresh(entity)}" />
+                                <p:column headerText="Last refresh" sortBy="#{rabbitmqCacheComponents.getEntityLastRefresh(entity)}" filterBy="#{rabbitmqCacheComponents.getEntityLastRefresh(entity)}" filterMatchMode="contains">
+                                    <h:outputText value="#{rabbitmqCacheComponents.getEntityLastRefresh(entity)}" />
                                 </p:column>
 
                                 <p:column headerText="Action" rendered="#{ccidm:hasPermission('injMapMdwRabbitMQ:action')}">
                                     <p:commandButton value="Refresh" id="action" icon="icon-refresh icon-large"
-                                                     update="@form" actionListener="#{cacheComponents.refreshEntity(entity)}" styleClass="ui-priority-primary icon-large"/>
+                                                     update="@form" actionListener="#{rabbitmqCacheComponents.refreshEntity(entity)}" styleClass="ui-priority-primary icon-large"/>
                                 </p:column>
                                 <c:if test="#{ccidm:hasPermission('injMapMdwRabbitMQ:action')}">
                                     <f:facet name="footer">

@@ -4,31 +4,31 @@
               xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
               version="2.0">
     <managed-bean>
-        <managed-bean-name>cacheComponents</managed-bean-name>
+        <managed-bean-name>rabbitmqCacheComponents</managed-bean-name>
         <managed-bean-class>net.echinopsii.ariane.community.plugin.rabbitmq.injector.controller.CacheComponents</managed-bean-class>
         <managed-bean-scope>session</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
-        <managed-bean-name>cacheGears</managed-bean-name>
+        <managed-bean-name>rabbitmqCacheGears</managed-bean-name>
         <managed-bean-class>net.echinopsii.ariane.community.plugin.rabbitmq.injector.controller.CacheGears</managed-bean-class>
         <managed-bean-scope>session</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
-        <managed-bean-name>configurationComponentsCache</managed-bean-name>
+        <managed-bean-name>rabbitmqConfigurationComponentsCache</managed-bean-name>
         <managed-bean-class>net.echinopsii.ariane.community.plugin.rabbitmq.injector.controller.ConfigurationComponentsCache</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
-        <managed-bean-name>configurationGearsCache</managed-bean-name>
+        <managed-bean-name>rabbitmqConfigurationGearsCache</managed-bean-name>
         <managed-bean-class>net.echinopsii.ariane.community.plugin.rabbitmq.injector.controller.ConfigurationGearsCache</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
-        <managed-bean-name>configurationScheduling</managed-bean-name>
+        <managed-bean-name>rabbitmqConfigurationScheduling</managed-bean-name>
         <managed-bean-class>net.echinopsii.ariane.community.plugin.rabbitmq.injector.controller.ConfigurationScheduling</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
