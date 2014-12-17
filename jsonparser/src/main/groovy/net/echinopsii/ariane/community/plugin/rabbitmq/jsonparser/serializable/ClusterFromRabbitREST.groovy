@@ -1,7 +1,8 @@
-package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
+package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.RESTClientProviderFromRabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 
 import javax.persistence.Transient
 
@@ -12,13 +13,13 @@ class ClusterFromRabbitREST implements Serializable {
     public static final int REST_CLU_DEF_NODE_INVALID  = -13;
 
     @Transient
-    RabbitmqCluster cluster = null;
+    RabbitClusterToConnect cluster = null;
 
     String       name;
     List<String> nodes        = new ArrayList<String>();
     List<String> runningNodes = new ArrayList<String>();
 
-    ClusterFromRabbitREST(RabbitmqCluster cluster) {
+    ClusterFromRabbitREST(RabbitClusterToConnect cluster) {
         this.cluster = cluster;
     }
 
@@ -44,11 +45,11 @@ class ClusterFromRabbitREST implements Serializable {
             if (!this.cluster.getName().equals(this.name))
                 this.cluster.getErrors().put(this.cluster.getName(), REST_CLU_INVALID_ID_NAME)
 
-            HashSet<RabbitmqNode> invalidNodes = new HashSet<RabbitmqNode>(this.cluster.getNodes());
+            HashSet<RabbitNodeToConnect> invalidNodes = new HashSet<RabbitNodeToConnect>(this.cluster.getNodes());
 
             for (String clusterNodeName : nodes) {
                 boolean isDefinedCorrectly = false;
-                for (RabbitmqNode node : this.cluster.getNodes()) {
+                for (RabbitNodeToConnect node : this.cluster.getNodes()) {
                     node.getErrors().clear();
                     if (node.getName().equals(clusterNodeName)) {
                         isDefinedCorrectly = true;
@@ -60,14 +61,14 @@ class ClusterFromRabbitREST implements Serializable {
                     this.cluster.getErrors().put(clusterNodeName, REST_CLU_NODE_NOT_DEFINED);
             }
 
-            for (RabbitmqNode node : invalidNodes) {
+            for (RabbitNodeToConnect node : invalidNodes) {
                 this.cluster.getErrors().put(this.cluster.getName()+"-"+node.getName(), REST_CLU_DEF_NODE_INVALID);
                 node.getErrors().put(NodeFromRabbitREST.REST_NODE_INVALID_ID_NAME_OR_CLUSTER);
             }
 
             for (String error : this.cluster.getErrors().keySet())
                 if (!error.contains(this.cluster.getName()))
-                    for (RabbitmqNode node : this.cluster.getNodes())
+                    for (RabbitNodeToConnect node : this.cluster.getNodes())
                         if (node.getName().equals(error))
                             node.getErrors().add(this.cluster.getErrors().get(error));
         }

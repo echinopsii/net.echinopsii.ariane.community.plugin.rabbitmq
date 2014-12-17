@@ -2,8 +2,8 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
 
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 import org.apache.http.NoHttpResponseException
 import org.apache.http.conn.HttpHostConnectException
 import org.slf4j.Logger
@@ -19,9 +19,9 @@ class RESTClientProviderFromRabbitmqCluster {
     public final static int REST_CLI_NODE_NO_RESPONSE = -3;
     public final static int REST_CLI_NODE_AUTH_ERROR  = 401;
 
-    static RESTClient getRESTClientFromCluster(RabbitmqCluster cluster) {
+    static RESTClient getRESTClientFromCluster(RabbitClusterToConnect cluster) {
         RESTClient ret = null;
-        for (RabbitmqNode node : cluster.getNodes()) {
+        for (RabbitNodeToConnect node : cluster.getNodes()) {
             RESTClient test = getRESTClientFromNode(node);
             int status = checkRabbitRESTClient(test);
             switch(status) {
@@ -37,9 +37,9 @@ class RESTClientProviderFromRabbitmqCluster {
         return ret;
     }
 
-    private static RESTClient getRESTClientFromNode(RabbitmqNode node) {
+    private static RESTClient getRESTClientFromNode(RabbitNodeToConnect node) {
         RESTClient rest = new RESTClient( node.getUrl() )
-        rest.auth.basic node.getUser(), node.getPasswd();
+        rest.auth.basic node.getUser(), node.getPassword();
         return rest;
     }
 

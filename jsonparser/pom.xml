@@ -16,18 +16,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.echinopsii.ariane.community.plugin.rabbitmq</groupId>
-            <artifactId>net.echinopsii.ariane.community.plugin.rabbitmq.directory</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.echinopsii.ariane.community.core.directory</groupId>
-            <artifactId>net.echinopsii.ariane.community.core.directory.base</artifactId>
-            <version>${version.net.echinopsii.ariane.community.core.directory}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>3.3.5</version>

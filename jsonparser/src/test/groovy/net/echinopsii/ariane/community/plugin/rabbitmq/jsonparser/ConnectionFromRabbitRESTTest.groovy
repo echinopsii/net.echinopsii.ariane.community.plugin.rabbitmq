@@ -1,5 +1,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
 
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable.ConnectionFromRabbitREST
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitRESTTools
 import org.junit.Test
 
 import static org.junit.Assert.assertTrue

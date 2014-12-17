@@ -1,11 +1,11 @@
-package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
+package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools
 
 import groovyx.net.http.RESTClient
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.RESTClientProviderFromRabbitmqCluster
 
 class RabbitRESTTools {
 
-    static List<String> getConnectionNames(RabbitmqCluster cluster) {
+    static List<String> getConnectionNames(RabbitClusterToConnect cluster) {
         RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<String> ret = new ArrayList<String>()
         def connections_list_req = client.get(path : '/api/connections')
@@ -17,7 +17,7 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<String> getChannelNames(RabbitmqCluster cluster) {
+    static List<String> getChannelNames(RabbitClusterToConnect cluster) {
         RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<String> ret = new ArrayList<String>()
         def channels_list_req = client.get(path : '/api/channels')
@@ -29,7 +29,7 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static Map<String,List<String>> getExchangeNames(RabbitmqCluster cluster) {
+    static Map<String,List<String>> getExchangeNames(RabbitClusterToConnect cluster) {
         RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         Map<String,List<String>> ret = new HashMap<String,List<String>>()
         def exchanges_list_req = client.get(path : '/api/exchanges')
@@ -45,7 +45,7 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<Map<String,String>> getBindings(RabbitmqCluster cluster) {
+    static List<Map<String,String>> getBindings(RabbitClusterToConnect cluster) {
         RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<Map<String,String>> ret = null;
         def bindings_list_req = client.get(path : '/api/bindings')
@@ -55,7 +55,7 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static Map<String,List<String>> getQueueNames(RabbitmqCluster cluster) {
+    static Map<String,List<String>> getQueueNames(RabbitClusterToConnect cluster) {
         RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         Map<String,List<String>> ret = new HashMap<String, List<String>>()
         def queues_list_req = client.get(path : '/api/queues')
@@ -71,7 +71,7 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<String> getVhostNames(RabbitmqCluster cluster) {
+    static List<String> getVhostNames(RabbitClusterToConnect cluster) {
         RESTClient client = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(cluster);
         List<String> ret = new ArrayList<String>()
         def vhosts_list_req = client.get(path : '/api/vhosts')

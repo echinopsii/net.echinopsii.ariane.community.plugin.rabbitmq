@@ -1,5 +1,6 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
 
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable.ClusterFromRabbitREST
 import org.junit.Test
 
 import static org.junit.Assert.assertNull

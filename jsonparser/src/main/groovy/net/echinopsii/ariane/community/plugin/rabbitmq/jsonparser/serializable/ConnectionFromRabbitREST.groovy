@@ -1,18 +1,19 @@
-package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
+package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.RESTClientProviderFromRabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 
 import javax.persistence.Transient
 
 class ConnectionFromRabbitREST implements Serializable {
 
     @Transient
-    RabbitmqCluster cluster;
+    RabbitClusterToConnect cluster;
 
     String name
     Map<String, Object> properties
 
-    ConnectionFromRabbitREST(String name, RabbitmqCluster cluster) {
+    ConnectionFromRabbitREST(String name, RabbitClusterToConnect cluster) {
         this.cluster = cluster
         this.name = name
     }

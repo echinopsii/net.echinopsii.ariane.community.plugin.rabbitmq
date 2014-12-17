@@ -4,10 +4,10 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 import groovyx.net.http.RESTClient
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.rabbitTestTools.Rreceiver
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.rabbitTestTools.Rsender
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
@@ -17,11 +17,11 @@ import static org.junit.Assert.assertTrue
 class RabbitRESTTestSetup {
 
     static String          hostname
-    static RabbitmqCluster validCluster
-    static RabbitmqCluster invalidURLCluster
-    static RabbitmqCluster invalidAUTHCluster
-    static RabbitmqCluster stoppedNodeCluster
-    static RabbitmqNode    validNode
+    static RabbitClusterToConnect validCluster
+    static RabbitClusterToConnect invalidURLCluster
+    static RabbitClusterToConnect invalidAUTHCluster
+    static RabbitClusterToConnect stoppedNodeCluster
+    static RabbitNodeToConnect    validNode
 
     static RESTClient      rclient;
 
@@ -38,35 +38,39 @@ class RabbitRESTTestSetup {
         hostname  = cmdReader.readLine();
 
 
-        validNode = new RabbitmqNode().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing valid rabbit").
-                                       setUrlR("http://localhost:15672/").setUserR("guest").setPasswdR("guest");
-        Set<RabbitmqNode> vnodes = new HashSet<RabbitmqNode>();
+        validNode = new RabbitNodeToConnect()
+        validNode.setName("rabbit@"+hostname); validNode.setUrl("http://localhost:15672/"); validNode.setUser("guest"); validNode.setPassword("guest");
+        Set<RabbitNodeToConnect> vnodes = new HashSet<RabbitNodeToConnect>();
         vnodes.add(validNode);
-        validCluster = new RabbitmqCluster().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing rabbit").setNodesR(vnodes);
+        validCluster = new RabbitClusterToConnect()
+        validCluster.setName("rabbit@"+hostname); validCluster.setNodes(vnodes);
         validNode.setCluster(validCluster);
 
 
-        RabbitmqNode invalidURLNode = new RabbitmqNode().setIdR(1).setVersionR(1).setNameR("rabbit@toto").setDescriptionR("testing invalid URL rabbit").
-                                                         setUrlR("http://toto:15672/").setUserR("guest").setPasswdR("guest");
-        Set<RabbitmqNode> iurlnodes = new HashSet<RabbitmqNode>();
+        RabbitNodeToConnect invalidURLNode = new RabbitNodeToConnect()
+        invalidURLNode.setName("rabbit@toto"); invalidURLNode.setUrl("http://toto:15672/"); invalidURLNode.setUser("guest"); invalidURLNode.setPassword("guest");
+        Set<RabbitNodeToConnect> iurlnodes = new HashSet<RabbitNodeToConnect>();
         iurlnodes.add(invalidURLNode);
-        invalidURLCluster = new RabbitmqCluster().setIdR(1).setVersionR(1).setNameR("rabbit@toto").setDescriptionR("testing invalid URL rabbit").setNodesR(iurlnodes);
+        invalidURLCluster = new RabbitClusterToConnect();
+        invalidURLCluster.setName("rabbit@toto"); invalidURLCluster.setNodes(iurlnodes);
         invalidURLNode.setCluster(invalidURLCluster);
 
 
-        RabbitmqNode invalidauthNode = new RabbitmqNode().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing invalid AUTH rabbit").
-                                                          setUrlR("http://localhost:15672/").setUserR("toto").setPasswdR("toto");
-        Set<RabbitmqNode> iauthnodes = new HashSet<RabbitmqNode>();
+        RabbitNodeToConnect invalidauthNode = new RabbitNodeToConnect();
+        invalidauthNode.setName("rabbit@"+hostname); invalidauthNode.setUrl("http://localhost:15672/"); invalidauthNode.setUser("toto"); invalidauthNode.setPassword("toto");
+        Set<RabbitNodeToConnect> iauthnodes = new HashSet<RabbitNodeToConnect>();
         iauthnodes.add(invalidauthNode);
-        invalidAUTHCluster = new RabbitmqCluster().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing invalid AUTH rabbit").setNodesR(iauthnodes);
+        invalidAUTHCluster = new RabbitClusterToConnect();
+        invalidAUTHCluster.setName("rabbit@"+hostname); invalidAUTHCluster.setNodes(iauthnodes);
         invalidauthNode.setCluster(invalidAUTHCluster);
 
 
-        RabbitmqNode stoppedNode = new RabbitmqNode().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing stopped rabbit").
-                                                      setUrlR("http://localhost:25672/").setUserR("toto").setPasswdR("toto");
-        Set<RabbitmqNode> stoppednodes = new HashSet<RabbitmqNode>();
+        RabbitNodeToConnect stoppedNode = new RabbitNodeToConnect();
+        stoppedNode.setName("rabbit@"+hostname); stoppedNode.setUrl("http://localhost:25672/"); stoppedNode.setUser("toto"); stoppedNode.setPassword("toto");
+        Set<RabbitNodeToConnect> stoppednodes = new HashSet<RabbitNodeToConnect>();
         stoppednodes.add(stoppedNode);
-        stoppedNodeCluster = new RabbitmqCluster().setIdR(1).setVersionR(1).setNameR("rabbit@"+hostname).setDescriptionR("testing invalid AUTH rabbit").setNodesR(stoppednodes);
+        stoppedNodeCluster = new RabbitClusterToConnect();
+        stoppedNodeCluster.setName("rabbit@"+hostname); stoppedNodeCluster.setNodes(stoppednodes);
         stoppedNode.setCluster(stoppedNodeCluster);
 
         try {

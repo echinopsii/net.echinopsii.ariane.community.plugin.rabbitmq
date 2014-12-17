@@ -1,6 +1,7 @@
-package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
+package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.RESTClientProviderFromRabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -13,12 +14,12 @@ class NodeFromRabbitREST implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(NodeFromRabbitREST.class);
 
     @Transient
-    RabbitmqCluster cluster;
+    RabbitClusterToConnect cluster;
 
     String name;
     Map<String, Object> properties
 
-    NodeFromRabbitREST(String name, RabbitmqCluster cluster) {
+    NodeFromRabbitREST(String name, RabbitClusterToConnect cluster) {
         this.name = name;
         this.cluster = cluster;
     }
