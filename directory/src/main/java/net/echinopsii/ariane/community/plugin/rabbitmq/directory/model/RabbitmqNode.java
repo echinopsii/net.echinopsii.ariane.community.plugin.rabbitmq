@@ -230,13 +230,6 @@ public class RabbitmqNode implements Serializable {
     }
 
     @Transient
-    List<Integer> errors = new ArrayList<Integer>();
-
-    public List<Integer> getErrors() {
-        return errors;
-    }
-
-    @Transient
     HashMap<String, Object> properties = null;
 
     @Transient
