@@ -82,6 +82,8 @@ public interface RabbitmqDirectoryService {
      */
     public void updateCluster(RabbitmqCluster cluster);
 
+    public static int FAKE_CLUSTER_ID = -1;
+
     /**
      * Get cluster from node. If no cluster is defined for this node return
      * a fake cluster with the node in the cluster node list.
