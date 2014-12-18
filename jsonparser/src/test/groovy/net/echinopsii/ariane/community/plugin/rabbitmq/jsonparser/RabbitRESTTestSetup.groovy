@@ -36,39 +36,34 @@ class RabbitRESTTestSetup {
         hostname  = cmdReader.readLine();
 
 
-        validNode = new RabbitNodeToConnect()
-        validNode.setName("rabbit@"+hostname); validNode.setUrl("http://localhost:15672/"); validNode.setUser("guest"); validNode.setPassword("guest");
+        validNode = new RabbitNodeToConnect("rabbit@"+hostname, "http://localhost:15672/", "guest", "guest")
         Set<RabbitNodeToConnect> vnodes = new HashSet<RabbitNodeToConnect>();
         vnodes.add(validNode);
-        validCluster = new RabbitClusterToConnect()
-        validCluster.setName("rabbit@"+hostname); validCluster.setNodes(vnodes);
+        validCluster = new RabbitClusterToConnect("rabbit@"+hostname)
         validNode.setCluster(validCluster);
 
 
-        RabbitNodeToConnect invalidURLNode = new RabbitNodeToConnect()
-        invalidURLNode.setName("rabbit@toto"); invalidURLNode.setUrl("http://toto:15672/"); invalidURLNode.setUser("guest"); invalidURLNode.setPassword("guest");
+        RabbitNodeToConnect invalidURLNode = new RabbitNodeToConnect("rabbit@toto", "http://toto:15672/", "guest", "guest")
         Set<RabbitNodeToConnect> iurlnodes = new HashSet<RabbitNodeToConnect>();
         iurlnodes.add(invalidURLNode);
-        invalidURLCluster = new RabbitClusterToConnect();
-        invalidURLCluster.setName("rabbit@toto"); invalidURLCluster.setNodes(iurlnodes);
+        invalidURLCluster = new RabbitClusterToConnect("rabbit@toto");
+        invalidURLCluster.setNodes(iurlnodes);
         invalidURLNode.setCluster(invalidURLCluster);
 
 
-        RabbitNodeToConnect invalidauthNode = new RabbitNodeToConnect();
-        invalidauthNode.setName("rabbit@"+hostname); invalidauthNode.setUrl("http://localhost:15672/"); invalidauthNode.setUser("toto"); invalidauthNode.setPassword("toto");
+        RabbitNodeToConnect invalidauthNode = new RabbitNodeToConnect("rabbit@"+hostname,"http://localhost:15672/","toto","toto");
         Set<RabbitNodeToConnect> iauthnodes = new HashSet<RabbitNodeToConnect>();
         iauthnodes.add(invalidauthNode);
-        invalidAUTHCluster = new RabbitClusterToConnect();
-        invalidAUTHCluster.setName("rabbit@"+hostname); invalidAUTHCluster.setNodes(iauthnodes);
+        invalidAUTHCluster = new RabbitClusterToConnect("rabbit@"+hostname);
+        invalidAUTHCluster.setNodes(iauthnodes);
         invalidauthNode.setCluster(invalidAUTHCluster);
 
 
-        RabbitNodeToConnect stoppedNode = new RabbitNodeToConnect();
-        stoppedNode.setName("rabbit@"+hostname); stoppedNode.setUrl("http://localhost:25672/"); stoppedNode.setUser("toto"); stoppedNode.setPassword("toto");
+        RabbitNodeToConnect stoppedNode = new RabbitNodeToConnect("rabbit@"+hostname, "http://localhost:25672/", "toto", "toto");
         Set<RabbitNodeToConnect> stoppednodes = new HashSet<RabbitNodeToConnect>();
         stoppednodes.add(stoppedNode);
-        stoppedNodeCluster = new RabbitClusterToConnect();
-        stoppedNodeCluster.setName("rabbit@"+hostname); stoppedNodeCluster.setNodes(stoppednodes);
+        stoppedNodeCluster = new RabbitClusterToConnect("rabbit@"+hostname);
+        stoppedNodeCluster.setNodes(stoppednodes);
         stoppedNode.setCluster(stoppedNodeCluster);
 
         try {

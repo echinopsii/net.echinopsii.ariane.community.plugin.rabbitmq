@@ -1,6 +1,5 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
-import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RESTClientProvider
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,7 +24,7 @@ class NodeFromRabbitREST implements Serializable {
     }
 
     NodeFromRabbitREST parse() {
-        def restClient = RESTClientProvider.getRESTClientFromCluster(this.cluster);
+        def restClient = this.cluster.getRestCli()
 
         String node_req_path =  '/api/nodes/' + this.name;
         def node_req = restClient.get(path : node_req_path)

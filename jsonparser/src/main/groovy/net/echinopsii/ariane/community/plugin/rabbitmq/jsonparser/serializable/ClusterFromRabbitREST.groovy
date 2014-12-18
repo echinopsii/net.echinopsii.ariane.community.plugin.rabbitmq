@@ -1,6 +1,5 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
-import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RESTClientProvider
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 
@@ -24,7 +23,7 @@ class ClusterFromRabbitREST implements Serializable {
     }
 
     ClusterFromRabbitREST parse() {
-        def rclient = RESTClientProvider.getRESTClientFromCluster(this.cluster);
+        def rclient = this.cluster.getRestCli()
 
         if (rclient!=null) {
             def cluster_name_req = rclient.get(path : '/api/cluster-name')

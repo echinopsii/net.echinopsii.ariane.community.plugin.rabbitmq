@@ -18,30 +18,33 @@ class RESTClientProvider {
     public final static int REST_CLI_NODE_AUTH_ERROR  = 401;
 
     static RESTClient getRESTClientFromCluster(RabbitClusterToConnect cluster) {
-        RESTClient ret = null;
+        RESTClient ret = null
+        RabbitNodeToConnect nodeOnRESTCli = null
         for (RabbitNodeToConnect node : cluster.getNodes()) {
-            RESTClient test = getRESTClientFromNode(node);
-            int status = checkRabbitRESTClient(test);
+            RESTClient test = getRESTClientFromNode(node)
+            int status = checkRabbitRESTClient(test)
             switch(status) {
                 case REST_CLI_NODE_OK:
-                    ret = test;
-                    cluster.getErrors().remove(node.getName());
+                    ret = test
+                    nodeOnRESTCli = node
+                    cluster.getErrors().remove(node.getName())
                     break;
                 default:
                     cluster.getErrors().put(node.getName(), status)
                     break;
             }
         }
+        cluster.setNodeOnRESTCli(nodeOnRESTCli)
         return ret;
     }
 
-    private static RESTClient getRESTClientFromNode(RabbitNodeToConnect node) {
+    static RESTClient getRESTClientFromNode(RabbitNodeToConnect node) {
         RESTClient rest = new RESTClient( node.getUrl() )
         rest.auth.basic node.getUser(), node.getPassword();
         return rest;
     }
 
-    private static int checkRabbitRESTClient(RESTClient client) {
+    static int checkRabbitRESTClient(RESTClient client) {
         int ret = REST_CLI_NODE_OK;
         try {
             client.get(path : '/api/overview')
@@ -55,7 +58,6 @@ class RESTClientProvider {
             ret = httpResponseException.statusCode;
         } catch (Exception e) {
             log.error(e.getMessage());
-            //e.printStackTrace();
             ret = REST_CLI_NODE_SOME_ERROR;
         }
 

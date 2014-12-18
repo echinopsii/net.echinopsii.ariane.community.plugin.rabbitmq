@@ -1,6 +1,5 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
-import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RESTClientProvider
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 
 import javax.persistence.Transient
@@ -18,7 +17,7 @@ class ChannelFromRabbitREST implements Serializable {
     }
 
     ChannelFromRabbitREST parse() {
-        def restClient = RESTClientProvider.getRESTClientFromCluster(this.cluster);
+        def restClient = this.cluster.getRestCli()
 
         String channel_req_path =  '/api/channels/' + this.name;
         def channel_req = restClient.get(path : channel_req_path)
