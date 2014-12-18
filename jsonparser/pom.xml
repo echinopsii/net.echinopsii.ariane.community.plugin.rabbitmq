@@ -108,6 +108,10 @@
                             org.xml.sax,
                             org.slf4j;version="${version.org.slf4j}"
                         </Import-Package>
+                        <Export-Package>
+                            net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable;version=${project.version},
+                            net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools;version=${project.version}
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

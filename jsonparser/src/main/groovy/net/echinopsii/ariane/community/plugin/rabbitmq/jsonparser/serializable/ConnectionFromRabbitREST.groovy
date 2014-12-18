@@ -1,6 +1,6 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
-import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.RESTClientProviderFromRabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RESTClientProvider
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 
 import javax.persistence.Transient
@@ -19,7 +19,7 @@ class ConnectionFromRabbitREST implements Serializable {
     }
 
     ConnectionFromRabbitREST parse() {
-        def restClient = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(this.cluster);
+        def restClient = RESTClientProvider.getRESTClientFromCluster(this.cluster);
 
         String connection_req_path =  '/api/connections/' + this.name;
         def connection_req = restClient.get(path : connection_req_path)

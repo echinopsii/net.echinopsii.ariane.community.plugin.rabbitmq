@@ -1,6 +1,6 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
-import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.RESTClientProviderFromRabbitmqCluster
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RESTClientProvider
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 
 import javax.persistence.Transient
@@ -20,7 +20,7 @@ class ExchangeFromRabbitREST implements Serializable {
     }
 
     ExchangeFromRabbitREST parse() {
-        def restClient = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(this.cluster);
+        def restClient = RESTClientProvider.getRESTClientFromCluster(this.cluster);
 
         String exchanges_req_path =  '/api/exchanges'
         def exchanges_req = restClient.get(path : exchanges_req_path)

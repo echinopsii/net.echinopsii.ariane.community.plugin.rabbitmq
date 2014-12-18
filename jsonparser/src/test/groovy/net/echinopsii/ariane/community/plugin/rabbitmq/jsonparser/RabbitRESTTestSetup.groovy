@@ -6,13 +6,11 @@ import com.rabbitmq.client.ConnectionFactory
 import groovyx.net.http.RESTClient
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.rabbitTestTools.Rreceiver
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.rabbitTestTools.Rsender
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RESTClientProvider
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 import org.junit.AfterClass
 import org.junit.BeforeClass
-import org.junit.Test
-
-import static org.junit.Assert.assertTrue
 
 class RabbitRESTTestSetup {
 
@@ -74,7 +72,7 @@ class RabbitRESTTestSetup {
         stoppedNode.setCluster(stoppedNodeCluster);
 
         try {
-            rclient = RESTClientProviderFromRabbitmqCluster.getRESTClientFromCluster(validCluster);
+            rclient = RESTClientProvider.getRESTClientFromCluster(validCluster);
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost("localhost");
