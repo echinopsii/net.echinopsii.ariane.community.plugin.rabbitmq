@@ -91,5 +91,11 @@ public interface RabbitmqDirectoryService {
      */
     public RabbitmqCluster getClusterFromNode(RabbitmqNode node);
 
-    public RabbitmqNode refreshRabbitmqNode(RabbitmqNode node);
+    /**
+     * Refresh a cluster according to the component ID
+     *
+     * @param componentID
+     * @return refreshed cluster associated to component ID
+     */
+    public RabbitmqCluster refreshRabbitmqCluster(Long componentID);
 }

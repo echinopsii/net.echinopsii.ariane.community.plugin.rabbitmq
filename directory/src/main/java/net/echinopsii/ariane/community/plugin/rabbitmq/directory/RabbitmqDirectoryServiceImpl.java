@@ -207,7 +207,7 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         else {
             Set<RabbitmqNode> vnodes = new HashSet<RabbitmqNode>();
             vnodes.add(node);
-            ret = new RabbitmqCluster().setIdR((long) 0).setVersionR(1).setNameR("rabbit@" + node.getName()).setDescriptionR("fake rabbit cluster").setNodesR(vnodes);
+            ret = new RabbitmqCluster().setIdR((long) -1).setVersionR(1).setNameR("rabbit@" + node.getName()).setDescriptionR("fake rabbit cluster").setNodesR(vnodes);
         }
         em.close();
 
@@ -215,30 +215,50 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
     }
 
     @Override
-    public RabbitmqNode refreshRabbitmqNode(RabbitmqNode node) {
+    public RabbitmqCluster refreshRabbitmqCluster(Long componentID) {
+        if (RabbitmqDirectoryBootstrap.getDirectoryJPAProvider()==null) {
+            log.error("Directory JPA provider has been unbounded !");
+            return null ;
+        }
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
-        RabbitmqNode freshRabbitmqNode = em.find(RabbitmqNode.class, node.getId());
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+
+        CriteriaQuery<RabbitmqCluster> rbcc = builder.createQuery(RabbitmqCluster.class);
+        Root<RabbitmqCluster> rbccRoot = rbcc.from(RabbitmqCluster.class);
+        rbcc.select(rbccRoot).where(builder.equal(rbccRoot.<String>get("id"), componentID));
+        TypedQuery<RabbitmqCluster> rbccQuery = em.createQuery(rbcc);
+
+        RabbitmqCluster freshRabbitmqCluster = null;
+        try {
+            freshRabbitmqCluster = rbccQuery.getSingleResult();
+        } catch (NoResultException e) {
+            log.error("unable to retrieve RabbitMQ Cluster component {} from Directory DB!", componentID);
+        } catch (Exception e) {
+            throw e;
+        }
 
         HashMap<String, Object> props = new HashMap<>();
-        if (freshRabbitmqNode!=null) {
-            HashSet<Datacenter> dcs = new HashSet<>();
-            HashSet<Subnet> subnets = new HashSet<>();
-            for (Subnet subnet : freshRabbitmqNode.getOsInstance().getNetworkSubnets()) {
-                for(Datacenter datacenter : subnet.getDatacenters()) if (!dcs.contains(datacenter)) dcs.add(datacenter);
-                if (!subnets.contains(subnet)) subnets.add(subnet);
+        if (freshRabbitmqCluster!=null) {
+            for (RabbitmqNode freshRabbitmqNode : freshRabbitmqCluster.getNodes()) {
+                HashSet<Datacenter> dcs = new HashSet<>();
+                HashSet<Subnet> subnets = new HashSet<>();
+                for (Subnet subnet : freshRabbitmqNode.getOsInstance().getNetworkSubnets()) {
+                    for(Datacenter datacenter : subnet.getDatacenters()) if (!dcs.contains(datacenter)) dcs.add(datacenter);
+                    if (!subnets.contains(subnet)) subnets.add(subnet);
+                }
+                for (Datacenter datacenter : dcs) props.put(Datacenter.DC_MAPPING_PROPERTIES,datacenter.toMappingProperties());
+                for (Subnet subnet : subnets) {
+                    HashMap<String, Object> subnetProps = subnet.toMappingProperties();
+                    props.put(Subnet.SUBNET_MAPPING_PROPERTIES, subnetProps);
+                }
+                props.put(OSInstance.OSI_MAPPING_PROPERTIES, freshRabbitmqNode.getOsInstance().toMappingProperties());
+                props.put(Team.TEAM_SUPPORT_MAPPING_PROPERTIES, freshRabbitmqNode.getSupportTeam().toMappingProperties());
+                freshRabbitmqNode.setProperties(props);
             }
-            for (Datacenter datacenter : dcs) props.put(Datacenter.DC_MAPPING_PROPERTIES,datacenter.toMappingProperties());
-            for (Subnet subnet : subnets) {
-                HashMap<String, Object> subnetProps = subnet.toMappingProperties();
-                props.put(Subnet.SUBNET_MAPPING_PROPERTIES, subnetProps);
-            }
-            props.put(OSInstance.OSI_MAPPING_PROPERTIES, freshRabbitmqNode.getOsInstance().toMappingProperties());
-            props.put(Team.TEAM_SUPPORT_MAPPING_PROPERTIES, freshRabbitmqNode.getSupportTeam().toMappingProperties());
-            freshRabbitmqNode.setProperties(props);
         }
 
         log.debug("Close entity manager ...");
         em.close();
-        return freshRabbitmqNode;
+        return freshRabbitmqCluster;
     }
 }
