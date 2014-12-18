@@ -20,7 +20,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears;
 
 import net.echinopsii.ariane.community.core.injector.base.model.AbstractAkkaGear;
-import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.cache.RabbitmqCachedComponent;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.actors.ComponentActor;
@@ -40,7 +40,7 @@ public class ComponentGear extends AbstractAkkaGear implements Serializable {
 
     private int componentSniffInterval ;
 
-    public ComponentGear(RabbitmqNode rabbitmqComponent, int sniffInterval) {
+    public ComponentGear(RabbitmqCluster rabbitmqComponent, int sniffInterval) {
         super();
         this.componentSniffInterval = sniffInterval;
         this.cacheEntity = (RabbitmqCachedComponent) RabbitmqInjectorBootstrap.getComponentsRegistry().getEntityFromCache(

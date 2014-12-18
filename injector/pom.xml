@@ -70,6 +70,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
+                            net.echinopsii.ariane.community.plugin.rabbitmq.injector;version=${project.version},
                             net.echinopsii.ariane.community.plugin.rabbitmq.injector.cache;version=${project.version},
                             net.echinopsii.ariane.community.plugin.rabbitmq.injector.controller;version=${project.version},
                             net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears;version=${project.version}

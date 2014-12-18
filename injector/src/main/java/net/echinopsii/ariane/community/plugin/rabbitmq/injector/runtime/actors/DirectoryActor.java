@@ -22,6 +22,7 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.actors;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears.ComponentGear;
@@ -56,9 +57,10 @@ public class DirectoryActor extends UntypedActor {
     private void refresh() {
         HashSet<RabbitmqNode> nodesList = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesList();
         for (RabbitmqNode rabbitmqNode : nodesList) {
-            ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+"_"+rabbitmqNode.getName()+"_");
+            RabbitmqCluster nodeCluster = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getClusterFromNode(rabbitmqNode);
+            ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+"_"+nodeCluster.getName()+"_");
             if (componentGear == null) {
-                componentGear = new ComponentGear(rabbitmqNode, this.gear.getDefaultComponentSniffInterval());
+                componentGear = new ComponentGear(nodeCluster, this.gear.getDefaultComponentSniffInterval());
                 RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
                 componentGear.start();
                 log.debug("New RabbitMQ Node Gear has been started ({})", new Object[]{rabbitmqNode.getUrl()});
