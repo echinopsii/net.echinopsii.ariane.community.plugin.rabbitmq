@@ -103,7 +103,7 @@ public interface RabbitmqDirectoryService {
     public RabbitmqCluster refreshRabbitmqCluster(Long clusterID);
 
     /**
-     * Get nodes list from a cluster according cluster ID
+     * Get fresh nodes list from a cluster according cluster ID
      *
      * @param clusterID
      * @return nodes list from a cluster according cluster ID

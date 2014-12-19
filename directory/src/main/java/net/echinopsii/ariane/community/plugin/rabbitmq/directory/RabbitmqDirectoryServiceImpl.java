@@ -202,8 +202,6 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         RabbitmqNode persistedNode = em.find(RabbitmqNode.class, node.getId());
         if (persistedNode!=null)
             ret = persistedNode.getCluster();
-        if (ret!=null)
-            ret.getNodes();
         else {
             Set<RabbitmqNode> vnodes = new HashSet<RabbitmqNode>();
             vnodes.add(node);
@@ -280,9 +278,9 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         RabbitmqCluster freshRabbitmqCluster = null;
         try {
             freshRabbitmqCluster = rbccQuery.getSingleResult();
-            ret = freshRabbitmqCluster.getNodes();
-            int size = ret.size();
-            //log.debug("nodes nb : {}", new Object[]{size});
+            // clone the list from JPA return as we close cleanly the entity manager at the end
+            // if not we may have some problems working on the returned Set depending on hibernate mood
+            ret = new HashSet<RabbitmqNode>(freshRabbitmqCluster.getNodes());
         } catch (NoResultException e) {
             log.error("unable to retrieve RabbitMQ Cluster component {} from Directory DB!", clusterID);
         } catch (Exception e) {
