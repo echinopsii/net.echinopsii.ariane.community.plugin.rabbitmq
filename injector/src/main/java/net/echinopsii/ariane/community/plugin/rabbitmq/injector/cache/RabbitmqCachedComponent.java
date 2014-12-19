@@ -21,6 +21,7 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.injector.cache;
 
 import net.echinopsii.ariane.community.core.injector.base.model.AbstractComponent;
 import net.echinopsii.ariane.community.core.injector.base.model.Component;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryService;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
@@ -34,6 +35,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class RabbitmqCachedComponent extends AbstractComponent implements Serializable {
 
@@ -45,8 +47,8 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
      * RabbitMQ sniff tooling
      */
     private transient RabbitClusterToConnect clusterToConnect = null;
-    private NodeFromRabbitREST       node        = null;
     private ClusterFromRabbitREST    cluster     = null;
+    private NodeFromRabbitREST       node        = null;
     private VhostFromRabbitREST      vhosts      = null;
     private ConnectionFromRabbitREST connections = null;
     private ChannelFromRabbitREST    channels    = null;
@@ -59,24 +61,38 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private Long componentDirectoryID;
     private String componentId;
     private String componentName;
+    private String componentType;
+    private String componentURL;
     private transient HashMap<String,Object> componentProperties;
 
     public RabbitmqCachedComponent setRabbitmqComponentFields(RabbitmqCluster rabbitmqComponent) {
-        clusterToConnect = new RabbitClusterToConnect();
-        clusterToConnect.setName(rabbitmqComponent.getName());
+        clusterToConnect = new RabbitClusterToConnect(rabbitmqComponent.getName());
+        log.debug("begin define cluster nodes list");
+        Set<RabbitmqNode> clusterNodes = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesFromCluster(rabbitmqComponent.getId());
         HashSet<RabbitNodeToConnect> clusterNodesToConnect = new HashSet<RabbitNodeToConnect>();
-        for (RabbitmqNode node : rabbitmqComponent.getNodes()) {
-            RabbitNodeToConnect nodeToConnect = new RabbitNodeToConnect();
-            nodeToConnect.setCluster(clusterToConnect); nodeToConnect.setName(node.getName()); nodeToConnect.setUrl(node.getUrl());
-            nodeToConnect.setUser(node.getUser()); nodeToConnect.setPassword(node.getPasswd());
+        for (RabbitmqNode node : clusterNodes) {
+            RabbitNodeToConnect nodeToConnect = new RabbitNodeToConnect(node.getName(), node.getUrl(), node.getUser(), node.getPasswd());
+            nodeToConnect.setCluster(clusterToConnect);
             clusterNodesToConnect.add(nodeToConnect);
         }
         clusterToConnect.setNodes(clusterNodesToConnect);
+        log.debug("end define cluster nodes list");
 
-        this.componentDirectoryID = rabbitmqComponent.getId();
-        this.componentId = RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+"_"+rabbitmqComponent.getName()+"_";
+        if (rabbitmqComponent.getId() != RabbitmqDirectoryService.FAKE_CLUSTER_ID) {
+            this.componentDirectoryID = rabbitmqComponent.getId();
+            this.componentType = "RabbitMQ Cluster";
+        } else {
+            //rabbitmqComponent.getNodes().length == 1 if component is a fake cluster
+            for (RabbitmqNode node : RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesFromCluster(rabbitmqComponent.getId()))
+                this.componentDirectoryID = node.getId();
+            this.componentType = "RabbitMQ Server";
+        }
+
+        this.componentId   = RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+"_"+rabbitmqComponent.getName()+"_";
         this.componentName = rabbitmqComponent.getName();
+        this.componentURL  = clusterToConnect.getNodeOnRESTCli().getUrl();
         this.componentProperties = rabbitmqComponent.getProperties();
+        log.debug("end setRbmqComponentFields");
         return this;
     }
 
@@ -91,7 +107,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     }
 
     public String getComponentURL() {
-        return "TODO";
+        return componentURL;
     }
 
     public HashMap<String, Object> getComponentProperties() {
@@ -100,7 +116,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
 
     @Override
     public String getComponentType() {
-        return "RabbitMQ Cluster";
+        return componentType;
     }
 
     private void sniffConfiguration(RabbitmqCluster cluster) {
@@ -117,7 +133,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         RabbitmqCluster rabbitmqCluster = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().refreshRabbitmqCluster(componentDirectoryID);
         if (rabbitmqCluster!=null) {
             setRabbitmqComponentFields(rabbitmqCluster);
-            if (node != null)
+            if (cluster != null)
                 super.setNextAction(Component.ACTION_UPDATE);
             else
                 super.setNextAction(Component.ACTION_CREATE);

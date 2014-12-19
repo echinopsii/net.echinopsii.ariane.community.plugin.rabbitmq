@@ -215,7 +215,7 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
     }
 
     @Override
-    public RabbitmqCluster refreshRabbitmqCluster(Long componentID) {
+    public RabbitmqCluster refreshRabbitmqCluster(Long clusterID) {
         if (RabbitmqDirectoryBootstrap.getDirectoryJPAProvider()==null) {
             log.error("Directory JPA provider has been unbounded !");
             return null ;
@@ -225,14 +225,14 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
 
         CriteriaQuery<RabbitmqCluster> rbcc = builder.createQuery(RabbitmqCluster.class);
         Root<RabbitmqCluster> rbccRoot = rbcc.from(RabbitmqCluster.class);
-        rbcc.select(rbccRoot).where(builder.equal(rbccRoot.<String>get("id"), componentID));
+        rbcc.select(rbccRoot).where(builder.equal(rbccRoot.<String>get("id"), clusterID));
         TypedQuery<RabbitmqCluster> rbccQuery = em.createQuery(rbcc);
 
         RabbitmqCluster freshRabbitmqCluster = null;
         try {
             freshRabbitmqCluster = rbccQuery.getSingleResult();
         } catch (NoResultException e) {
-            log.error("unable to retrieve RabbitMQ Cluster component {} from Directory DB!", componentID);
+            log.error("unable to retrieve RabbitMQ Cluster component {} from Directory DB!", clusterID);
         } catch (Exception e) {
             throw e;
         }
@@ -260,5 +260,37 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         log.debug("Close entity manager ...");
         em.close();
         return freshRabbitmqCluster;
+    }
+
+    public Set<RabbitmqNode> getNodesFromCluster(Long clusterID) {
+        Set<RabbitmqNode> ret = null;
+        if (RabbitmqDirectoryBootstrap.getDirectoryJPAProvider()==null) {
+            log.error("Directory JPA provider has been unbounded !");
+            return null ;
+        }
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+
+        CriteriaQuery<RabbitmqCluster> rbcc = builder.createQuery(RabbitmqCluster.class);
+        Root<RabbitmqCluster> rbccRoot = rbcc.from(RabbitmqCluster.class);
+        rbcc.select(rbccRoot).where(builder.equal(rbccRoot.<String>get("id"), clusterID));
+        TypedQuery<RabbitmqCluster> rbccQuery = em.createQuery(rbcc);
+
+        RabbitmqCluster freshRabbitmqCluster = null;
+        try {
+            freshRabbitmqCluster = rbccQuery.getSingleResult();
+            ret = freshRabbitmqCluster.getNodes();
+            int size = ret.size();
+            //log.debug("nodes nb : {}", new Object[]{size});
+        } catch (NoResultException e) {
+            log.error("unable to retrieve RabbitMQ Cluster component {} from Directory DB!", clusterID);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        log.debug("Close entity manager");
+        em.close();
+        return ret ;
     }
 }

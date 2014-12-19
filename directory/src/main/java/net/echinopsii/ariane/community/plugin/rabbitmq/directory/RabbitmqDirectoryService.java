@@ -23,6 +23,7 @@ import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqC
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public interface RabbitmqDirectoryService {
 
@@ -94,10 +95,18 @@ public interface RabbitmqDirectoryService {
     public RabbitmqCluster getClusterFromNode(RabbitmqNode node);
 
     /**
-     * Refresh a cluster according to the component ID
+     * Refresh a cluster according to the cluster ID
      *
-     * @param componentID
-     * @return refreshed cluster associated to component ID
+     * @param clusterID
+     * @return refreshed cluster associated to cluster ID
      */
-    public RabbitmqCluster refreshRabbitmqCluster(Long componentID);
+    public RabbitmqCluster refreshRabbitmqCluster(Long clusterID);
+
+    /**
+     * Get nodes list from a cluster according cluster ID
+     *
+     * @param clusterID
+     * @return nodes list from a cluster according cluster ID
+     */
+    public Set<RabbitmqNode> getNodesFromCluster(Long clusterID);
 }

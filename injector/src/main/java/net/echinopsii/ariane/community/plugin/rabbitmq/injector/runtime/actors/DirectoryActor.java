@@ -63,7 +63,7 @@ public class DirectoryActor extends UntypedActor {
                 componentGear = new ComponentGear(nodeCluster, this.gear.getDefaultComponentSniffInterval());
                 RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
                 componentGear.start();
-                log.debug("New RabbitMQ Node Gear has been started ({})", new Object[]{rabbitmqNode.getUrl()});
+                log.debug("New RabbitMQ Node Gear has been started ({})", new Object[]{componentGear.getGearName()});
             }
         }
     }
