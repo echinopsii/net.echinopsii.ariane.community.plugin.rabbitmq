@@ -6,8 +6,7 @@ import javax.persistence.Transient
 
 class ConnectionFromRabbitREST implements Serializable {
 
-    @Transient
-    RabbitClusterToConnect cluster;
+    transient RabbitClusterToConnect cluster;
 
     String name
     Map<String, Object> properties
@@ -28,5 +27,20 @@ class ConnectionFromRabbitREST implements Serializable {
         }
 
         return this;
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        ConnectionFromRabbitREST that = (ConnectionFromRabbitREST) o
+
+        if (name != that.name) return false
+
+        return true
+    }
+
+    int hashCode() {
+        return name.hashCode()
     }
 }

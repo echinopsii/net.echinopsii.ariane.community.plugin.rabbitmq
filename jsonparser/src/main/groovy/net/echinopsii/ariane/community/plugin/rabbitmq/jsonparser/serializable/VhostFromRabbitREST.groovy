@@ -5,8 +5,8 @@ import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitCl
 import javax.persistence.Transient
 
 class VhostFromRabbitREST implements Serializable {
-    @Transient
-    RabbitClusterToConnect cluster;
+
+    transient RabbitClusterToConnect cluster;
 
     String name
     Map<String, Object> properties
@@ -32,4 +32,18 @@ class VhostFromRabbitREST implements Serializable {
         return this
     }
 
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        VhostFromRabbitREST that = (VhostFromRabbitREST) o
+
+        if (name != that.name) return false
+
+        return true
+    }
+
+    int hashCode() {
+        return name.hashCode()
+    }
 }

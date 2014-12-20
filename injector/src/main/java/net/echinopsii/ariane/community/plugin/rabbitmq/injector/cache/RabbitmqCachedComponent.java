@@ -28,14 +28,12 @@ import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjector
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable.*;
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect;
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect;
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitRESTTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class RabbitmqCachedComponent extends AbstractComponent implements Serializable {
 
@@ -47,18 +45,18 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
      * RabbitMQ sniff tooling
      */
     private transient RabbitClusterToConnect clusterToConnect = null;
-    private ClusterFromRabbitREST    cluster     = null;
-    private NodeFromRabbitREST       node        = null;
-    private VhostFromRabbitREST      vhosts      = null;
-    private ConnectionFromRabbitREST connections = null;
-    private ChannelFromRabbitREST    channels    = null;
-    private QueueFromRabbitREST      queues      = null;
-    private ExchangeFromRabbitREST   exchanges   = null;
+    private ClusterFromRabbitREST          cluster     = null;
+    private List<NodeFromRabbitREST>       nodes       = new ArrayList<NodeFromRabbitREST>();
+    private List<VhostFromRabbitREST>      vhosts      = new ArrayList<VhostFromRabbitREST>();
+    private List<ConnectionFromRabbitREST> connections = new ArrayList<ConnectionFromRabbitREST>();
+    private List<ChannelFromRabbitREST>    channels    = new ArrayList<ChannelFromRabbitREST>();
+    private List<QueueFromRabbitREST>      queues      = new ArrayList<QueueFromRabbitREST>();
+    private List<ExchangeFromRabbitREST>   exchanges   = new ArrayList<ExchangeFromRabbitREST>();
 
     /*
      * RabbitmqCachedComponent cache part implementation
      */
-    private Long componentDirectoryID;
+    private Long   componentDirectoryID;
     private String componentId;
     private String componentName;
     private String componentType;
@@ -66,17 +64,18 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private transient HashMap<String,Object> componentProperties;
 
     public RabbitmqCachedComponent setRabbitmqComponentFields(RabbitmqCluster rabbitmqComponent) {
-        clusterToConnect = new RabbitClusterToConnect(rabbitmqComponent.getName());
-        log.debug("begin define cluster nodes list");
+        if (clusterToConnect == null)
+            clusterToConnect = new RabbitClusterToConnect(rabbitmqComponent.getName());
+
         Set<RabbitmqNode> clusterNodes = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesFromCluster(rabbitmqComponent.getId());
         HashSet<RabbitNodeToConnect> clusterNodesToConnect = new HashSet<RabbitNodeToConnect>();
         for (RabbitmqNode node : clusterNodes) {
-            RabbitNodeToConnect nodeToConnect = new RabbitNodeToConnect(node.getName(), node.getUrl(), node.getUser(), node.getPasswd());
+            RabbitNodeToConnect nodeToConnect = new RabbitNodeToConnect(node.getName(), node.getUrl(),
+                                                                        node.getUser(), node.getPasswd());
             nodeToConnect.setCluster(clusterToConnect);
             clusterNodesToConnect.add(nodeToConnect);
         }
         clusterToConnect.setNodes(clusterNodesToConnect);
-        log.debug("end define cluster nodes list");
 
         if (rabbitmqComponent.getId() != RabbitmqDirectoryService.FAKE_CLUSTER_ID) {
             this.componentDirectoryID = rabbitmqComponent.getId();
@@ -90,9 +89,10 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
 
         this.componentId   = RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+"_"+rabbitmqComponent.getName()+"_";
         this.componentName = rabbitmqComponent.getName();
-        this.componentURL  = clusterToConnect.getNodeOnRESTCli().getUrl();
+        RabbitNodeToConnect node = clusterToConnect.getNodeOnRESTCli();
+        log.debug("Will sniff from : {}", (node!=null) ? node.getName() : "null");
+        this.componentURL  = (node!=null) ? node.getUrl() : "";
         this.componentProperties = rabbitmqComponent.getProperties();
-        log.debug("end setRbmqComponentFields");
         return this;
     }
 
@@ -119,11 +119,51 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         return componentType;
     }
 
-    private void sniffConfiguration(RabbitmqCluster cluster) {
-        //RabbitClusterToConnect clusterToConnect = new RabbitClusterToConnect();
-        //clusterToConnect.s
-        //this.node = new NodeFromRabbitREST(this.rabbitmqNode.getName(), cluster).parse();
-        //log.debug(node.getProperties().toString());
+    private void sniffRuntime() {
+        this.cluster = new ClusterFromRabbitREST(clusterToConnect).parse();
+        if (this.cluster!=null) {
+            for (String nodeName : cluster.getNodes()) {
+                NodeFromRabbitREST tmp = new NodeFromRabbitREST(nodeName, clusterToConnect).parse();
+                if (!this.nodes.contains(tmp))
+                    this.nodes.add(tmp);
+            }
+
+            for (String vhostName : RabbitRESTTools.getVhostNames(clusterToConnect)) {
+                VhostFromRabbitREST tmp = new VhostFromRabbitREST(vhostName, clusterToConnect).parse();
+                if (!this.vhosts.contains(tmp))
+                    this.vhosts.add(tmp);
+            }
+
+            for (String connectionName : RabbitRESTTools.getConnectionNames(clusterToConnect)) {
+                ConnectionFromRabbitREST tmp = new ConnectionFromRabbitREST(connectionName, clusterToConnect).parse();
+                if (!this.connections.contains(tmp))
+                    this.connections.add(tmp);
+            }
+
+            for (String channelName : RabbitRESTTools.getChannelNames(clusterToConnect)) {
+                ChannelFromRabbitREST tmp = new ChannelFromRabbitREST(channelName, clusterToConnect).parse();
+                if (!this.channels.contains(tmp))
+                    this.channels.add(tmp);
+            }
+
+            Map<String, List<String>> exchangesListing = RabbitRESTTools.getExchangeNames(clusterToConnect);
+            for (String vhostName : exchangesListing.keySet()) {
+                for (String exchangeName : exchangesListing.get(vhostName)) {
+                    ExchangeFromRabbitREST tmp = new ExchangeFromRabbitREST(exchangeName, vhostName, clusterToConnect).parse();
+                    if (!this.exchanges.contains(tmp))
+                        this.exchanges.add(tmp);
+                }
+            }
+
+            Map<String, List<String>> queuesListing = RabbitRESTTools.getQueueNames(clusterToConnect);
+            for (String vhostName : queuesListing.keySet()) {
+                for (String queueName : queuesListing.get(vhostName)) {
+                    QueueFromRabbitREST tmp = new QueueFromRabbitREST(queueName, vhostName, clusterToConnect).parse();
+                    if (!this.queues.contains(tmp))
+                        this.queues.add(tmp);
+                }
+            }
+        }
     }
 
     @Override
@@ -144,10 +184,10 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         log.debug("nextAction for {} : {}", new Object[]{componentName, super.getNextAction()});
         switch (super.getNextAction()) {
             case Component.ACTION_UPDATE:
-                sniffConfiguration(rabbitmqCluster);
+                sniffRuntime();
                 break;
             case Component.ACTION_CREATE:
-                sniffConfiguration(rabbitmqCluster);
+                sniffRuntime();
                 break;
             case Component.ACTION_DELETE:
                 break;

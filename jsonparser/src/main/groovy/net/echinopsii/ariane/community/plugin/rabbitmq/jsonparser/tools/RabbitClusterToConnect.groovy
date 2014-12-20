@@ -1,8 +1,13 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools
 
 import groovyx.net.http.RESTClient
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class RabbitClusterToConnect {
+
+    private static final Logger log = LoggerFactory.getLogger(RabbitClusterToConnect.class);
+
     String name
     HashSet<RabbitNodeToConnect> nodes = new HashSet<RabbitNodeToConnect>()
     HashMap<String, Integer> errors  = new HashMap<String, Integer>()
@@ -44,5 +49,11 @@ class RabbitClusterToConnect {
         if (this.restCli==null || RESTClientProvider.checkRabbitRESTClient(this.restCli)!=RESTClientProvider.REST_CLI_NODE_OK)
             this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
         return this.restCli
+    }
+
+    public RabbitNodeToConnect getNodeOnRESTCli() {
+        if (this.nodeOnRESTCli==null || this.restCli==null || RESTClientProvider.checkRabbitRESTClient(this.restCli)!=RESTClientProvider.REST_CLI_NODE_OK)
+            this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
+        return this.nodeOnRESTCli
     }
 }

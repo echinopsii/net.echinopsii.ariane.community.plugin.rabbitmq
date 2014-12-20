@@ -60,7 +60,6 @@ class RESTClientProvider {
             log.error(e.getMessage());
             ret = REST_CLI_NODE_SOME_ERROR;
         }
-
         return ret;
     }
 }

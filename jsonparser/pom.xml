@@ -103,6 +103,7 @@
                         <Import-Package>
                             org.w3c.dom*,
                             org.ccil.cowan.tagsoup,
+                            javax.net.ssl,
                             javax.xml.parsers,
                             org.xml.sax.helpers,
                             org.xml.sax,

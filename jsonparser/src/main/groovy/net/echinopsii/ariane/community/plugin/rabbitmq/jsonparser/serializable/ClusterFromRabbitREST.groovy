@@ -11,8 +11,7 @@ class ClusterFromRabbitREST implements Serializable {
     public static final int REST_CLU_NODE_NOT_DEFINED  = -12;
     public static final int REST_CLU_DEF_NODE_INVALID  = -13;
 
-    @Transient
-    RabbitClusterToConnect cluster = null;
+    transient RabbitClusterToConnect cluster = null;
 
     String       name;
     List<String> nodes        = new ArrayList<String>();

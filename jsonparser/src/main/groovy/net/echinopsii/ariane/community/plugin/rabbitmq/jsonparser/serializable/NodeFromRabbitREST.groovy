@@ -12,8 +12,7 @@ class NodeFromRabbitREST implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(NodeFromRabbitREST.class);
 
-    @Transient
-    RabbitClusterToConnect cluster;
+    transient RabbitClusterToConnect cluster;
 
     String name;
     Map<String, Object> properties
@@ -33,5 +32,20 @@ class NodeFromRabbitREST implements Serializable {
         properties.remove("name")
 
         return this;
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        NodeFromRabbitREST that = (NodeFromRabbitREST) o
+
+        if (name != that.name) return false
+
+        return true
+    }
+
+    int hashCode() {
+        return name.hashCode()
     }
 }
