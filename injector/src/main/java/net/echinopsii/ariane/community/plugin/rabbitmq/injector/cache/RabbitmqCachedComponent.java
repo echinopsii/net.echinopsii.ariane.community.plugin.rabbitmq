@@ -53,6 +53,14 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private List<QueueFromRabbitREST>      queues      = new ArrayList<QueueFromRabbitREST>();
     private List<ExchangeFromRabbitREST>   exchanges   = new ArrayList<ExchangeFromRabbitREST>();
 
+    private ClusterFromRabbitREST          lastCluster     = null;
+    private List<NodeFromRabbitREST>       lastNodes       = null;
+    private List<VhostFromRabbitREST>      lastVhosts      = null;
+    private List<ConnectionFromRabbitREST> lastConnections = null;
+    private List<ChannelFromRabbitREST>    lastChannels    = null;
+    private List<QueueFromRabbitREST>      lastQueues      = null;
+    private List<ExchangeFromRabbitREST>   lastExchanges   = null;
+
     /*
      * RabbitmqCachedComponent cache part implementation
      */
@@ -166,6 +174,28 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         }
     }
 
+    private void cloneCurrentRuntime() {
+        this.lastCluster = this.cluster.clone();
+
+        this.lastNodes = new ArrayList<NodeFromRabbitREST>(this.nodes);
+        this.nodes.clear();
+
+        this.lastVhosts = new ArrayList<VhostFromRabbitREST>(this.vhosts);
+        this.vhosts.clear();
+
+        this.lastConnections = new ArrayList<ConnectionFromRabbitREST>(this.connections);
+        this.connections.clear();
+
+        this.lastChannels = new ArrayList<ChannelFromRabbitREST>(this.channels);
+        this.channels.clear();
+
+        this.lastExchanges = new ArrayList<ExchangeFromRabbitREST>(this.exchanges);
+        this.exchanges.clear();
+
+        this.lastQueues = new ArrayList<QueueFromRabbitREST>(this.queues);
+        this.queues.clear();
+    }
+
     @Override
     public void refresh() {
         super.setRefreshing(true);
@@ -184,6 +214,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         log.debug("nextAction for {} : {}", new Object[]{componentName, super.getNextAction()});
         switch (super.getNextAction()) {
             case Component.ACTION_UPDATE:
+                cloneCurrentRuntime();
                 sniffRuntime();
                 break;
             case Component.ACTION_CREATE:

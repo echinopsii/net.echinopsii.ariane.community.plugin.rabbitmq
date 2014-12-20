@@ -73,4 +73,12 @@ class ClusterFromRabbitREST implements Serializable {
 
         return this;
     }
+
+    ClusterFromRabbitREST clone() {
+        ClusterFromRabbitREST ret = new ClusterFromRabbitREST(this.cluster);
+        ret.setName(this.name);
+        ret.setNodes(new ArrayList<String>(this.nodes));
+        ret.setRunningNodes(new ArrayList<String>(this.runningNodes));
+        return ret;
+    }
 }
