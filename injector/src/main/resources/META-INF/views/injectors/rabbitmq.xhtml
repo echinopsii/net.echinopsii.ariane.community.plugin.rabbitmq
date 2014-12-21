@@ -121,7 +121,7 @@
                                 </p:column>
                                 <c:if test="#{ccidm:hasPermission('injMapMdwRabbitMQ:action')}">
                                     <f:facet name="footer">
-                                        <p:commandButton value="Refresh RabbitMQ injector components cache" icon="icon-refresh icon-large" update="@form" actionListener="#{cacheComponents.refreshCache()}"
+                                        <p:commandButton value="Refresh RabbitMQ injector components cache" icon="icon-refresh icon-large" update="@form" actionListener="#{rabbitmqCacheComponents.refreshCache()}"
                                                          styleClass="ui-priority-primary icon-large"/>
                                     </f:facet>
                                 </c:if>

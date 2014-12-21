@@ -25,6 +25,7 @@ import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirecto
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
+import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears.ComponentGear;
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable.*;
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect;
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect;
@@ -234,6 +235,8 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
 
     @Override
     public void refreshAndMap() {
-
+        log.debug("attached gear id {}", this.getAttachedGearId());
+        ComponentGear attachedGear = ((ComponentGear)RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(this.getAttachedGearId()));
+        attachedGear.refresh();
     }
 }
