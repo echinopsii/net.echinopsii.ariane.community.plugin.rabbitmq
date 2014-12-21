@@ -10,18 +10,6 @@
         <ui:fragment rendered="#{ccidm:isAuthenticated() and ccidm:hasPermission('injMapMdwRabbitMQ:display')}">
             <div>
                 <div style="width:49%; float:left;">
-                    <p:fieldset id="cacheGearConfpnl" legend="Gears cache configuration" collapsed="true" toggleable="true" toggleSpeed="500">
-                        <h:dataTable var="key" value="#{rabbitmqConfigurationGearsCache.keys}">
-                            <h:column>
-                                <h:outputText value="#{key} : " styleClass="inputTitle"/>
-                            </h:column>
-                            <h:column>
-                                <h:outputText value="#{rabbitmqConfigurationGearsCache.getGearsCacheConf(key)}"/>
-                            </h:column>
-                        </h:dataTable>
-                    </p:fieldset>
-                    <br/>
-
                     <p:fieldset id="confpnl" legend="Scheduling configuration" toggleable="true" toggleSpeed="500">
                         <h:form>
                             <p:growl id="rabbitmqConfigurationMessages" showDetail="true" />
@@ -45,6 +33,34 @@
                     </p:fieldset>
                     <br/>
 
+                </div>
+                <div style="width:49%; float:right;">
+                    <p:fieldset id="cacheGearConfpnl" legend="Gears cache configuration" collapsed="true" toggleable="true" toggleSpeed="500">
+                        <h:dataTable var="key" value="#{rabbitmqConfigurationGearsCache.keys}">
+                            <h:column>
+                                <h:outputText value="#{key} : " styleClass="inputTitle"/>
+                            </h:column>
+                            <h:column>
+                                <h:outputText value="#{rabbitmqConfigurationGearsCache.getGearsCacheConf(key)}"/>
+                            </h:column>
+                        </h:dataTable>
+                    </p:fieldset>
+                    <br/>
+
+                    <p:fieldset id="cacheComponentConfpnl" legend="Components cache configuration" collapsed="true" toggleable="true" toggleSpeed="500">
+                        <h:dataTable var="key" value="#{rabbitmqConfigurationComponentsCache.keys}">
+                            <h:column>
+                                <h:outputText value="#{key} : " styleClass="inputTitle"/>
+                            </h:column>
+                            <h:column>
+                                <h:outputText value="#{rabbitmqConfigurationComponentsCache.getComponentsCacheConf(key)}"/>
+                            </h:column>
+                        </h:dataTable>
+                    </p:fieldset>
+                    <br/>
+                </div>
+
+                <div>
                     <p:fieldset id="gearpnl" legend="Gears" toggleable="true" toggleSpeed="500">
                         <h:form id="rabbitmqGearsTableForm">
                             <p:growl id="rabbitmqGearsTableMessages" showDetail="true" />
@@ -76,20 +92,7 @@
                             <p:poll update="@form" interval="10"/>
                         </h:form>
                     </p:fieldset>
-                </div>
-                <div style="width:49%; float:right;">
-                    <p:fieldset id="cacheComponentConfpnl" legend="Components cache configuration" collapsed="true" toggleable="true" toggleSpeed="500">
-                        <h:dataTable var="key" value="#{rabbitmqConfigurationComponentsCache.keys}">
-                            <h:column>
-                                <h:outputText value="#{key} : " styleClass="inputTitle"/>
-                            </h:column>
-                            <h:column>
-                                <h:outputText value="#{rabbitmqConfigurationComponentsCache.getComponentsCacheConf(key)}"/>
-                            </h:column>
-                        </h:dataTable>
-                    </p:fieldset>
                     <br/>
-
                     <p:fieldset id="cachepnl" legend="Components" toggleable="true" toggleSpeed="500">
                         <h:form id="rabbitmqCacheTableForm">
                             <p:growl id="rabbitmqCacheTableMessages" showDetail="true" />
