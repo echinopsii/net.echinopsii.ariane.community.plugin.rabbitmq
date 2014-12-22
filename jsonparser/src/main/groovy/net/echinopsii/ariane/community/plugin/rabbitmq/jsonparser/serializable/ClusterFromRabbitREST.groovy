@@ -3,8 +3,6 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 
-import javax.persistence.Transient
-
 class ClusterFromRabbitREST implements Serializable {
 
     public static final int REST_CLU_INVALID_ID_NAME   = -11;
@@ -61,7 +59,7 @@ class ClusterFromRabbitREST implements Serializable {
 
             for (RabbitNodeToConnect node : invalidNodes) {
                 this.cluster.getErrors().put(this.cluster.getName()+"-"+node.getName(), REST_CLU_DEF_NODE_INVALID);
-                node.getErrors().put(NodeFromRabbitREST.REST_NODE_INVALID_ID_NAME_OR_CLUSTER);
+                node.getErrors().put(BrokerFromRabbitREST.REST_NODE_INVALID_ID_NAME_OR_CLUSTER);
             }
 
             for (String error : this.cluster.getErrors().keySet())

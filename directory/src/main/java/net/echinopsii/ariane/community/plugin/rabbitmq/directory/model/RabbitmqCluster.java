@@ -147,18 +147,4 @@ public class RabbitmqCluster implements Serializable {
     public RabbitmqCluster clone() {
         return new RabbitmqCluster().setIdR(id).setVersionR(version).setNameR(name).setDescriptionR(description).setNodesR(new HashSet<>(this.nodes));
     }
-
-    @Transient
-    HashMap<String, Object> properties = null;
-
-    @Transient
-    public HashMap<String, Object> getProperties() {
-        return properties;
-    }
-
-    @Transient
-    public void setProperties(HashMap<String, Object> properties) {
-        this.properties = properties;
-    }
-
 }

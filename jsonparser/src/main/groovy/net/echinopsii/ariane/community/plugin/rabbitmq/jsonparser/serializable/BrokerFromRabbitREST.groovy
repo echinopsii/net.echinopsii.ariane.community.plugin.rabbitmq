@@ -4,25 +4,24 @@ import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitCl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import javax.persistence.Transient
-
-class NodeFromRabbitREST implements Serializable {
+class BrokerFromRabbitREST implements Serializable {
 
     public static final int REST_NODE_INVALID_ID_NAME_OR_CLUSTER = -21;
 
-    private static final Logger log = LoggerFactory.getLogger(NodeFromRabbitREST.class);
+    private static final Logger log = LoggerFactory.getLogger(BrokerFromRabbitREST.class);
 
     transient RabbitClusterToConnect cluster;
 
     String name;
+    String url;
     Map<String, Object> properties
 
-    NodeFromRabbitREST(String name, RabbitClusterToConnect cluster) {
+    BrokerFromRabbitREST(String name, RabbitClusterToConnect cluster) {
         this.name = name;
         this.cluster = cluster;
     }
 
-    NodeFromRabbitREST parse() {
+    BrokerFromRabbitREST parse() {
         def restClient = this.cluster.getRestCli()
 
         String node_req_path =  '/api/nodes/' + this.name;
@@ -34,11 +33,16 @@ class NodeFromRabbitREST implements Serializable {
         return this;
     }
 
+    BrokerFromRabbitREST setUrl(String url) {
+        this.url = url
+        return this
+    }
+
     boolean equals(o) {
         if (this.is(o)) return true
         if (getClass() != o.class) return false
 
-        NodeFromRabbitREST that = (NodeFromRabbitREST) o
+        BrokerFromRabbitREST that = (BrokerFromRabbitREST) o
 
         if (name != that.name) return false
 

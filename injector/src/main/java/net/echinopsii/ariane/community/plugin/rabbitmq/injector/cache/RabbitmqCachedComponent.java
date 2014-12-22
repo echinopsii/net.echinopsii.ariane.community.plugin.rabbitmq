@@ -47,7 +47,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
      */
     private transient RabbitClusterToConnect clusterToConnect = null;
     private ClusterFromRabbitREST          cluster     = null;
-    private List<NodeFromRabbitREST>       nodes       = new ArrayList<NodeFromRabbitREST>();
+    private List<BrokerFromRabbitREST>     brokers     = new ArrayList<BrokerFromRabbitREST>();
     private List<VhostFromRabbitREST>      vhosts      = new ArrayList<VhostFromRabbitREST>();
     private List<ConnectionFromRabbitREST> connections = new ArrayList<ConnectionFromRabbitREST>();
     private List<ChannelFromRabbitREST>    channels    = new ArrayList<ChannelFromRabbitREST>();
@@ -55,22 +55,78 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private List<ExchangeFromRabbitREST>   exchanges   = new ArrayList<ExchangeFromRabbitREST>();
 
     private ClusterFromRabbitREST          lastCluster     = null;
-    private List<NodeFromRabbitREST>       lastNodes       = null;
+    private List<BrokerFromRabbitREST>     lastNodes       = null;
     private List<VhostFromRabbitREST>      lastVhosts      = null;
     private List<ConnectionFromRabbitREST> lastConnections = null;
     private List<ChannelFromRabbitREST>    lastChannels    = null;
     private List<QueueFromRabbitREST>      lastQueues      = null;
     private List<ExchangeFromRabbitREST>   lastExchanges   = null;
 
+    public ClusterFromRabbitREST getCluster() {
+        return cluster;
+    }
+
+    public List<BrokerFromRabbitREST> getBrokers() {
+        return brokers;
+    }
+
+    public List<VhostFromRabbitREST> getVhosts() {
+        return vhosts;
+    }
+
+    public List<ConnectionFromRabbitREST> getConnections() {
+        return connections;
+    }
+
+    public List<ChannelFromRabbitREST> getChannels() {
+        return channels;
+    }
+
+    public List<QueueFromRabbitREST> getQueues() {
+        return queues;
+    }
+
+    public List<ExchangeFromRabbitREST> getExchanges() {
+        return exchanges;
+    }
+
+    public ClusterFromRabbitREST getLastCluster() {
+        return lastCluster;
+    }
+
+    public List<BrokerFromRabbitREST> getLastNodes() {
+        return lastNodes;
+    }
+
+    public List<VhostFromRabbitREST> getLastVhosts() {
+        return lastVhosts;
+    }
+
+    public List<ConnectionFromRabbitREST> getLastConnections() {
+        return lastConnections;
+    }
+
+    public List<ChannelFromRabbitREST> getLastChannels() {
+        return lastChannels;
+    }
+
+    public List<QueueFromRabbitREST> getLastQueues() {
+        return lastQueues;
+    }
+
+    public List<ExchangeFromRabbitREST> getLastExchanges() {
+        return lastExchanges;
+    }
+
     /*
-     * RabbitmqCachedComponent cache part implementation
-     */
+         * RabbitmqCachedComponent cache part implementation
+         */
     private Long   componentDirectoryID;
     private String componentId;
     private String componentName;
     private String componentType;
     private String componentURL;
-    private transient HashMap<String,Object> componentProperties;
+    private transient Map<String,Map<String,Object>> componentProperties;
 
     public RabbitmqCachedComponent setRabbitmqComponentFields(RabbitmqCluster rabbitmqComponent) {
         if (clusterToConnect == null)
@@ -82,13 +138,17 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
             RabbitNodeToConnect nodeToConnect = new RabbitNodeToConnect(node.getName(), node.getUrl(),
                                                                         node.getUser(), node.getPasswd());
             nodeToConnect.setCluster(clusterToConnect);
+            nodeToConnect.setUrl(node.getUrl());
             clusterNodesToConnect.add(nodeToConnect);
         }
         clusterToConnect.setNodes(clusterNodesToConnect);
 
         if (rabbitmqComponent.getId() != RabbitmqDirectoryService.FAKE_CLUSTER_ID) {
             this.componentDirectoryID = rabbitmqComponent.getId();
-            this.componentType = "RabbitMQ Cluster";
+            if (clusterNodesToConnect.size()>1)
+                this.componentType = "RabbitMQ Cluster";
+            else
+                this.componentType = "RabbitMQ Server";
         } else {
             //rabbitmqComponent.getNodes().length == 1 if component is a fake cluster
             for (RabbitmqNode node : RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesFromCluster(rabbitmqComponent.getId()))
@@ -101,7 +161,9 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         RabbitNodeToConnect node = clusterToConnect.getNodeOnRESTCli();
         log.debug("Will sniff from : {}", (node!=null) ? node.getName() : "null");
         this.componentURL  = (node!=null) ? node.getUrl() : "";
-        this.componentProperties = rabbitmqComponent.getProperties();
+        if (this.componentProperties==null)
+            this.componentProperties = new HashMap<>();
+
         return this;
     }
 
@@ -119,7 +181,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         return componentURL;
     }
 
-    public HashMap<String, Object> getComponentProperties() {
+    public Map<String, Map<String, Object>> getComponentProperties() {
         return componentProperties;
     }
 
@@ -132,9 +194,16 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         this.cluster = new ClusterFromRabbitREST(clusterToConnect).parse();
         if (this.cluster!=null) {
             for (String nodeName : cluster.getNodes()) {
-                NodeFromRabbitREST tmp = new NodeFromRabbitREST(nodeName, clusterToConnect).parse();
-                if (!this.nodes.contains(tmp))
-                    this.nodes.add(tmp);
+                BrokerFromRabbitREST tmp = new BrokerFromRabbitREST(nodeName, clusterToConnect).parse();
+                if (!this.brokers.contains(tmp)) {
+                    for(RabbitNodeToConnect nodeToConnect : clusterToConnect.getNodes()) {
+                        if (nodeToConnect.getName().equals(nodeName))
+                            tmp.setUrl(nodeToConnect.getUrl());
+                    }
+                    this.brokers.add(tmp);
+                    Map<String, Object> nodeProperties = tmp.getProperties();
+                    this.componentProperties.put(nodeName, nodeProperties);
+                }
             }
 
             for (String vhostName : RabbitRESTTools.getVhostNames(clusterToConnect)) {
@@ -178,8 +247,8 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private void cloneCurrentRuntime() {
         this.lastCluster = this.cluster.clone();
 
-        this.lastNodes = new ArrayList<NodeFromRabbitREST>(this.nodes);
-        this.nodes.clear();
+        this.lastNodes = new ArrayList<BrokerFromRabbitREST>(this.brokers);
+        this.brokers.clear();
 
         this.lastVhosts = new ArrayList<VhostFromRabbitREST>(this.vhosts);
         this.vhosts.clear();
