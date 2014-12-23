@@ -19,7 +19,7 @@ class BindingFromRabbitRESTTest extends RabbitRESTTestSetup {
                     assertTrue(rbinding.getName().equals(bindingName))
                     assertTrue(rbinding.getVhost().equals(vhostName))
                     assertTrue(rbinding.getCluster().equals(validCluster))
-                    assertTrue(rbinding.getProperties().size()>0);
+                    assertTrue(rbinding.getProperties()!=null && rbinding.getProperties().size()>0);
                 }
             }
         }

@@ -14,7 +14,7 @@ class BrokerFromRabbitRESTTest extends RabbitRESTTestSetup {
             rnode.parse();
             assertTrue(rnode.getName().equals(validNode.getName()))
             assertTrue(rnode.getCluster().equals(validCluster))
-            assertTrue(rnode.getProperties().size()>0);
+            assertTrue(rnode.getProperties()!=null && rnode.getProperties().size()>0);
         }
     }
 }

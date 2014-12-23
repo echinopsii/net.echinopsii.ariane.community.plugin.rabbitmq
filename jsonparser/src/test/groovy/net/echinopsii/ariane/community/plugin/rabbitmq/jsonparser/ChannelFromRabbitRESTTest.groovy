@@ -15,7 +15,7 @@ class ChannelFromRabbitRESTTest extends RabbitRESTTestSetup {
                 ChannelFromRabbitREST rchan = new ChannelFromRabbitREST(channelName, validCluster).parse()
                 assertTrue(rchan.getName().equals(channelName))
                 assertTrue(rchan.getCluster().equals(validCluster))
-                assertTrue(rchan.getProperties().size()>0);
+                assertTrue(rchan.getProperties()!=null && rchan.getProperties().size()>0);
             }
         }
     }

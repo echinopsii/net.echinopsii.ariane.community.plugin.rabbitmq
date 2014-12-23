@@ -19,7 +19,7 @@ class ExchangeFromRabbitRESTTest extends RabbitRESTTestSetup {
                     assertTrue(rexchange.getName().equals(exchangeName))
                     assertTrue(rexchange.getVhost().equals(vhostName))
                     assertTrue(rexchange.getCluster().equals(validCluster))
-                    assertTrue(rexchange.getProperties().size()>0);
+                    assertTrue(rexchange.getProperties()!=null && rexchange.getProperties().size()>0);
                 }
             }
         }

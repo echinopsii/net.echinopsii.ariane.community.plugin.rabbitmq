@@ -16,14 +16,14 @@ class ClusterFromRabbitRESTTest extends RabbitRESTTestSetup {
             assertTrue(clu.getName().startsWith("rabbit@"))
             assertTrue(clu.getNodes().size()>=1)
             assertTrue(clu.getRunningNodes().size()>=1)
-            assertNull(validCluster.getErrors().get("rabbit@"+hostname));
+            assertNull(validCluster.getErrors()!=null && validCluster.getErrors().get("rabbit@"+hostname));
         }
     }
 
     @Test
     public void parseInvalidURLCluster() {
         ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidURLCluster).parse();
-        assertTrue(invalidURLCluster.getErrors().get("rabbit@toto")==RESTClientProvider.REST_CLI_NODE_URL_ERROR);
+        assertTrue(invalidURLCluster.getErrors()!=null && invalidURLCluster.getErrors().get("rabbit@toto")==RESTClientProvider.REST_CLI_NODE_URL_ERROR);
     }
 
     @Test
@@ -31,7 +31,7 @@ class ClusterFromRabbitRESTTest extends RabbitRESTTestSetup {
         if (rclient!=null) {
             ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidAUTHCluster).parse();
             System.out.println(invalidAUTHCluster.getErrors().toString());
-            assertTrue(invalidAUTHCluster.getErrors().get("rabbit@"+hostname)==RESTClientProvider.REST_CLI_NODE_AUTH_ERROR);
+            assertTrue(invalidAUTHCluster.getErrors()!=null && invalidAUTHCluster.getErrors().get("rabbit@"+hostname)==RESTClientProvider.REST_CLI_NODE_AUTH_ERROR);
         }
     }
 
@@ -39,6 +39,6 @@ class ClusterFromRabbitRESTTest extends RabbitRESTTestSetup {
     public void parseStoppedNodeCluster() {
         ClusterFromRabbitREST clu = new ClusterFromRabbitREST(stoppedNodeCluster).parse();
         System.out.println(stoppedNodeCluster.getErrors().toString());
-        assertTrue(stoppedNodeCluster.getErrors().get("rabbit@"+hostname)==RESTClientProvider.REST_CLI_NODE_NO_RESPONSE);
+        assertTrue(stoppedNodeCluster.getErrors()!=null && stoppedNodeCluster.getErrors().get("rabbit@"+hostname)==RESTClientProvider.REST_CLI_NODE_NO_RESPONSE);
     }
 }

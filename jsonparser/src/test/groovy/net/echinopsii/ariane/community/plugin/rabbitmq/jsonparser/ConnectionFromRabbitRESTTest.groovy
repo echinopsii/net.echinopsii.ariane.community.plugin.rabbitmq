@@ -15,7 +15,7 @@ class ConnectionFromRabbitRESTTest extends RabbitRESTTestSetup {
                 ConnectionFromRabbitREST rconn = new ConnectionFromRabbitREST(connectionName, validCluster).parse()
                 assertTrue(rconn.getName().equals(connectionName))
                 assertTrue(rconn.getCluster().equals(validCluster))
-                assertTrue(rconn.getProperties().size()>0);
+                assertTrue(rconn.getProperties()!=null && rconn.getProperties().size()>0);
             }
         }
     }
