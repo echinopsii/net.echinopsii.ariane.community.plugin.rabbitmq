@@ -55,7 +55,9 @@ class RabbitRESTTools {
                     ret.put((String)abinding.vhost, new ArrayList<String>())
             }
             bindings_list_req.data.each { abinding ->
-                ret.get((String)abinding.vhost).add((String)abinding.name)
+                ret.get((String)abinding.vhost).add((String)abinding.source +
+                        "-[" + (String)abinding.destination_type + "/{" + (String)abinding.routing_key + "," + (String)abinding.properties_key + "}]->"
+                        + (String)abinding.destination)
             }
         }
         return ret;
