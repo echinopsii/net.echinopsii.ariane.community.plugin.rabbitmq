@@ -40,7 +40,8 @@ class RabbitRESTTestSetup {
         Set<RabbitNodeToConnect> vnodes = new HashSet<RabbitNodeToConnect>();
         vnodes.add(validNode);
         validCluster = new RabbitClusterToConnect("rabbit@"+hostname)
-        validNode.setCluster(validCluster);
+        validCluster.setNodes(vnodes)
+        validNode.setCluster(validCluster)
 
 
         RabbitNodeToConnect invalidURLNode = new RabbitNodeToConnect("rabbit@toto", "http://toto:15672/", "guest", "guest")
@@ -67,7 +68,7 @@ class RabbitRESTTestSetup {
         stoppedNode.setCluster(stoppedNodeCluster);
 
         try {
-            rclient = RESTClientProvider.getRESTClientFromCluster(validCluster);
+            rclient = validCluster.getRestCli();
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost("localhost");

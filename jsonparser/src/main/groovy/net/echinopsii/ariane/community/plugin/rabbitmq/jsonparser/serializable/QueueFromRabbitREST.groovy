@@ -1,10 +1,12 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
-
-import javax.persistence.Transient
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class QueueFromRabbitREST implements Serializable {
+
+    private static final Logger log = LoggerFactory.getLogger(QueueFromRabbitREST.class);
 
     transient RabbitClusterToConnect cluster;
 
@@ -21,16 +23,24 @@ class QueueFromRabbitREST implements Serializable {
     QueueFromRabbitREST parse() {
         def restClient = this.cluster.getRestCli()
 
-        String queue_req_path =  '/api/queues/' + this.vhost + "/" + this.name
-        def queue_req = restClient.get(path : queue_req_path)
-        if (queue_req.status == 200 && queue_req.data != null) {
-            //queues_req.data.each { queue ->
-            //    if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
-            //        properties = queue
-            //}
-            properties = queue_req.data
-            properties.remove("name")
-            properties.remove("vhost")
+        if (restClient!=null) {
+            // The following queue_req_path should be used but there is a problem in the groovy HTTPBuilder
+            // api/queues/%2F/queueName for vhost "/" is re-encoded api/queues/%252F/queueName and api/queues///queueName is re-encoded api/queues/queueName
+            // String queue_req_path =  'api/queues/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
+            String queues_req_path = 'api/queues'
+            try {
+                def queues_req = restClient.get(path : queues_req_path)
+                if (queues_req.status == 200 && queues_req.data != null) {
+                    queues_req.data.each { queue ->
+                        if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
+                            properties = queue
+                    }
+                    properties.remove("name")
+                    properties.remove("vhost")
+                }
+            } catch (Exception e) {
+                e.printStackTrace()
+            }
         }
 
         return this

@@ -19,7 +19,7 @@ class QueueFromRabbitRESTTest extends RabbitRESTTestSetup {
                     assertTrue(rqueue.getName().equals(queueName))
                     assertTrue(rqueue.getVhost().equals(vhostName))
                     assertTrue(rqueue.getCluster().equals(validCluster))
-                    assertTrue(rqueue.getProperties().size()>0);
+                    assertTrue(rqueue.getProperties()!=null && rqueue.getProperties().size()>0);
                 }
             }
         }
