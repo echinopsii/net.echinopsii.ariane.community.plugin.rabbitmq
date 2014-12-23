@@ -22,10 +22,8 @@ class BrokerFromRabbitREST implements Serializable {
     }
 
     BrokerFromRabbitREST parse() {
-        def restClient = this.cluster.getRestCli()
-
         String node_req_path =  '/api/nodes/' + this.name;
-        def node_req = restClient.get(path : node_req_path)
+        def node_req = cluster.get(node_req_path)
         if (node_req.status == 200 && node_req.data != null)
             properties = node_req.data
         properties.remove("name")

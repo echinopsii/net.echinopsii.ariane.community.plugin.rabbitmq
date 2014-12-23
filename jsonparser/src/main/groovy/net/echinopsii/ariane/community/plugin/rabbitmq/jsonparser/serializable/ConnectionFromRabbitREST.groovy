@@ -17,15 +17,12 @@ class ConnectionFromRabbitREST implements Serializable {
     }
 
     ConnectionFromRabbitREST parse() {
-        def restClient = this.cluster.getRestCli()
-
         String connection_req_path =  '/api/connections/' + this.name;
-        def connection_req = restClient.get(path : connection_req_path)
+        def connection_req = cluster.get(connection_req_path)
         if (connection_req.status == 200 && connection_req.data != null) {
             properties = connection_req.data
             properties.remove("name")
         }
-
         return this;
     }
 

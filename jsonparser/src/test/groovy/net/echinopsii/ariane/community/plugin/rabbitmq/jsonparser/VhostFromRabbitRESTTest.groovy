@@ -15,7 +15,7 @@ class VhostFromRabbitRESTTest extends RabbitRESTTestSetup {
                 VhostFromRabbitREST rvhost = new VhostFromRabbitREST(vhostName, validCluster).parse()
                 assertTrue(rvhost.getName().equals(vhostName))
                 assertTrue(rvhost.getCluster().equals(validCluster))
-                assertTrue(rvhost.getProperties().size()>0);
+                assertTrue(rvhost!=null && rvhost.getProperties().size()>0);
             }
         }
     }

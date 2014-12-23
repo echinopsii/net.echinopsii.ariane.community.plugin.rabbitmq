@@ -20,14 +20,12 @@ class ClusterFromRabbitREST implements Serializable {
     }
 
     ClusterFromRabbitREST parse() {
-        def rclient = this.cluster.getRestCli()
+        def cluster_name_req = this.cluster.get('/api/cluster-name')
+        if (cluster_name_req!=null && cluster_name_req.status == 200 && cluster_name_req.data != null && cluster_name_req.data.name!=null ) this.name = cluster_name_req.data.name;
 
-        if (rclient!=null) {
-            def cluster_name_req = rclient.get(path : '/api/cluster-name')
-            if (cluster_name_req.status == 200 && cluster_name_req.data != null && cluster_name_req.data.name!=null ) this.name = cluster_name_req.data.name;
-
-            def cluster_nodes_req = rclient.get(path : '/api/nodes')
-            if (cluster_nodes_req.status == 200 && cluster_nodes_req.data != null && cluster_nodes_req.data instanceof List) {
+        if (this.name != null)  {
+            def cluster_nodes_req = this.cluster.get('/api/nodes')
+            if (cluster_name_req!=null && cluster_nodes_req.status == 200 && cluster_nodes_req.data != null && cluster_nodes_req.data instanceof List) {
                 cluster_nodes_req.data.each { node ->
                     nodes.add((String)node.name)
                     if (node.running)
@@ -36,7 +34,7 @@ class ClusterFromRabbitREST implements Serializable {
             }
 
             /*
-             * some compliance between Ariane RabbitMQ Dir and real cluster definitions
+             * some compliance between in memory cluster definition and real cluster definitions
              */
             if (!this.cluster.getName().equals(this.name))
                 this.cluster.getErrors().put(this.cluster.getName(), REST_CLU_INVALID_ID_NAME)
@@ -59,7 +57,7 @@ class ClusterFromRabbitREST implements Serializable {
 
             for (RabbitNodeToConnect node : invalidNodes) {
                 this.cluster.getErrors().put(this.cluster.getName()+"-"+node.getName(), REST_CLU_DEF_NODE_INVALID);
-                node.getErrors().put(BrokerFromRabbitREST.REST_NODE_INVALID_ID_NAME_OR_CLUSTER);
+                node.getErrors().put(node.getName(), BrokerFromRabbitREST.REST_NODE_INVALID_ID_NAME_OR_CLUSTER);
             }
 
             for (String error : this.cluster.getErrors().keySet())
@@ -67,6 +65,7 @@ class ClusterFromRabbitREST implements Serializable {
                     for (RabbitNodeToConnect node : this.cluster.getNodes())
                         if (node.getName().equals(error))
                             node.getErrors().add(this.cluster.getErrors().get(error));
+
         }
 
         return this;

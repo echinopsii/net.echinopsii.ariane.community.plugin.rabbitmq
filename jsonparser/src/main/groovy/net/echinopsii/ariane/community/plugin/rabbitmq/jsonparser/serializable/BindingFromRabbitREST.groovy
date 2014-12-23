@@ -21,13 +21,11 @@ class BindingFromRabbitREST implements Serializable {
     }
 
     BindingFromRabbitREST parse() {
-        def restClient = this.cluster.getRestCli()
-
         // The following binding_req_path should be used but there is a problem in the groovy HTTPBuilder
         // api/bindings/%2F/bindingName for vhost "/" is re-encoded api/bindings/%252F/bindingName and api/bindings///bindingName is re-encoded api/bindings/bindingName
         // String binding_req_path =  'api/bindings/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
         String bindings_req_path =  '/api/bindings'
-        def bindings_req = restClient.get(path : bindings_req_path)
+        def bindings_req = cluster.get(bindings_req_path)
         if (bindings_req.status == 200 && bindings_req.data != null) {
             bindings_req.data.each { binding ->
                 if (((String)binding.source +
@@ -37,8 +35,6 @@ class BindingFromRabbitREST implements Serializable {
             }
             properties.remove("vhost")
         }
-
-
         return this;
     }
 

@@ -21,28 +21,19 @@ class QueueFromRabbitREST implements Serializable {
     }
 
     QueueFromRabbitREST parse() {
-        def restClient = this.cluster.getRestCli()
-
-        if (restClient!=null) {
-            // The following queue_req_path should be used but there is a problem in the groovy HTTPBuilder
-            // api/queues/%2F/queueName for vhost "/" is re-encoded api/queues/%252F/queueName and api/queues///queueName is re-encoded api/queues/queueName
-            // String queue_req_path =  'api/queues/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
-            String queues_req_path = 'api/queues'
-            try {
-                def queues_req = restClient.get(path : queues_req_path)
-                if (queues_req.status == 200 && queues_req.data != null) {
-                    queues_req.data.each { queue ->
-                        if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
-                            properties = queue
-                    }
-                    properties.remove("name")
-                    properties.remove("vhost")
-                }
-            } catch (Exception e) {
-                e.printStackTrace()
+        // The following queue_req_path should be used but there is a problem in the groovy HTTPBuilder
+        // api/queues/%2F/queueName for vhost "/" is re-encoded api/queues/%252F/queueName and api/queues///queueName is re-encoded api/queues/queueName
+        // String queue_req_path =  'api/queues/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
+        String queues_req_path = 'api/queues'
+        def queues_req = cluster.get(queues_req_path)
+        if (queues_req.status == 200 && queues_req.data != null) {
+            queues_req.data.each { queue ->
+                if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
+                    properties = queue
             }
+            properties.remove("name")
+            properties.remove("vhost")
         }
-
         return this
     }
 

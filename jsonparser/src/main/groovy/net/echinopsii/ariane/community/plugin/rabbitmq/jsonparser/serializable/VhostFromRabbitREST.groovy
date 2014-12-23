@@ -17,10 +17,8 @@ class VhostFromRabbitREST implements Serializable {
     }
 
     VhostFromRabbitREST parse() {
-        def restClient = this.cluster.getRestCli()
-
         String vhosts_req_path  = '/api/vhosts'
-        def vhosts_req = restClient.get(path : vhosts_req_path)
+        def vhosts_req = cluster.get(vhosts_req_path)
         if (vhosts_req.status == 200 && vhosts_req.data != null) {
             vhosts_req.data.each { vhost ->
                 if (vhost.name.equals(this.name))
@@ -28,7 +26,6 @@ class VhostFromRabbitREST implements Serializable {
             }
             properties.remove("name")
         }
-
         return this
     }
 

@@ -19,13 +19,11 @@ class ExchangeFromRabbitREST implements Serializable {
     }
 
     ExchangeFromRabbitREST parse() {
-        def restClient = this.cluster.getRestCli()
-
         // The following exchange_req_path should be used but there is a problem in the groovy HTTPBuilder
         // api/exchanges/%2F/exchangeName for vhost "/" is re-encoded api/exchanges/%252F/exchangeName and api/exchanges///exchangeName is re-encoded api/exchanges/exchangeName
         // String exchange_req_path =  'api/exchanges/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
         String exchanges_req_path =  '/api/exchanges'
-        def exchanges_req = restClient.get(path : exchanges_req_path)
+        def exchanges_req = cluster.get(exchanges_req_path)
         if (exchanges_req.status == 200 && exchanges_req.data != null) {
             exchanges_req.data.each { exchange ->
                 if (exchange.name.equals(this.name) && exchange.vhost.equals(this.vhost))

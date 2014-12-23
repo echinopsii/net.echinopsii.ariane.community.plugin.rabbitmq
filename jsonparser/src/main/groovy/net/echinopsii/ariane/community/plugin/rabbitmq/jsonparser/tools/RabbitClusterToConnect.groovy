@@ -1,6 +1,10 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools
 
+import groovyx.net.http.HttpResponseDecorator
+import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
+import org.apache.http.NoHttpResponseException
+import org.apache.http.conn.HttpHostConnectException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -55,5 +59,42 @@ class RabbitClusterToConnect {
         if (this.nodeOnRESTCli==null || this.restCli==null || RESTClientProvider.checkRabbitRESTClient(this.restCli)!=RESTClientProvider.REST_CLI_NODE_OK)
             this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
         return this.nodeOnRESTCli
+    }
+
+    private void retryGetOnException(Exception exp, String path, int maxRetry) {
+        log.warn("Exception " + exp.getMessage() + "raise while getting " + path)
+        log.warn("Retry get " + path)
+        this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
+        this.getMaxRetry(path, --maxRetry)
+    }
+
+    private Object getMaxRetry(String path, int maxretry) {
+        Object ret = null;
+
+        if (this.restCli==null)
+            this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
+
+        if (this.restCli!=null) {
+            try {
+                ret = this.restCli.get(path: path)
+            } catch (UnknownHostException urlpb) {
+                this.retryGetOnException(urlpb, path, maxretry)
+            } catch (NoHttpResponseException noHttpResponseException) {
+                this.retryGetOnException(noHttpResponseException, path, maxretry)
+            } catch (HttpHostConnectException httpHostConnectException) {
+                this.retryGetOnException(httpHostConnectException, path, maxretry)
+            } catch (HttpResponseException httpResponseException) {
+                this.retryGetOnException(httpResponseException, path, maxretry)
+            } catch (Exception e) {
+                ret = null
+                e.printStackTrace()
+            }
+        } else
+            log.error("No available REST node on cluster " + this.name)
+        return ret;
+    }
+
+    public Object get(String path) {
+        return getMaxRetry(path, this.getNodes().size());
     }
 }

@@ -5,9 +5,8 @@ import groovyx.net.http.RESTClient
 class RabbitRESTTools {
 
     static List<String> getConnectionNames(RabbitClusterToConnect cluster) {
-        RESTClient client = cluster.getRestCli()
         List<String> ret = new ArrayList<String>()
-        def connections_list_req = client.get(path : '/api/connections')
+        def connections_list_req = cluster.get('/api/connections')
         if (connections_list_req.status == 200 && connections_list_req.data != null) {
             connections_list_req.data.each { aconnection ->
                 ret.add((String)aconnection.name)
@@ -17,9 +16,8 @@ class RabbitRESTTools {
     }
 
     static List<String> getChannelNames(RabbitClusterToConnect cluster) {
-        RESTClient client = cluster.getRestCli()
         List<String> ret = new ArrayList<String>()
-        def channels_list_req = client.get(path : '/api/channels')
+        def channels_list_req = cluster.get('/api/channels')
         if (channels_list_req.status == 200 && channels_list_req.data != null) {
             channels_list_req.data.each { achannel ->
                 ret.add((String) achannel.name);
@@ -29,9 +27,8 @@ class RabbitRESTTools {
     }
 
     static Map<String,List<String>> getExchangeNames(RabbitClusterToConnect cluster) {
-        RESTClient client = cluster.getRestCli()
         Map<String,List<String>> ret = new HashMap<String,List<String>>()
-        def exchanges_list_req = client.get(path : '/api/exchanges')
+        def exchanges_list_req = cluster.get('/api/exchanges')
         if (exchanges_list_req.status == 200 && exchanges_list_req.data != null) {
             exchanges_list_req.data.each { anexchange ->
                 if (ret.get(anexchange.vhost)==null)
@@ -46,9 +43,8 @@ class RabbitRESTTools {
 
 
     static Map<String, List<String>> getBindingNames(RabbitClusterToConnect cluster) {
-        RESTClient client = cluster.getRestCli()
         Map<String,List<String>> ret = new HashMap<String, List<String>>()
-        def bindings_list_req = client.get(path : '/api/bindings')
+        def bindings_list_req = cluster.get('/api/bindings')
         if (bindings_list_req.status == 200 && bindings_list_req.data != null) {
             bindings_list_req.data.each { abinding ->
                 if (ret.get(abinding.vhost)==null)
@@ -64,9 +60,8 @@ class RabbitRESTTools {
     }
 
     static Map<String,List<String>> getQueueNames(RabbitClusterToConnect cluster) {
-        RESTClient client = cluster.getRestCli()
         Map<String,List<String>> ret = new HashMap<String, List<String>>()
-        def queues_list_req = client.get(path : '/api/queues')
+        def queues_list_req = cluster.get('/api/queues')
         if (queues_list_req.status == 200 && queues_list_req.data != null) {
             queues_list_req.data.each { aqueue ->
                 if (ret.get(aqueue.vhost)==null)
@@ -80,9 +75,8 @@ class RabbitRESTTools {
     }
 
     static List<String> getVhostNames(RabbitClusterToConnect cluster) {
-        RESTClient client = cluster.getRestCli()
         List<String> ret = new ArrayList<String>()
-        def vhosts_list_req = client.get(path : '/api/vhosts')
+        def vhosts_list_req = cluster.get('/api/vhosts')
         if (vhosts_list_req.status == 200 && vhosts_list_req.data != null) {
             vhosts_list_req.data.each { avhost ->
                 ret.add((String)avhost.name);

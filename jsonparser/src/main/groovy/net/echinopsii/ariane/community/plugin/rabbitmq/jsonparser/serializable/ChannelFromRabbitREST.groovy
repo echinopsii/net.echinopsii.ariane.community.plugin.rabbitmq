@@ -17,10 +17,8 @@ class ChannelFromRabbitREST implements Serializable {
     }
 
     ChannelFromRabbitREST parse() {
-        def restClient = this.cluster.getRestCli()
-
         String channel_req_path =  '/api/channels/' + this.name;
-        def channel_req = restClient.get(path : channel_req_path)
+        def channel_req = cluster.get(channel_req_path)
         if (channel_req.status == 200 && channel_req.data != null) {
             properties = channel_req.data
             properties.remove("name")
