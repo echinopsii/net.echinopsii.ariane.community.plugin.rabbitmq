@@ -53,6 +53,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private List<ChannelFromRabbitREST>    channels    = new ArrayList<ChannelFromRabbitREST>();
     private List<QueueFromRabbitREST>      queues      = new ArrayList<QueueFromRabbitREST>();
     private List<ExchangeFromRabbitREST>   exchanges   = new ArrayList<ExchangeFromRabbitREST>();
+    private List<BindingFromRabbitREST>    bindings    = new ArrayList<BindingFromRabbitREST>();
 
     private ClusterFromRabbitREST          lastCluster     = null;
     private List<BrokerFromRabbitREST>     lastNodes       = null;
@@ -61,6 +62,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private List<ChannelFromRabbitREST>    lastChannels    = null;
     private List<QueueFromRabbitREST>      lastQueues      = null;
     private List<ExchangeFromRabbitREST>   lastExchanges   = null;
+    private List<BindingFromRabbitREST>    lastBindings    = null;
 
     public ClusterFromRabbitREST getCluster() {
         return cluster;
@@ -88,6 +90,10 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
 
     public List<ExchangeFromRabbitREST> getExchanges() {
         return exchanges;
+    }
+
+    public List<BindingFromRabbitREST> getBindings() {
+        return bindings;
     }
 
     public ClusterFromRabbitREST getLastCluster() {
@@ -118,9 +124,13 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         return lastExchanges;
     }
 
+    public List<BindingFromRabbitREST> getLastBindings() {
+        return lastBindings;
+    }
+
     /*
-         * RabbitmqCachedComponent cache part implementation
-         */
+             * RabbitmqCachedComponent cache part implementation
+             */
     private Long   componentDirectoryID;
     private String componentId;
     private String componentName;
@@ -241,6 +251,15 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
                         this.queues.add(tmp);
                 }
             }
+
+            Map<String, List<String>> bindingsListing = RabbitRESTTools.getBindingNames(clusterToConnect);
+            for (String vhostName : bindingsListing.keySet()) {
+                for (String bindingName : bindingsListing.get(vhostName)) {
+                    BindingFromRabbitREST tmp = new BindingFromRabbitREST(bindingName, vhostName, clusterToConnect).parse();
+                    if (!this.bindings.contains(tmp))
+                        this.bindings.add(tmp);
+                }
+            }
         }
     }
 
@@ -264,6 +283,9 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
 
         this.lastQueues = new ArrayList<QueueFromRabbitREST>(this.queues);
         this.queues.clear();
+
+        this.lastBindings = new ArrayList<BindingFromRabbitREST>(this.bindings);
+        this.bindings.clear();
     }
 
     @Override
