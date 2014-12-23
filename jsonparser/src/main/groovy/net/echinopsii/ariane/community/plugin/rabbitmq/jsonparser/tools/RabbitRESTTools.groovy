@@ -44,12 +44,19 @@ class RabbitRESTTools {
         return ret;
     }
 
-    static List<Map<String,String>> getBindings(RabbitClusterToConnect cluster) {
+
+    static Map<String, List<String>> getBindingNames(RabbitClusterToConnect cluster) {
         RESTClient client = RESTClientProvider.getRESTClientFromCluster(cluster);
-        List<Map<String,String>> ret = null;
+        Map<String,List<String>> ret = new HashMap<String, List<String>>()
         def bindings_list_req = client.get(path : '/api/bindings')
         if (bindings_list_req.status == 200 && bindings_list_req.data != null) {
-            ret = bindings_list_req.data
+            bindings_list_req.data.each { abinding ->
+                if (ret.get(abinding.vhost)==null)
+                    ret.put((String)abinding.vhost, new ArrayList<String>())
+            }
+            bindings_list_req.data.each { abinding ->
+                ret.get((String)abinding.vhost).add((String)abinding.name)
+            }
         }
         return ret;
     }

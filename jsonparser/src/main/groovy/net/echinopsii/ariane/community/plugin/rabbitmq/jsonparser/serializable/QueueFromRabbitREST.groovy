@@ -21,13 +21,14 @@ class QueueFromRabbitREST implements Serializable {
     QueueFromRabbitREST parse() {
         def restClient = this.cluster.getRestCli()
 
-        String queues_req_path =  '/api/queues'
-        def queues_req = restClient.get(path : queues_req_path)
-        if (queues_req.status == 200 && queues_req.data != null) {
-            queues_req.data.each { queue ->
-                if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
-                    properties = queue
-            }
+        String queue_req_path =  '/api/queues/' + this.vhost + "/" + this.name
+        def queue_req = restClient.get(path : queue_req_path)
+        if (queue_req.status == 200 && queue_req.data != null) {
+            //queues_req.data.each { queue ->
+            //    if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
+            //        properties = queue
+            //}
+            properties = queue_req.data
             properties.remove("name")
             properties.remove("vhost")
         }

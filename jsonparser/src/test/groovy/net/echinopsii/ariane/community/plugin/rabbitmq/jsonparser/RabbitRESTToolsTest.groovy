@@ -46,8 +46,10 @@ class RabbitRESTToolsTest extends RabbitRESTTestSetup {
     @Test
     public void testBindingsList() {
         if (rclient!=null) {
-            List<Map<String,String>> list = RabbitRESTTools.getBindings(validCluster)
-            assertTrue(list.size() > 0)
+            Map<String,List<String>> map = RabbitRESTTools.getBindingNames(validCluster)
+            assertTrue(map.size() > 0)
+            for (List<String> listOnVhost : map.values())
+                assertTrue(listOnVhost.size() > 0)
         }
     }
 

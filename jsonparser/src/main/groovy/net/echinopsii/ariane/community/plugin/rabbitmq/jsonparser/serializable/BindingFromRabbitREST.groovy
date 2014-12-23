@@ -1,46 +1,43 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-import javax.persistence.Transient
+class BindingFromRabbitREST implements Serializable {
 
-class ExchangeFromRabbitREST implements Serializable {
+    private static final Logger log = LoggerFactory.getLogger(BindingFromRabbitREST.class);
 
     transient RabbitClusterToConnect cluster;
 
-    String name
-    String vhost
+    String name;
+    String vhost;
     Map<String, Object> properties
 
-    ExchangeFromRabbitREST(String name, String vhost, RabbitClusterToConnect cluster) {
+    BindingFromRabbitREST(String name,  String vhost, RabbitClusterToConnect cluster) {
         this.name = name
         this.vhost = vhost
         this.cluster = cluster
     }
 
-    ExchangeFromRabbitREST parse() {
+    BindingFromRabbitREST parse() {
         def restClient = this.cluster.getRestCli()
 
-        String exchange_req_path =  '/api/exchanges/' + this.vhost + "/" + this.name
-        def exchange_req = restClient.get(path : exchange_req_path)
-        if (exchange_req.status == 200 && exchange_req.data != null) {
-            //exchange_req.data.each { exchange ->
-            //    if (exchange.name.equals(this.name) && exchange.vhost.equals(this.vhost))
-            //        properties = exchange
-            //}
-            properties = exchange_req.data
+        String binding_req_path =  '/api/bindings/' + this.vhost + "/" + this.name;
+        def binding_req = restClient.get(path : binding_req_path)
+        if (binding_req.status == 200 && binding_req.data != null)
+            properties = binding_req.data
             properties.remove("name")
             properties.remove("vhost")
-        }
 
-        return this
+        return this;
     }
 
     boolean equals(o) {
         if (this.is(o)) return true
         if (getClass() != o.class) return false
 
-        ExchangeFromRabbitREST that = (ExchangeFromRabbitREST) o
+        BindingFromRabbitREST that = (BindingFromRabbitREST) o
 
         if (name != that.name) return false
         if (vhost != that.vhost) return false
