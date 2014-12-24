@@ -28,6 +28,8 @@ class BindingFromRabbitREST implements Serializable {
         def bindings_req = cluster.get(bindings_req_path)
         if (bindings_req.status == 200 && bindings_req.data != null) {
             bindings_req.data.each { binding ->
+                if (binding.source.equals(""))
+                    binding.source = ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME
                 if (((String)binding.source +
                      "-[" + (String)binding.destination_type + "/{" + (String)binding.routing_key + "," + (String)binding.properties_key + "}]->"
                      + (String)binding.destination).equals(this.name) && binding.vhost.equals(this.vhost))

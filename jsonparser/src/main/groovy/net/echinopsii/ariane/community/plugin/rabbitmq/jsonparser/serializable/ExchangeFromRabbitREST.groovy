@@ -12,6 +12,8 @@ class ExchangeFromRabbitREST implements Serializable {
     String vhost
     Map<String, Object> properties
 
+    public static final String RABBITMQ_DEFAULT_EXCH_NAME = "[AMQP default]"
+
     ExchangeFromRabbitREST(String name, String vhost, RabbitClusterToConnect cluster) {
         this.name = name
         this.vhost = vhost
@@ -26,7 +28,8 @@ class ExchangeFromRabbitREST implements Serializable {
         def exchanges_req = cluster.get(exchanges_req_path)
         if (exchanges_req.status == 200 && exchanges_req.data != null) {
             exchanges_req.data.each { exchange ->
-                if (exchange.name.equals(this.name) && exchange.vhost.equals(this.vhost))
+                if (((this.name.equals(RABBITMQ_DEFAULT_EXCH_NAME) && exchange.name.equals("")) || (!this.name.equals(RABBITMQ_DEFAULT_EXCH_NAME && exchange.name.equals(this.name))))
+                    && exchange.vhost.equals(this.vhost))
                     properties = exchange
             }
             properties.remove("name")

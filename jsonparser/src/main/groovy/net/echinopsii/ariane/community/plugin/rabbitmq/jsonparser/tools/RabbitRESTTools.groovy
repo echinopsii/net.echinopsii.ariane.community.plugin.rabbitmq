@@ -1,6 +1,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools
 
 import groovyx.net.http.RESTClient
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable.ExchangeFromRabbitREST
 
 class RabbitRESTTools {
 
@@ -35,7 +36,10 @@ class RabbitRESTTools {
                     ret.put((String)anexchange.vhost, new ArrayList<String>())
             }
             exchanges_list_req.data.each { anexchange ->
-                ret.get((String)anexchange.vhost).add((String)anexchange.name)
+                if (anexchange.name.equals(""))
+                    ret.get((String)anexchange.vhost).add(ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME)
+                else
+                    ret.get((String)anexchange.vhost).add((String)anexchange.name)
             }
         }
         return ret;
@@ -51,6 +55,8 @@ class RabbitRESTTools {
                     ret.put((String)abinding.vhost, new ArrayList<String>())
             }
             bindings_list_req.data.each { abinding ->
+                if (abinding.source.equals(""))
+                    abinding.source = ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME
                 ret.get((String)abinding.vhost).add((String)abinding.source +
                         "-[" + (String)abinding.destination_type + "/{" + (String)abinding.routing_key + "," + (String)abinding.properties_key + "}]->"
                         + (String)abinding.destination)

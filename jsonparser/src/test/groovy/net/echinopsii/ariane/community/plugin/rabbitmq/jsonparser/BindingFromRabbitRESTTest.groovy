@@ -13,8 +13,8 @@ class BindingFromRabbitRESTTest extends RabbitRESTTestSetup {
         if (rclient!=null) {
             Map<String, List<String>> bindingMap2Vhost = RabbitRESTTools.getBindingNames(validCluster)
             for (String vhostName : bindingMap2Vhost.keySet()) {
-                List<String> vhostExchangesList = bindingMap2Vhost.get(vhostName)
-                for (String bindingName: vhostExchangesList) {
+                List<String> vhostBindingsList = bindingMap2Vhost.get(vhostName)
+                for (String bindingName: vhostBindingsList) {
                     BindingFromRabbitREST rbinding = new BindingFromRabbitREST(bindingName, vhostName, validCluster).parse()
                     assertTrue(rbinding.getName().equals(bindingName))
                     assertTrue(rbinding.getVhost().equals(vhostName))
