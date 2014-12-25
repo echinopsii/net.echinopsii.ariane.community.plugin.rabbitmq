@@ -5,6 +5,7 @@ class RabbitNodeToConnect {
     String url;
     String user;
     String password;
+    boolean isStatisticsDBNode;
     RabbitClusterToConnect cluster;
     HashMap<String, Integer> errors = new HashMap<String, Integer>();
 

@@ -19,14 +19,19 @@ class RESTClientProvider {
 
     static RESTClient getRESTClientFromCluster(RabbitClusterToConnect cluster) {
         RESTClient ret = null
+        boolean statisticNodeFound = false;
         RabbitNodeToConnect nodeOnRESTCli = null
         for (RabbitNodeToConnect node : cluster.getNodes()) {
             RESTClient test = getRESTClientFromNode(node)
-            int status = checkRabbitRESTClient(test)
+            int status = checkRabbitRESTClient(test, node)
             switch(status) {
                 case REST_CLI_NODE_OK:
-                    ret = test
-                    nodeOnRESTCli = node
+                    if (!statisticNodeFound) {
+                        ret = test
+                        nodeOnRESTCli = node
+                    }
+                    if (node.isStatisticsDBNode)
+                        statisticNodeFound=true
                     cluster.getErrors().remove(node.getName())
                     break;
                 default:
@@ -44,10 +49,11 @@ class RESTClientProvider {
         return rest;
     }
 
-    static int checkRabbitRESTClient(RESTClient client) {
+    static int checkRabbitRESTClient(RESTClient client, RabbitNodeToConnect node) {
         int ret = REST_CLI_NODE_OK;
         try {
-            client.get(path : '/api/overview')
+            def overview_req =client.get(path : '/api/overview')
+            node.setIsStatisticsDBNode(overview_req.data.node.equals(overview_req.data.statistics_db_node))
         } catch (UnknownHostException urlpb) {
             ret = REST_CLI_NODE_URL_ERROR;
         } catch (NoHttpResponseException noHttpResponseException) {
