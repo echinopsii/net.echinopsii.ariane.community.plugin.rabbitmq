@@ -1,13 +1,21 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools
 
 class RabbitNodeToConnect {
-    String name;
-    String url;
-    String user;
-    String password;
-    boolean isStatisticsDBNode;
-    RabbitClusterToConnect cluster;
-    HashMap<String, Integer> errors = new HashMap<String, Integer>();
+    String name
+    String url
+    String user
+    String password
+
+    boolean isStatisticsDBNode
+    String rabbitmqVersion
+    String managementVersion
+    String erlangVersion
+    String erlangFullVersion
+    Map<String, String>  listeningAddress = new HashMap<String, String>()
+    Map<String, Integer> listeningPorts = new HashMap<String, Integer>()
+
+    RabbitClusterToConnect cluster
+    HashMap<String, Integer> errors = new HashMap<String, Integer>()
 
     public RabbitNodeToConnect(String name, String url, String user, String password) {
         this.name = name

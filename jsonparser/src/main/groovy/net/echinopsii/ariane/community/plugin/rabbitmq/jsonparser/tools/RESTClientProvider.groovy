@@ -54,6 +54,20 @@ class RESTClientProvider {
         try {
             def overview_req =client.get(path : '/api/overview')
             node.setIsStatisticsDBNode(overview_req.data.node.equals(overview_req.data.statistics_db_node))
+            node.setManagementVersion((String)overview_req.data.management_version)
+            node.setRabbitmqVersion((String)overview_req.data.rabbitmq_version)
+            node.setErlangVersion((String)overview_req.data.erlang_version)
+            node.setErlangFullVersion((String)overview_req.data.erlang_full_version)
+            ArrayList<HashMap<String, Object>> listeners = overview_req.data.listeners
+            for (HashMap<String, Object> listener : listeners)
+                if (listener.get("node").equals(overview_req.data.node)) {
+                    String protocol = (String)listener.get("protocol")
+                    String ip_addr  = (String)listener.get("ip_address")
+                    int port        = new Integer((String)listener.get("port"))
+                    node.getListeningAddress().put(protocol, ip_addr)
+                    node.getListeningPorts().put(protocol, port)
+                    break;
+                }
         } catch (UnknownHostException urlpb) {
             ret = REST_CLI_NODE_URL_ERROR;
         } catch (NoHttpResponseException noHttpResponseException) {
