@@ -6,7 +6,7 @@ class RabbitNodeToConnect {
     String user
     String password
 
-    boolean isStatisticsDBNode
+    boolean statisticsDBNode
     String rabbitmqVersion
     String managementVersion
     String erlangVersion

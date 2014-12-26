@@ -46,7 +46,7 @@ class BrokerFromRabbitREST implements Serializable {
             if (node.getName().equals(this.name)) {
                 listeningAddress = node.getListeningAddress()
                 listeningPorts   = node.getListeningPorts()
-                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_STATISTICS_DB_NODE, node.isStatisticsDBNode)
+                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_STATISTICS_DB_NODE, node.statisticsDBNode)
                 properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_VERSION, node.getErlangVersion())
                 properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_FULL_VERSION, node.getErlangFullVersion())
                 properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_MANAGEMENT_VERSION, node.getManagementVersion())

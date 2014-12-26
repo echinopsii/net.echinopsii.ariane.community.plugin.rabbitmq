@@ -26,8 +26,11 @@ class RESTClientProvider {
             int status = checkRabbitRESTClient(test, node)
             switch(status) {
                 case REST_CLI_NODE_OK:
-                    ret = test
-                    nodeOnRESTCli = node
+                    // avoid staticDbNode as much as possible for latency purpose
+                    if (ret==null || !node.isStatisticsDBNode()) {
+                        ret = test
+                        nodeOnRESTCli = node
+                    }
                     cluster.getErrors().remove(node.getName())
                     break;
                 default:
@@ -49,7 +52,7 @@ class RESTClientProvider {
         int ret = REST_CLI_NODE_OK;
         try {
             def overview_req =client.get(path : BrokerFromRabbitREST.REST_RABBITMQ_BROKER_OVERVIEW_PATH)
-            node.setIsStatisticsDBNode(overview_req.data.node.equals(overview_req.data.statistics_db_node))
+            node.setStatisticsDBNode(overview_req.data.node.equals(overview_req.data.statistics_db_node))
             node.setManagementVersion((String)overview_req.data.management_version)
             node.setRabbitmqVersion((String)overview_req.data.rabbitmq_version)
             node.setErlangVersion((String)overview_req.data.erlang_version)
@@ -62,7 +65,6 @@ class RESTClientProvider {
                     int port        = new Integer((String)listener.get(BrokerFromRabbitREST.JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_PORT))
                     node.getListeningAddress().put(protocol, ip_addr)
                     node.getListeningPorts().put(protocol, port)
-                    break;
                 }
         } catch (UnknownHostException urlpb) {
             ret = REST_CLI_NODE_URL_ERROR;
