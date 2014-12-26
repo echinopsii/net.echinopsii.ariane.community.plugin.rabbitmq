@@ -6,6 +6,10 @@ import javax.persistence.Transient
 
 class VhostFromRabbitREST implements Serializable {
 
+    private transient static final String REST_RABBITMQ_VHOST_PATH = "/api/vhosts/"
+
+    private transient static final String JSON_RABBITMQ_VHOST_NAME = "name"
+
     transient RabbitClusterToConnect cluster;
 
     String name
@@ -17,14 +21,13 @@ class VhostFromRabbitREST implements Serializable {
     }
 
     VhostFromRabbitREST parse() {
-        String vhosts_req_path  = '/api/vhosts'
-        def vhosts_req = cluster.get(vhosts_req_path)
+        def vhosts_req = cluster.get(REST_RABBITMQ_VHOST_PATH)
         if (vhosts_req.status == 200 && vhosts_req.data != null) {
             vhosts_req.data.each { vhost ->
                 if (vhost.name.equals(this.name))
                     properties = vhost
             }
-            properties.remove("name")
+            properties.remove(JSON_RABBITMQ_VHOST_NAME)
         }
         return this
     }

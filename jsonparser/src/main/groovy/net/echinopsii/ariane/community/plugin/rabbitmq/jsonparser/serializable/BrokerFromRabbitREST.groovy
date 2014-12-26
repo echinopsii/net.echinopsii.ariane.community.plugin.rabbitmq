@@ -7,9 +7,25 @@ import org.slf4j.LoggerFactory
 
 class BrokerFromRabbitREST implements Serializable {
 
-    public static final int REST_NODE_INVALID_ID_NAME_OR_CLUSTER = -21;
+    public transient static final String REST_RABBITMQ_BROKER_OVERVIEW_PATH = '/api/overview'
 
-    private static final Logger log = LoggerFactory.getLogger(BrokerFromRabbitREST.class);
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_STATISTICS_DB_NODE  = "statistics_db_node"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_MANAGEMENT_VERSION  = "management_version"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_RABBITMQ_VERSION    = "rabbitmq_version"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_VERSION      = "erlang_version"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_FULL_VERSION = "erlang_full_version"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS           = "listeners"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_NODE      = "node"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_PROTOCOL  = "protocol"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_IPADDRESS = "ip_address"
+    public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_PORT      = "port"
+
+    private transient static final String JSON_RABBITMQ_NODE_PATH = "/api/nodes/"
+    private transient static final String JSON_RABBITMQ_NODE_NAME = "name"
+
+    public transient static final int REST_NODE_INVALID_ID_NAME_OR_CLUSTER = -21;
+
+    private transient static final Logger log = LoggerFactory.getLogger(BrokerFromRabbitREST.class);
 
     transient RabbitClusterToConnect cluster;
 
@@ -30,19 +46,19 @@ class BrokerFromRabbitREST implements Serializable {
             if (node.getName().equals(this.name)) {
                 listeningAddress = node.getListeningAddress()
                 listeningPorts   = node.getListeningPorts()
-                properties.put("statistics_db_node", node.isStatisticsDBNode)
-                properties.put("erlang_version", node.getErlangVersion())
-                properties.put("erlang_full_version", node.getErlangFullVersion())
-                properties.put("management_version", node.getManagementVersion())
-                properties.put("rabbitmq_version", node.getRabbitmqVersion())
+                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_STATISTICS_DB_NODE, node.isStatisticsDBNode)
+                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_VERSION, node.getErlangVersion())
+                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_FULL_VERSION, node.getErlangFullVersion())
+                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_MANAGEMENT_VERSION, node.getManagementVersion())
+                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_RABBITMQ_VERSION, node.getRabbitmqVersion())
                 break;
             }
 
-        String node_req_path =  '/api/nodes/' + this.name;
+        String node_req_path = JSON_RABBITMQ_NODE_PATH + this.name;
         def node_req = cluster.get(node_req_path)
         if (node_req.status == 200 && node_req.data != null)
             properties.putAll((Map<String,Object>)node_req.data)
-        properties.remove("name")
+        properties.remove(JSON_RABBITMQ_NODE_NAME)
 
         return this;
     }

@@ -6,7 +6,17 @@ import org.slf4j.LoggerFactory
 
 class BindingFromRabbitREST implements Serializable {
 
-    private static final Logger log = LoggerFactory.getLogger(BindingFromRabbitREST.class);
+    private transient static final String REST_RABBITMQ_BINDING_PATH = "/api/bindings/"
+
+    public transient static final String JSON_RABBITMQ_BINDING_SOURCE           = "source"
+    public transient static final String JSON_RABBITMQ_BINDING_DESTINATION_TYPE = "destination_type"
+    public transient static final String JSON_RABBITMQ_BINDING_DESTINATION      = "destination"
+    public transient static final String JSON_RABBITMQ_BINDING_PROPERTIES_KEY   = "properties_key"
+    public transient static final String JSON_RABBITMQ_BINDING_ROUNTING_KEY     = "routing_key"
+    private transient static final String JSON_RABBITMQ_BINDING_VHOST           = "vhost"
+
+
+    private transient static final Logger log = LoggerFactory.getLogger(BindingFromRabbitREST.class);
 
     transient RabbitClusterToConnect cluster;
 
@@ -24,8 +34,7 @@ class BindingFromRabbitREST implements Serializable {
         // The following binding_req_path should be used but there is a problem in the groovy HTTPBuilder
         // api/bindings/%2F/bindingName for vhost "/" is re-encoded api/bindings/%252F/bindingName and api/bindings///bindingName is re-encoded api/bindings/bindingName
         // String binding_req_path =  'api/bindings/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
-        String bindings_req_path =  '/api/bindings'
-        def bindings_req = cluster.get(bindings_req_path)
+        def bindings_req = cluster.get(REST_RABBITMQ_BINDING_PATH)
         if (bindings_req.status == 200 && bindings_req.data != null) {
             bindings_req.data.each { binding ->
                 if (binding.source.equals(""))
@@ -35,7 +44,7 @@ class BindingFromRabbitREST implements Serializable {
                      + (String)binding.destination).equals(this.name) && binding.vhost.equals(this.vhost))
                     properties = binding
             }
-            properties.remove("vhost")
+            properties.remove(JSON_RABBITMQ_BINDING_VHOST)
         }
         return this;
     }
