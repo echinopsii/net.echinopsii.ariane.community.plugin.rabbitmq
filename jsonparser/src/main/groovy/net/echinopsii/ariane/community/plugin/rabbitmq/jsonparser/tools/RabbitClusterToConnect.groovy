@@ -34,7 +34,7 @@ class RabbitClusterToConnect {
         return nodes
     }
 
-    RabbitClusterToConnect setNodes(HashSet<RabbitNodeToConnect> nodes) {
+    RabbitClusterToConnect setNodesAndDefineRESTCli(HashSet<RabbitNodeToConnect> nodes) {
         this.nodes   = nodes
         this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
         return this

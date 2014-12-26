@@ -2,6 +2,7 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools
 
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable.BrokerFromRabbitREST
 import org.apache.http.NoHttpResponseException
 import org.apache.http.conn.HttpHostConnectException
 import org.slf4j.Logger
@@ -19,19 +20,14 @@ class RESTClientProvider {
 
     static RESTClient getRESTClientFromCluster(RabbitClusterToConnect cluster) {
         RESTClient ret = null
-        boolean statisticNodeFound = false;
         RabbitNodeToConnect nodeOnRESTCli = null
         for (RabbitNodeToConnect node : cluster.getNodes()) {
             RESTClient test = getRESTClientFromNode(node)
             int status = checkRabbitRESTClient(test, node)
             switch(status) {
                 case REST_CLI_NODE_OK:
-                    if (!statisticNodeFound) {
-                        ret = test
-                        nodeOnRESTCli = node
-                    }
-                    if (node.isStatisticsDBNode)
-                        statisticNodeFound=true
+                    ret = test
+                    nodeOnRESTCli = node
                     cluster.getErrors().remove(node.getName())
                     break;
                 default:
@@ -52,7 +48,7 @@ class RESTClientProvider {
     static int checkRabbitRESTClient(RESTClient client, RabbitNodeToConnect node) {
         int ret = REST_CLI_NODE_OK;
         try {
-            def overview_req =client.get(path : '/api/overview')
+            def overview_req =client.get(path : BrokerFromRabbitREST.REST_RABBITMQ_BROKER_OVERVIEW_PATH)
             node.setIsStatisticsDBNode(overview_req.data.node.equals(overview_req.data.statistics_db_node))
             node.setManagementVersion((String)overview_req.data.management_version)
             node.setRabbitmqVersion((String)overview_req.data.rabbitmq_version)
@@ -60,10 +56,10 @@ class RESTClientProvider {
             node.setErlangFullVersion((String)overview_req.data.erlang_full_version)
             ArrayList<HashMap<String, Object>> listeners = overview_req.data.listeners
             for (HashMap<String, Object> listener : listeners)
-                if (listener.get("node").equals(overview_req.data.node)) {
-                    String protocol = (String)listener.get("protocol")
-                    String ip_addr  = (String)listener.get("ip_address")
-                    int port        = new Integer((String)listener.get("port"))
+                if (listener.get(BrokerFromRabbitREST.JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_NODE).equals(overview_req.data.node)) {
+                    String protocol = (String)listener.get(BrokerFromRabbitREST.JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_PROTOCOL)
+                    String ip_addr  = (String)listener.get(BrokerFromRabbitREST.JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_IPADDRESS)
+                    int port        = new Integer((String)listener.get(BrokerFromRabbitREST.JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_PORT))
                     node.getListeningAddress().put(protocol, ip_addr)
                     node.getListeningPorts().put(protocol, port)
                     break;
