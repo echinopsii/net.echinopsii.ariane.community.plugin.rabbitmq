@@ -151,7 +151,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
             nodeToConnect.setUrl(node.getUrl());
             clusterNodesToConnect.add(nodeToConnect);
         }
-        clusterToConnect.setNodes(clusterNodesToConnect);
+        clusterToConnect.setNodesAndDefineRESTCli(clusterNodesToConnect);
 
         if (rabbitmqComponent.getId() != RabbitmqDirectoryService.FAKE_CLUSTER_ID) {
             this.componentDirectoryID = rabbitmqComponent.getId();
