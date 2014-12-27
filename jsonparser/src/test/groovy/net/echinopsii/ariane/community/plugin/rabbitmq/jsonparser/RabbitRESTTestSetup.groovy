@@ -40,34 +40,27 @@ class RabbitRESTTestSetup {
         vnodes.add(validNode);
         validCluster = new RabbitClusterToConnect("rabbit@"+hostname)
         validCluster.setNodes(vnodes)
-        validNode.setCluster(validCluster)
-
 
         RabbitNodeToConnect invalidURLNode = new RabbitNodeToConnect("rabbit@toto", "http://toto:15672/", "guest", "guest")
         Set<RabbitNodeToConnect> iurlnodes = new HashSet<RabbitNodeToConnect>();
         iurlnodes.add(invalidURLNode);
         invalidURLCluster = new RabbitClusterToConnect("rabbit@toto");
         invalidURLCluster.setNodes(iurlnodes);
-        invalidURLNode.setCluster(invalidURLCluster);
-
 
         RabbitNodeToConnect invalidauthNode = new RabbitNodeToConnect("rabbit@"+hostname,"http://localhost:15672/","toto","toto");
         Set<RabbitNodeToConnect> iauthnodes = new HashSet<RabbitNodeToConnect>();
         iauthnodes.add(invalidauthNode);
         invalidAUTHCluster = new RabbitClusterToConnect("rabbit@"+hostname);
         invalidAUTHCluster.setNodes(iauthnodes);
-        invalidauthNode.setCluster(invalidAUTHCluster);
-
 
         RabbitNodeToConnect stoppedNode = new RabbitNodeToConnect("rabbit@"+hostname, "http://localhost:25672/", "toto", "toto");
         Set<RabbitNodeToConnect> stoppednodes = new HashSet<RabbitNodeToConnect>();
         stoppednodes.add(stoppedNode);
         stoppedNodeCluster = new RabbitClusterToConnect("rabbit@"+hostname);
         stoppedNodeCluster.setNodes(stoppednodes);
-        stoppedNode.setCluster(stoppedNodeCluster);
 
         try {
-            rclient = validCluster.getRestCli();
+            rclient = validCluster.getSelectedNodeForREST().getRestCli();
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost("localhost");

@@ -1,7 +1,6 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools
 
 import groovyx.net.http.HttpResponseException
-import groovyx.net.http.RESTClient
 import org.apache.http.NoHttpResponseException
 import org.apache.http.conn.HttpHostConnectException
 import org.slf4j.Logger
@@ -11,11 +10,15 @@ class RabbitClusterToConnect {
 
     private static final Logger log = LoggerFactory.getLogger(RabbitClusterToConnect.class);
 
+    public static final int REST_CLU_INVALID_ID_NAME   = -11;
+    public static final int REST_CLU_DEF_NODE_INVALID  = -12;
+
     String name
     HashSet<RabbitNodeToConnect> nodes = new HashSet<RabbitNodeToConnect>()
-    HashMap<String, Integer> errors  = new HashMap<String, Integer>()
-    RESTClient restCli
-    RabbitNodeToConnect nodeOnRESTCli
+
+    HashMap<String, String> errors = new HashMap<String, String>()
+
+    RabbitNodeToConnect selectedNodeForREST
 
     public RabbitClusterToConnect(String name) {
         this.name  = name;
@@ -34,57 +37,70 @@ class RabbitClusterToConnect {
         return nodes
     }
 
-    RabbitClusterToConnect setNodesAndDefineRESTCli(HashSet<RabbitNodeToConnect> nodes) {
+    private void selectNodeForREST() {
+        for (RabbitNodeToConnect node : this.nodes) {
+            int status = node.checkRabbitRESTClient()
+            switch(status) {
+                case RabbitNodeToConnect.REST_CLI_NODE_OK:
+                    // avoid staticDbNode as much as possible for latency purpose
+                    if (this.selectedNodeForREST==null || !node.isStatisticsDBNode())
+                        this.selectedNodeForREST = node
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        for (RabbitNodeToConnect node : this.nodes) {
+            if (node.getConnectionStatus()!=RabbitNodeToConnect.REST_CLI_NODE_OK)
+                this.errors.put(node.getName() + "-" + node.getConnectionStatus(), "node " + node.getName() + " connection problem: " + node.getConnectionProblemDescription())
+            if (node.isErrorOnProvidedNodeName())
+                this.errors.put(node.getName() + "-" + REST_CLU_DEF_NODE_INVALID, "provided node name is invalid : " + node.getName() +
+                        ". Valid node name from target is " + node.getValidNodeNameFromTarget())
+            if (node.isErrorOnProvidedClusterName())
+                this.errors.put(this.name + "-" + REST_CLU_INVALID_ID_NAME, "provided cluster name is invalid : " + this.name +
+                        ". Valid cluster name from target is : " + node.getValidClusterNameFromTarget())
+        }
+    }
+
+    RabbitClusterToConnect setNodesAndSelectOneForREST(HashSet<RabbitNodeToConnect> nodes) {
+        for (RabbitNodeToConnect node : nodes)
+            node.setCluster(this)
         this.nodes   = nodes
-        this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
+        this.selectNodeForREST()
         return this
     }
 
-    HashMap<String, Integer> getErrors() {
-        return errors
-    }
-
-    RabbitClusterToConnect setErrors(HashMap<String, Integer> errors) {
-        this.errors = errors
-        return this
-    }
-
-    public RESTClient getRestCli() {
-        if (this.restCli==null || RESTClientProvider.checkRabbitRESTClient(this.restCli, this.nodeOnRESTCli)!=RESTClientProvider.REST_CLI_NODE_OK)
-            this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
-        return this.restCli
-    }
-
-    public RabbitNodeToConnect getNodeOnRESTCli() {
-        if (this.nodeOnRESTCli==null || this.restCli==null || RESTClientProvider.checkRabbitRESTClient(this.restCli, this.nodeOnRESTCli)!=RESTClientProvider.REST_CLI_NODE_OK)
-            this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
-        return this.nodeOnRESTCli
+    public RabbitNodeToConnect getSelectedNodeForREST() {
+        if (this.selectedNodeForREST==null || this.selectedNodeForREST.checkRabbitRESTClient()!=RabbitNodeToConnect.REST_CLI_NODE_OK)
+            this.selectNodeForREST()
+        return this.selectedNodeForREST
     }
 
     private void retryGetOnException(Exception exp, String path, int maxRetry) {
         log.warn("Exception " + exp.getMessage() + "raise while getting " + path)
         log.warn("Retry get " + path)
-        this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
+        this.selectNodeForREST()
         this.getMaxRetry(path, --maxRetry)
     }
 
-    private Object getMaxRetry(String path, int maxretry) {
+    private Object getMaxRetry(String path, int maxRetry) {
         Object ret = null;
 
-        if (this.restCli==null)
-            this.restCli = RESTClientProvider.getRESTClientFromCluster(this)
+        if (this.selectedNodeForREST==null)
+            this.selectNodeForREST()
 
-        if (this.restCli!=null) {
+        if (this.selectedNodeForREST!=null) {
             try {
-                ret = this.restCli.get(path: path)
+                ret = this.selectedNodeForREST.getRestCli().get(path: path)
             } catch (UnknownHostException urlpb) {
-                this.retryGetOnException(urlpb, path, maxretry)
+                this.retryGetOnException(urlpb, path, maxRetry)
             } catch (NoHttpResponseException noHttpResponseException) {
-                this.retryGetOnException(noHttpResponseException, path, maxretry)
+                this.retryGetOnException(noHttpResponseException, path, maxRetry)
             } catch (HttpHostConnectException httpHostConnectException) {
-                this.retryGetOnException(httpHostConnectException, path, maxretry)
+                this.retryGetOnException(httpHostConnectException, path, maxRetry)
             } catch (HttpResponseException httpResponseException) {
-                this.retryGetOnException(httpResponseException, path, maxretry)
+                this.retryGetOnException(httpResponseException, path, maxRetry)
             } catch (Exception e) {
                 ret = null
                 e.printStackTrace()

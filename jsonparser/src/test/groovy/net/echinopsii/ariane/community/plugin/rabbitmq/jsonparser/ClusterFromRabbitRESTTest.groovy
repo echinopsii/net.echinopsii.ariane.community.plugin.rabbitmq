@@ -1,9 +1,10 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable.ClusterFromRabbitREST
-import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RESTClientProvider
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 import org.junit.Test
 
+import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertTrue
 
@@ -22,23 +23,21 @@ class ClusterFromRabbitRESTTest extends RabbitRESTTestSetup {
 
     @Test
     public void parseInvalidURLCluster() {
-        ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidURLCluster).parse();
-        assertTrue(invalidURLCluster.getErrors().get("rabbit@toto")==RESTClientProvider.REST_CLI_NODE_URL_ERROR);
+        new ClusterFromRabbitREST(invalidURLCluster).parse();
+        assertNotNull(invalidURLCluster.getErrors().get("rabbit@toto-"+RabbitNodeToConnect.REST_CLI_NODE_URL_ERROR));
     }
 
     @Test
     public void parseInvalidAUTHCluster() {
         if (rclient!=null) {
-            ClusterFromRabbitREST clu = new ClusterFromRabbitREST(invalidAUTHCluster).parse();
-            System.out.println(invalidAUTHCluster.getErrors().toString());
-            assertTrue(invalidAUTHCluster.getErrors().get("rabbit@"+hostname)==RESTClientProvider.REST_CLI_NODE_AUTH_ERROR);
+            new ClusterFromRabbitREST(invalidAUTHCluster).parse();
+            assertNotNull(invalidAUTHCluster.getErrors().get("rabbit@"+hostname+"-"+RabbitNodeToConnect.REST_CLI_NODE_AUTH_ERROR));
         }
     }
 
     @Test
     public void parseStoppedNodeCluster() {
-        ClusterFromRabbitREST clu = new ClusterFromRabbitREST(stoppedNodeCluster).parse();
-        System.out.println(stoppedNodeCluster.getErrors().toString());
-        assertTrue(stoppedNodeCluster.getErrors().get("rabbit@"+hostname)==RESTClientProvider.REST_CLI_NODE_NO_RESPONSE);
+        new ClusterFromRabbitREST(stoppedNodeCluster).parse();
+        assertNotNull(stoppedNodeCluster.getErrors().get("rabbit@"+hostname+"-"+RabbitNodeToConnect.REST_CLI_NODE_NO_RESPONSE));
     }
 }
