@@ -4,10 +4,21 @@ import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitCl
 
 class ExchangeFromRabbitREST implements Serializable {
 
-    private transient static String REST_RABBITMQ_EXCHANGE_PATH = "/api/exchanges/"
+    private final transient static String REST_RABBITMQ_EXCHANGE_PATH = "/api/exchanges/"
 
-    private transient static String JSON_RABBITMQ_EXCHANGE_NAME  = "name"
-    private transient static String JSON_RABBITMQ_EXCHANGE_VHOST = "vhost"
+    private final transient static String JSON_RABBITMQ_EXCHANGE_NAME  = "name"
+    private final transient static String JSON_RABBITMQ_EXCHANGE_VHOST = "vhost"
+
+    public final transient static String JSON_RABBITMQ_EXCHANGE_AUTO_DELETE = "auto_delete"
+    public final transient static String JSON_RABBITMQ_EXCHANGE_ARGUMENTS   = "arguments"
+    public final transient static String JSON_RABBITMQ_EXCHANGE_DURABLE     = "durable"
+    public final transient static String JSON_RABBITMQ_EXCHANGE_TYPE        = "type"
+    public final transient static String JSON_RABBITMQ_EXCHANGE_INTERNAL    = "internal"
+
+    public final transient static String RABBITMQ_EXCHANGE_TYPE_DIRECT = "direct"
+    public final transient static String RABBITMQ_EXCHANGE_TYPE_FANOUT = "fanout"
+    public final transient static String RABBITMQ_EXCHANGE_TYPE_TOPIC  = "topic"
+    public final transient static String RABBITMQ_EXCHANGE_TYPE_HEADER = "header"
 
     transient RabbitClusterToConnect cluster;
 
@@ -30,7 +41,7 @@ class ExchangeFromRabbitREST implements Serializable {
         def exchanges_req = cluster.get(REST_RABBITMQ_EXCHANGE_PATH)
         if (exchanges_req.status == 200 && exchanges_req.data != null) {
             exchanges_req.data.each { exchange ->
-                if (((this.name.equals(RABBITMQ_DEFAULT_EXCH_NAME) && exchange.name.equals("")) || (!this.name.equals(RABBITMQ_DEFAULT_EXCH_NAME && exchange.name.equals(this.name))))
+                if (((this.name.equals(RABBITMQ_DEFAULT_EXCH_NAME) && exchange.name.equals("")) || (!this.name.equals(RABBITMQ_DEFAULT_EXCH_NAME) && exchange.name.equals(this.name)))
                     && exchange.vhost.equals(this.vhost))
                     properties = exchange
             }

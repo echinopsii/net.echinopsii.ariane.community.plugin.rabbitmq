@@ -6,18 +6,28 @@ class ConnectionFromRabbitREST implements Serializable {
 
     private transient static final String REST_RABBITMQ_CONNECTION_PATH = "/api/connections/"
 
-    public transient static final String JSON_RABBITMQ_CONNECTION_NAME                          = "name";
-    public transient static final String JSON_RABBITMQ_CONNECTION_NODE                          = "node";
-    public transient static final String JSON_RABBITMQ_CONNECTION_PROTOCOL                      = "protocol";
-    public transient static final String JSON_RABBITMQ_CONNECTION_SSL                           = "ssl";
-    public transient static final String JSON_RABBITMQ_CONNECTION_HOST                          = "host";
-    public transient static final String JSON_RABBITMQ_CONNECTION_PORT                          = "port";
-    public transient static final String JSON_RABBITMQ_CONNECTION_PEER_HOST                     = "peer_host";
-    public transient static final String JSON_RABBITMQ_CONNECTION_PEER_PORT                     = "peer_port";
-    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES             = "client_properties";
-    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PRODUCT     = "product";
-    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PLATFORM    = "platform";
-    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_INFORMATION = "information";
+    public transient static final String JSON_RABBITMQ_CONNECTION_NAME                           = "name";
+    public transient static final String JSON_RABBITMQ_CONNECTION_NODE                           = "node";
+    public transient static final String JSON_RABBITMQ_CONNECTION_PROTOCOL                       = "protocol";
+    public transient static final String JSON_RABBITMQ_CONNECTION_SSL                            = "ssl";
+    public transient static final String JSON_RABBITMQ_CONNECTION_HOST                           = "host";
+    public transient static final String JSON_RABBITMQ_CONNECTION_PORT                           = "port";
+    public transient static final String JSON_RABBITMQ_CONNECTION_PEER_HOST                      = "peer_host";
+    public transient static final String JSON_RABBITMQ_CONNECTION_PEER_PORT                      = "peer_port";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES              = "client_properties";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PRODUCT      = "product";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PLATFORM     = "platform";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_INFORMATION  = "information";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PGURL = "ariane.pgurl"
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OSI   = "ariane.osi";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_DTM   = "ariane.dtm";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OTM   = "ariane.otm";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_CMP   = "ariane.cmp";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_TYPE  = "ariane.type";
+
+    public transient static final String RABBITMQ_CONNECTION_PROTOCOL_AMQP  = "AMQP"
+    public transient static final String RABBITMQ_CONNECTION_PROTOCOL_MQTT  = "MQTT"
+    public transient static final String RABBITMQ_CONNECTION_PROTOCOL_STOMP = "STOMP"
 
     transient RabbitClusterToConnect cluster;
 

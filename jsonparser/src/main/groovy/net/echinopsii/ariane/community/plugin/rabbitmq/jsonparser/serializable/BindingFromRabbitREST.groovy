@@ -15,6 +15,8 @@ class BindingFromRabbitREST implements Serializable {
     public transient static final String JSON_RABBITMQ_BINDING_ROUNTING_KEY     = "routing_key"
     private transient static final String JSON_RABBITMQ_BINDING_VHOST           = "vhost"
 
+    public transient static final String RABBITMQ_BINDING_DESTINATION_TYPE_Q = "queue"
+    public transient static final String RABBITMQ_BINDING_DESTINATION_TYPE_E = "exchange"
 
     private transient static final Logger log = LoggerFactory.getLogger(BindingFromRabbitREST.class);
 
