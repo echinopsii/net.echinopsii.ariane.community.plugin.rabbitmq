@@ -5,8 +5,13 @@ import groovyx.net.http.RESTClient
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable.BrokerFromRabbitREST
 import org.apache.http.NoHttpResponseException
 import org.apache.http.conn.HttpHostConnectException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class RabbitNodeToConnect {
+
+    private static final Logger log = LoggerFactory.getLogger(RabbitNodeToConnect.class)
+
     String name
     String url
     String user
@@ -40,13 +45,20 @@ class RabbitNodeToConnect {
     String  validClusterNameFromTarget = null
 
     public RabbitNodeToConnect(String name, String url, String user, String password) {
+        log.debug("[init]new node to connect : " + name);
         this.name = name
         this.url  = url
         this.user = user
         this.password = password
 
-        this.restCli = new RESTClient( this.url )
-        this.restCli.auth.basic this.user, this.password;
+        try {
+            this.restCli = new RESTClient( this.url )
+            this.restCli.auth.basic this.user, this.password;
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage())
+        }
+        log.debug("[init done]new node to connect : " + name);
     }
 
     String getName() {
@@ -134,7 +146,8 @@ class RabbitNodeToConnect {
             else
                 this.connectionProblemDescription = "HTTP RESPONSE ERROR " + this.connectionStatus
         } catch (Exception e) {
-            log.error(e.getMessage());
+            e.printStackTrace();
+            log.error(e.getMessage())
             this.connectionStatus = REST_CLI_NODE_SOME_ERROR;
             this.connectionProblemDescription = "SOME ERROR : " + e.getMessage()
         }

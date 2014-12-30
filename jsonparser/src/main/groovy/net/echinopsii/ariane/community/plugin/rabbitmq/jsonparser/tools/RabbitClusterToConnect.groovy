@@ -21,6 +21,7 @@ class RabbitClusterToConnect {
     RabbitNodeToConnect selectedNodeForREST
 
     public RabbitClusterToConnect(String name) {
+        log.debug("[init]new cluster to connect : " + name);
         this.name  = name;
     }
 
