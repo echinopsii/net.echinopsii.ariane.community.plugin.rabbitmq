@@ -31,8 +31,6 @@
                             </h:panelGrid>
                         </h:form>
                     </p:fieldset>
-                    <br/>
-
                 </div>
                 <div style="width:49%; float:right;">
                     <p:fieldset id="cacheGearConfpnl" legend="Gears cache configuration" collapsed="true" toggleable="true" toggleSpeed="500">
@@ -57,10 +55,10 @@
                             </h:column>
                         </h:dataTable>
                     </p:fieldset>
-                    <br/>
                 </div>
-
-                <div>
+            </div>
+            <div>
+                <div style="width:100%; float: left;">
                     <p:fieldset id="gearpnl" legend="Gears" toggleable="true" toggleSpeed="500">
                         <h:form id="rabbitmqGearsTableForm">
                             <p:growl id="rabbitmqGearsTableMessages" showDetail="true" />
@@ -92,7 +90,8 @@
                             <p:poll update="@form" interval="10"/>
                         </h:form>
                     </p:fieldset>
-                    <br/>
+                </div>
+                <div style="width:100%; float: left;">
                     <p:fieldset id="cachepnl" legend="Components" toggleable="true" toggleSpeed="500">
                         <h:form id="rabbitmqCacheTableForm">
                             <p:growl id="rabbitmqCacheTableMessages" showDetail="true" />
