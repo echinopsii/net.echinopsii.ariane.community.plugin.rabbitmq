@@ -20,10 +20,9 @@ class ConnectionFromRabbitREST implements Serializable {
     public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_INFORMATION  = "information";
     public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PGURL = "ariane.pgurl"
     public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OSI   = "ariane.osi";
-    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_DTM   = "ariane.dtm";
     public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OTM   = "ariane.otm";
     public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_CMP   = "ariane.cmp";
-    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_TYPE  = "ariane.type";
+    public transient static final String JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_APP   = "ariane.app";
 
     public transient static final String RABBITMQ_CONNECTION_PROTOCOL_AMQP  = "AMQP"
     public transient static final String RABBITMQ_CONNECTION_PROTOCOL_MQTT  = "MQTT"
