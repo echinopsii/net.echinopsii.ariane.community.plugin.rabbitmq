@@ -19,9 +19,12 @@
 
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory;
 
+import net.echinopsii.ariane.community.core.directory.base.model.organisational.Team;
+import net.echinopsii.ariane.community.core.directory.base.model.technical.system.OSInstance;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -109,4 +112,14 @@ public interface RabbitmqDirectoryService {
      * @return nodes list from a cluster according cluster ID
      */
     public Set<RabbitmqNode> getNodesFromCluster(Long clusterID);
+
+    /**
+     * Get remote client container properties from its OS Instance Name and team name
+     *
+     * @param osiName the rbq client OS instance provided from RabbitMQ Connection
+     * @param teamName the rbq client team name provided from RabbitMQ Connection
+     *
+     * @return properties
+     */
+    public HashMap<String, Object> getRemoteClientContainerProperties(String osiName, String teamName);
 }

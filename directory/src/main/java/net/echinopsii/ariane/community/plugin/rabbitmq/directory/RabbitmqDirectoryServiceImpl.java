@@ -190,6 +190,38 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         em.close();
     }
 
+    private HashMap<String, Object> getLocationPropertiesFromOSI(OSInstance osInstance) {
+        HashMap<String, Object> props = new HashMap<>();
+        HashSet<Datacenter> dcs = new HashSet<>();
+        HashSet<Subnet> subnets = new HashSet<>();
+        for (Subnet subnet : osInstance.getNetworkSubnets()) {
+            for(Datacenter datacenter : subnet.getDatacenters()) if (!dcs.contains(datacenter)) dcs.add(datacenter);
+            if (!subnets.contains(subnet)) subnets.add(subnet);
+        }
+        for (Datacenter datacenter : dcs) props.put(Datacenter.DC_MAPPING_PROPERTIES,datacenter.toMappingProperties());
+        for (Subnet subnet : subnets) {
+            HashMap<String, Object> subnetProps = subnet.toMappingProperties();
+            props.put(Subnet.SUBNET_MAPPING_PROPERTIES, subnetProps);
+        }
+        props.put(OSInstance.OSI_MAPPING_PROPERTIES, osInstance.toMappingProperties());
+        return props;
+    }
+
+    private HashMap<String, Object> getTeamPropertiesFromTeam(Team team) {
+        HashMap<String, Object> props = new HashMap<>();
+        props.put(Team.TEAM_SUPPORT_MAPPING_PROPERTIES, team.toMappingProperties());
+        return props;
+    }
+
+    private void putLocationAndTeamPropertiesToRabbitmqNodes(RabbitmqCluster cluster) {
+        HashMap<String, Object> props = new HashMap<>();
+        for (RabbitmqNode rabbitmqNode : cluster.getNodes()) {
+            props.putAll(getLocationPropertiesFromOSI(rabbitmqNode.getOsInstance()));
+            props.putAll(getTeamPropertiesFromTeam(rabbitmqNode.getSupportTeam()));
+            rabbitmqNode.setProperties(props);
+        }
+    }
+
     @Override
     public RabbitmqCluster getClusterFromNode(RabbitmqNode node) {
         RabbitmqCluster ret = null;
@@ -200,9 +232,10 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
 
         EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
         RabbitmqNode persistedNode = em.find(RabbitmqNode.class, node.getId());
-        if (persistedNode!=null)
+        if (persistedNode!=null) {
             ret = persistedNode.getCluster();
-        else {
+            putLocationAndTeamPropertiesToRabbitmqNodes(ret);
+        } else {
             Set<RabbitmqNode> vnodes = new HashSet<RabbitmqNode>();
             vnodes.add(node);
             ret = new RabbitmqCluster().setIdR((long) -1).setVersionR(1).setNameR("rabbit@" + node.getName()).setDescriptionR("fake rabbit cluster").setNodesR(vnodes);
@@ -235,25 +268,8 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
             throw e;
         }
 
-        HashMap<String, Object> props = new HashMap<>();
-        if (freshRabbitmqCluster!=null) {
-            for (RabbitmqNode freshRabbitmqNode : freshRabbitmqCluster.getNodes()) {
-                HashSet<Datacenter> dcs = new HashSet<>();
-                HashSet<Subnet> subnets = new HashSet<>();
-                for (Subnet subnet : freshRabbitmqNode.getOsInstance().getNetworkSubnets()) {
-                    for(Datacenter datacenter : subnet.getDatacenters()) if (!dcs.contains(datacenter)) dcs.add(datacenter);
-                    if (!subnets.contains(subnet)) subnets.add(subnet);
-                }
-                for (Datacenter datacenter : dcs) props.put(Datacenter.DC_MAPPING_PROPERTIES,datacenter.toMappingProperties());
-                for (Subnet subnet : subnets) {
-                    HashMap<String, Object> subnetProps = subnet.toMappingProperties();
-                    props.put(Subnet.SUBNET_MAPPING_PROPERTIES, subnetProps);
-                }
-                props.put(OSInstance.OSI_MAPPING_PROPERTIES, freshRabbitmqNode.getOsInstance().toMappingProperties());
-                props.put(Team.TEAM_SUPPORT_MAPPING_PROPERTIES, freshRabbitmqNode.getSupportTeam().toMappingProperties());
-                freshRabbitmqNode.setProperties(props);
-            }
-        }
+        if (freshRabbitmqCluster!=null)
+            putLocationAndTeamPropertiesToRabbitmqNodes(freshRabbitmqCluster);
 
         log.debug("Close entity manager ...");
         em.close();
@@ -280,6 +296,7 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
             freshRabbitmqCluster = rbccQuery.getSingleResult();
             // clone the list from JPA return as we close cleanly the entity manager at the end
             // if not we may have some problems working on the returned Set depending on hibernate mood
+            putLocationAndTeamPropertiesToRabbitmqNodes(freshRabbitmqCluster);
             ret = new HashSet<RabbitmqNode>(freshRabbitmqCluster.getNodes());
         } catch (NoResultException e) {
             log.error("unable to retrieve RabbitMQ Cluster component {} from Directory DB!", clusterID);
@@ -290,5 +307,46 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         log.debug("Close entity manager");
         em.close();
         return ret ;
+    }
+
+    @Override
+    public HashMap<String, Object> getRemoteClientContainerProperties(String osiName, String teamName) {
+        HashMap<String, Object> ret = new HashMap<String, Object>();
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+
+        CriteriaQuery<OSInstance> osicc = builder.createQuery(OSInstance.class);
+        Root<OSInstance> osiccRoot = osicc.from(OSInstance.class);
+        osicc.select(osiccRoot).where(builder.equal(osiccRoot.<String>get("name"), osiName));
+        TypedQuery<OSInstance> osiccQuery = em.createQuery(osicc);
+
+        OSInstance osInstance = null;
+        try {
+            osInstance = osiccQuery.getSingleResult();
+            ret.putAll(getLocationPropertiesFromOSI(osInstance));
+        } catch (NoResultException e) {
+            log.error("unable to retrieve OS instance {} from Directory DB!", osiName);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        CriteriaQuery<Team> teamcc = builder.createQuery(Team.class);
+        Root<Team> teamccRoot = teamcc.from(Team.class);
+        teamcc.select(teamccRoot).where(builder.equal(teamccRoot.<String>get("name"), teamName));
+        TypedQuery<Team> teamccQuery = em.createQuery(teamcc);
+
+        Team team = null;
+        try {
+            team = teamccQuery.getSingleResult();
+            ret.putAll(getTeamPropertiesFromTeam(team));
+        } catch (NoResultException e) {
+            log.error("unable to retrieve OS instance {} from Directory DB!", teamName);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        em.close();
+        return ret;
     }
 }
