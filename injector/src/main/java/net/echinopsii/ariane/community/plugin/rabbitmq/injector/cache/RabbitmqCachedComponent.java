@@ -305,7 +305,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         RabbitmqCluster rabbitmqCluster = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().refreshRabbitmqCluster(componentDirectoryID);
         if (rabbitmqCluster!=null) {
             setRabbitmqComponentFields(rabbitmqCluster);
-            if (cluster != null)
+            if (this.brokers.size() > 0)
                 super.setNextAction(Component.ACTION_UPDATE);
             else
                 super.setNextAction(Component.ACTION_CREATE);
