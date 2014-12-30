@@ -45,6 +45,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     /*
      * RabbitMQ sniff tooling
      */
+    private transient Set<RabbitmqNode> clusterNodes = null;
     private transient RabbitClusterToConnect clusterToConnect = null;
     private ClusterFromRabbitREST          cluster     = null;
     private List<BrokerFromRabbitREST>     brokers     = new ArrayList<BrokerFromRabbitREST>();
@@ -144,7 +145,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         else
             clusterToConnect.setName(rabbitmqComponent.getName());
 
-        Set<RabbitmqNode> clusterNodes = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesFromCluster(rabbitmqComponent.getId());
+        this.clusterNodes = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesFromCluster(rabbitmqComponent.getId());
         HashSet<RabbitNodeToConnect> clusterNodesToConnect = new HashSet<RabbitNodeToConnect>();
         for (RabbitmqNode node : clusterNodes) {
             RabbitNodeToConnect nodeToConnect = new RabbitNodeToConnect(node.getName(), node.getUrl(),
@@ -179,9 +180,9 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
             this.componentType = "RabbitMQ Server";
         }
 
-        RabbitNodeToConnect node = clusterToConnect.getSelectedNodeForREST();
-        log.debug("Will sniff from : {}", (node!=null) ? node.getName() : "null");
-        this.componentURL  = (node!=null) ? node.getUrl() : "";
+        RabbitNodeToConnect nodeToConnect = clusterToConnect.getSelectedNodeForREST();
+        log.debug("Will sniff from : {}", (nodeToConnect != null) ? nodeToConnect.getName() : "null");
+        this.componentURL  = (nodeToConnect!=null) ? nodeToConnect.getUrl() : "";
         if (this.componentProperties==null)
             this.componentProperties = new HashMap<>();
 
@@ -216,10 +217,12 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
             for (String nodeName : cluster.getNodes()) {
                 BrokerFromRabbitREST tmp = new BrokerFromRabbitREST(nodeName, clusterToConnect).parse();
                 if (!this.brokers.contains(tmp)) {
-                    for(RabbitNodeToConnect nodeToConnect : clusterToConnect.getNodes()) {
+                    for (RabbitmqNode node : this.clusterNodes)
+                        if (node.getName().equals(nodeName) && node.getProperties()!=null)
+                            tmp.getProperties().putAll(node.getProperties());
+                    for(RabbitNodeToConnect nodeToConnect : clusterToConnect.getNodes())
                         if (nodeToConnect.getName().equals(nodeName))
                             tmp.setUrl(nodeToConnect.getUrl());
-                    }
                     this.brokers.add(tmp);
                     Map<String, Object> nodeProperties = tmp.getProperties();
                     this.componentProperties.put(nodeName, nodeProperties);
