@@ -1,0 +1,44 @@
+{
+    "id": "ariane.community.plugin.rabbitmq",
+    "version": "master.SNAPSHOT",
+    "type": "community",
+    "deployCommandsFile": "resources/virgoscripts/deploy-plugin.rabbitmq.vsh",
+    "distribs": [
+        "master.SNAPSHOT"
+    ],
+    "hook": {
+        "package": "plugins.rabbitmq",
+        "module": "rabbitmqProcessor",
+        "class": "rabbitmqProcessor"
+    },
+    "environment": [
+        {
+            "sqlScriptFP": "resources/sqlscripts/plugins/rabbitmq/directory_plugin_rabbitmq.sql",
+            "deployCmdFP": "None",
+            "templateFP": "None",
+            "targetConf" : "None",
+            "defaultValuesFP": "None"
+        },
+        {
+            "sqlScriptFP": "resources/sqlscripts/plugins/rabbitmq/idm_plugin_rabbitmq_insert.sql",
+            "deployCmdFP": "None",
+            "templateFP": "None",
+            "targetConf" : "None",
+            "defaultValuesFP": "None"
+        },
+        {
+            "sqlScriptFP": "None",
+            "deployCmdFP": "None",
+            "templateFP" : "resources/templates/plugins/rabbitmq/net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQInjectorManagedService.properties.tpl",
+            "targetConf" : "repository/ariane-plugins/net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQnjectorManagedService.properties",
+            "defaultValuesFP" : "resources/configvalues/plugins/rabbitmq/cuRabbitmqInjectorManagedService.json"
+        },
+        {
+            "sqlScriptFP": "None",
+            "deployCmdFP": "resources/virgoscripts/deploy-plugin.rabbitmq.vsh",
+            "templateFP": "None",
+            "targetConf" : "None",
+            "defaultValuesFP": "None"
+        }
+    ]
+}
