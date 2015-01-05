@@ -341,7 +341,7 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
             team = teamccQuery.getSingleResult();
             ret.putAll(getTeamPropertiesFromTeam(team));
         } catch (NoResultException e) {
-            log.error("unable to retrieve OS instance {} from Directory DB!", teamName);
+            log.error("unable to retrieve team {} from Directory DB!", teamName);
         } catch (Exception e) {
             throw e;
         }
