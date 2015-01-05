@@ -69,8 +69,6 @@ public class MappingActor extends UntypedActor {
     private static final String RABBITMQ_TRANSPORT_SSL_AMQP    = "ssl-rbq-amqp://";
     private static final String RABBITMQ_TRANSPORT_SSL_MQTT    = "ssl-rbq-mqtt://";
     private static final String RABBITMQ_TRANSPORT_SSL_STOMP   = "ssl-rbq-stomp://";
-
-
     private static final String RABBITMQ_TRANSPORT_MEM_BINDING = "mem-rbq-binding://";
 
     private void applyEntityDifferencesFromLastSniff(RabbitmqCachedComponent entity) {
@@ -550,7 +548,7 @@ public class MappingActor extends UntypedActor {
                                         Node publisherNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(publisherNodeName, rbqClient.getContainerID(), 0);
                                         log.debug("Create or get node for publisher ({},{},{})", new Object[]{publisherNode.getNodeID(), publisherNodeName, rbqClient.getContainerID()});
 
-                                        String sourceEpUrl = transportName + peerHost + ":" + peerPort + "/(" + channelNumber + ")/" + exchangeName;
+                                        String sourceEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + exchangeName;
                                         Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(sourceEpUrl, publisherNode.getNodeID());
                                         log.debug("Create or get endpoint : ({},{},{})", new Object[]{sourceEp.getEndpointID(), sourceEpUrl, publisherNode.getNodeID()});
 
@@ -574,7 +572,12 @@ public class MappingActor extends UntypedActor {
                     }
 
                 } else
-                    log.error("Remote RabbitMQ client didn't define necessary Ariane properties to map it...");
+                    log.error("Remote RabbitMQ client didn't define necessary Ariane properties to map it...\n" +
+                               ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PGURL + ": " + remoteCliPGURL + "\n" +
+                               ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OSI + ": " + remoteCliOSI + "\n" +
+                               ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OTM + ": " + remoteCliOTM + "\n" +
+                               ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_CMP + ": " + remoteCliCMP + "\n" +
+                               ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_APP + ": " + remoteCliAPP);
             } else
                 log.error("Unable to find target RabbitMQ node for connection {}", connectionFromRabbitREST.getName());
         }
