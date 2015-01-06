@@ -72,7 +72,294 @@ public class MappingActor extends UntypedActor {
     private static final String RABBITMQ_TRANSPORT_MEM_BINDING = "mem-rbq-binding://";
 
     private void applyEntityDifferencesFromLastSniff(RabbitmqCachedComponent entity) {
+        Set<String> deletedBrk      = new HashSet<>();
+        Set<String> deletedVHTs     = new HashSet<>();
+        Set<String> deletedQ        = new HashSet<>();
+        Set<String> deletedExchange = new HashSet<>();
 
+        Cluster cluster = RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().getCluster(entity.getComponentId());
+
+        if (entity.getLastBrokers()!=null) {
+            for (BrokerFromRabbitREST lastBroker : entity.getLastBrokers()) {
+                BrokerFromRabbitREST currentBroker = null;
+                for (BrokerFromRabbitREST curBrok : entity.getBrokers())
+                    if (curBrok.equals(lastBroker)) {
+                        currentBroker = curBrok;
+                        break;
+                    }
+
+                if (currentBroker==null) {
+                    try {
+                        log.debug("Deleting broker ({},{})...", new Object[]{lastBroker.getName(), lastBroker.getUrl()});
+                        RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(lastBroker.getUrl());
+                        deletedBrk.add(lastBroker.getName());
+                    } catch (MappingDSException e) {
+                        log.error("Error raised while deleting broker ({},{})... Continue.", new Object[]{lastBroker.getName(), lastBroker.getUrl()});
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        if (entity.getLastVhosts()!=null) {
+            for (VhostFromRabbitREST lastVHost : entity.getLastVhosts())  {
+                VhostFromRabbitREST currentVHost = null;
+                for (VhostFromRabbitREST curVH : entity.getVhosts())
+                    if (curVH.equals(lastVHost)) {
+                        currentVHost = curVH;
+                        break;
+                    }
+
+                if (currentVHost==null) {
+                    if (cluster!=null) {
+                        for (Container container : cluster.getClusterContainers()) {
+                            Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(container, lastVHost.getName());
+                            if (nodeToDelete!=null) {
+                                try {
+                                    log.debug("Deleting VHost node ({},{})", new Object[]{container.getContainerID(), lastVHost.getName()});
+                                    RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(nodeToDelete.getNodeID());
+                                    deletedVHTs.add(lastVHost.getName());
+                                } catch (MappingDSException e) {
+                                    log.error("Error raised while deleting VHost node ({},{})... Continue", new Object[]{container.getContainerID(), lastVHost.getName()});
+                                    e.printStackTrace();
+                                }
+                            } else log.error("VHost node ({},{}) doesn't exist.", new Object[]{container.getContainerID(), lastVHost.getName()});
+                        }
+                    } else log.error("Deleting vhost {} : cluster {} doesn't exist.", new Object[]{lastVHost.getName(), entity.getComponentId()});
+                }
+            }
+        }
+
+        if (entity.getLastQueues()!=null) {
+            for (QueueFromRabbitREST lastQueue : entity.getLastQueues()) {
+                if (!deletedVHTs.contains(lastQueue.getVhost())) {
+                    QueueFromRabbitREST currentQueue = null;
+                    for (QueueFromRabbitREST curQ : entity.getQueues())
+                        if (curQ.equals(lastQueue)) {
+                            currentQueue = curQ;
+                            break;
+                        }
+
+                    if (currentQueue == null) {
+                        if (cluster != null) {
+                            for (Container container : cluster.getClusterContainers()) {
+                                Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(container, lastQueue.getVhost());
+                                if (vhostNode != null) {
+                                    Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, lastQueue.getName() + " (queue)");
+                                    if (nodeToDelete != null) {
+                                        try {
+                                            log.debug("Deleting queue node ({}/{},{})", new Object[]{container.getContainerID(), lastQueue.getVhost(), lastQueue.getName()});
+                                            RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(nodeToDelete.getNodeID());
+                                            deletedQ.add(lastQueue.getName());
+                                        } catch (MappingDSException e) {
+                                            log.error("Error raised while deleting queue node ({}/{},{})... Continue", new Object[]{container.getContainerID(), lastQueue.getVhost(), lastQueue.getName()});
+                                            e.printStackTrace();
+                                        }
+                                    } else log.error("Deleting queue {} in ({}/{}): doesn't exist.", new Object[]{lastQueue.getName(), container.getContainerID(), lastQueue.getVhost()});
+                                } else log.error("Deleting queue {} : vhost {} doesn't exist.", new Object[]{lastQueue.getName(), lastQueue.getVhost()});
+                            }
+                        } else log.error("Deleting queue {} : cluster {} doesn't exist.", new Object[]{lastQueue.getName(), entity.getComponentId()});
+                    }
+                } // else VHost has been deleted with the child nodes and so the queue
+            }
+        }
+
+        if (entity.getLastExchanges()!=null) {
+            for (ExchangeFromRabbitREST lastExchange : entity.getLastExchanges()) {
+                if (!deletedVHTs.contains(lastExchange.getVhost())) {
+                    ExchangeFromRabbitREST currentExchange = null;
+                    for (ExchangeFromRabbitREST curEx : entity.getExchanges())
+                        if (curEx.equals(lastExchange)) {
+                            currentExchange = curEx;
+                            break;
+                        }
+
+                    if (currentExchange != null) {
+                        if (cluster!=null) {
+                            for (Container container : cluster.getClusterContainers()) {
+                                Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(container, lastExchange.getVhost());
+                                if (vhostNode != null) {
+                                    Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, lastExchange.getName() + " (exchange)");
+                                    if (nodeToDelete!=null) {
+                                        try {
+                                            log.debug("Deleting exchange node ({}/{},{})",
+                                                       new Object[]{container.getContainerID(), lastExchange.getVhost(), lastExchange.getName()});
+                                            RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(nodeToDelete.getNodeID());
+                                            deletedExchange.add(lastExchange.getName());
+                                        } catch (MappingDSException e) {
+                                            log.error("Error raised while deleting exchange node ({}/{},{})... Continue",
+                                                       new Object[]{container.getContainerID(), lastExchange.getVhost(), lastExchange.getName()});
+                                            e.printStackTrace();
+                                        }
+                                    } else log.error("Deleting exchange {} in ({}/{}): doesn't exist.",
+                                                      new Object[]{lastExchange.getName(), container.getContainerID(), lastExchange.getVhost()});
+                                }
+                            }
+                        }
+                    }
+                }
+            } // else VHost has been deleted with the child nodes and so the exchange
+        }
+
+        if (entity.getLastBindings()!=null) {
+            for (BindingFromRabbitREST lastBinding : entity.getLastBindings()) {
+                if (!deletedVHTs.contains(lastBinding.getVhost())) {
+                    BindingFromRabbitREST currentBinding = null;
+                    for (BindingFromRabbitREST curBind : entity.getBindings())
+                        if (curBind.equals(lastBinding)) {
+                            currentBinding = curBind;
+                            break;
+                        }
+
+                    if (currentBinding==null) {
+                        String bindingDestinationType = (String) lastBinding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_DESTINATION_TYPE);
+                        String routingKey = (String) lastBinding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_ROUNTING_KEY);
+                        String exchangeSrc = (String) lastBinding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_SOURCE);
+                        String destination = (String) lastBinding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_DESTINATION);
+                        if (cluster != null) {
+                            for (Container container : cluster.getClusterContainers()) {
+                                Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(container, lastBinding.getVhost());
+                                if (bindingDestinationType.equals(BindingFromRabbitREST.RABBITMQ_BINDING_DESTINATION_TYPE_Q)) {
+                                    if (!deletedQ.contains(destination) && !deletedExchange.contains(exchangeSrc)) {
+                                        Node sourceNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode,  exchangeSrc + " (exchange)");
+                                        Node destNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, destination + " (queue)");
+
+                                        if (destNode != null && sourceNode != null) {
+                                            String exchangeType = (String) sourceNode.getNodeProperties().get(ExchangeFromRabbitREST.JSON_RABBITMQ_EXCHANGE_TYPE);
+                                            String exchangeSourceEndpointURL = null;
+                                            String queueTargetEndpointURL = null;
+
+                                            if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_DIRECT)) {
+                                                exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                    exchangeSrc + "/" + routingKey;
+                                                queueTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                 destination + "/" + routingKey;
+                                            } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_FANOUT)) {
+                                                exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                    exchangeSrc;
+                                                queueTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                 destination;
+                                            } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_TOPIC)) {
+                                                exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                    exchangeSrc + "/" + routingKey;
+                                                queueTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                 destination + "/" + routingKey;
+                                            } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_HEADER)) {
+                                                exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                    exchangeSrc;
+                                                queueTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                 destination;
+                                            } else log.error("Unknown exchange type : {}", new Object[]{exchangeType});
+
+                                            if (exchangeSourceEndpointURL != null) {
+                                                Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(exchangeSourceEndpointURL);
+                                                if (sourceEp!=null)
+                                                    try {
+                                                        log.debug("Deleting binding source endpoint ({}/{},{})",
+                                                                   new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
+                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEp.getEndpointID());
+                                                    } catch (MappingDSException e) {
+                                                        log.error("Error raised whilde deleting binding source endpoint ({}/{},{})... Continue",
+                                                                         new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
+                                                        e.printStackTrace();
+                                                    }
+                                                Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(queueTargetEndpointURL);
+                                                if (targetEp!=null)
+                                                    try {
+                                                        log.debug("Deleting binding target endpoint ({}/{},{})",
+                                                                   new Object[]{container.getContainerID(), lastBinding.getVhost(), queueTargetEndpointURL});
+                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEp.getEndpointID());
+                                                    } catch (MappingDSException e) {
+                                                        log.debug("Error raised while deleting binding target endpoint ({}/{},{})... Continue",
+                                                                   new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
+                                                        e.printStackTrace();
+                                                    }
+                                            }
+
+                                        } else {
+                                            if (sourceNode != null) log.error("Deleting binding {} : destination node {} doesn't exists...", new Object[]{lastBinding.getName(), destination});
+                                            else if (destNode != null) log.error("Deleting binding {} : source node {} doesn't exists...", new Object[]{lastBinding.getName(), exchangeSrc});
+                                            else log.error("Deleting binding {} : source and destination nodes ({},{}) doesn't exists...", new Object[]{lastBinding.getName(), exchangeSrc, destination});
+                                        }
+
+                                    }
+                                } else if (bindingDestinationType.equals(BindingFromRabbitREST.RABBITMQ_BINDING_DESTINATION_TYPE_E)) {
+                                    if (!deletedExchange.contains(destination) && !deletedExchange.contains(exchangeSrc)) {
+                                        Node sourceNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode,  exchangeSrc + " (exchange)");
+                                        Node destNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, destination+ " (exchange)");
+
+                                        if (destNode != null && sourceNode != null) {
+                                            String exchangeType = (String) sourceNode.getNodeProperties().get(ExchangeFromRabbitREST.JSON_RABBITMQ_EXCHANGE_TYPE);
+                                            String exchangeSourceEndpointURL = null;
+                                            String exchangeTargetEndpointURL = null;
+
+                                            if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_DIRECT)) {
+                                                exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                    exchangeSrc + "/" + routingKey;
+                                                exchangeTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                 destination + "/" + routingKey;
+                                            } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_FANOUT)) {
+                                                exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                    exchangeSrc;
+                                                exchangeTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                 destination;
+                                            } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_TOPIC)) {
+                                                exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                    exchangeSrc + "/" + routingKey;
+                                                exchangeTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                 destination + "/" + routingKey;
+                                            } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_HEADER)) {
+                                                exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                    exchangeSrc;
+                                                exchangeTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + sourceNode.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
+                                                                                 destination;
+                                            } else log.error("Unknown exchange type : {}", new Object[]{exchangeType});
+
+                                            if (exchangeSourceEndpointURL != null) {
+                                                Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(exchangeSourceEndpointURL);
+                                                if (sourceEp!=null)
+                                                    try {
+                                                        log.debug("Deleting binding source endpoint ({}/{},{})",
+                                                                         new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
+                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEp.getEndpointID());
+                                                    } catch (MappingDSException e) {
+                                                        log.error("Error raised whilde deleting binding source endpoint ({}/{},{})... Continue",
+                                                                         new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
+                                                        e.printStackTrace();
+                                                    }
+                                                Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(exchangeTargetEndpointURL);
+                                                if (targetEp!=null)
+                                                    try {
+                                                        log.debug("Deleting binding target endpoint ({}/{},{})",
+                                                                         new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeTargetEndpointURL});
+                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEp.getEndpointID());
+                                                    } catch (MappingDSException e) {
+                                                        log.debug("Error raised while deleting binding target endpoint ({}/{},{})... Continue",
+                                                                         new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
+                                                        e.printStackTrace();
+                                                    }
+                                            }
+
+
+                                        } else {
+                                            if (sourceNode != null) log.error("Deleting binding {} : destination node {} doesn't exists...", new Object[]{lastBinding.getName(), destination});
+                                            else if (destNode != null) log.error("Deleting binding {} : source node {} doesn't exists...", new Object[]{lastBinding.getName(), exchangeSrc});
+                                            else log.error("Deleting binding {} : source and destination nodes ({},{}) doesn't exists...", new Object[]{lastBinding.getName(), exchangeSrc, destination});
+                                        }
+                                    }
+                                } else log.error("Unknown binding destination type : {}", new Object[]{bindingDestinationType});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+        if (lastConnections!=null) {
+
+        }
+        */
     }
 
     private void pushEntityToMappingDS(RabbitmqCachedComponent entity) throws MappingDSException {
@@ -196,7 +483,7 @@ public class MappingActor extends UntypedActor {
                 if (queue.getVhost().equals(vHost.getNodeName())) {
                     log.debug("");
                     log.debug("-----------------------------------");
-                    Node queueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(queue.getName(), vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
+                    Node queueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(queue.getName() + " (queue)", vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
                     log.debug("Create or get node for queue ({},{},{},{})", new Object[]{queueNode.getNodeID(), queue.getName(), vHost.getNodeContainer().getContainerID(), vHost.getNodeID()});
                     for (String propsKey : queue.getProperties().keySet()) {
                         log.debug("Add property {} to rabbitmq node {} : {}", new Object[]{propsKey, queueNode.getNodeName(), queue.getProperties().get(propsKey).toString()});
@@ -231,7 +518,7 @@ public class MappingActor extends UntypedActor {
                 if (exchange.getVhost().equals(vHost.getNodeName())) {
                     log.debug("");
                     log.debug("-----------------------------------");
-                    Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(exchange.getName(), vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
+                    Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(exchange.getName() + " (exchange)", vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
                     log.debug("Create or get node for exchange ({},{},{},{})", new Object[]{exchangeNode.getNodeID(), exchange.getName(), vHost.getNodeContainer().getContainerID(), vHost.getNodeID()});
                     for (String propsKey : exchange.getProperties().keySet()) {
                         log.debug("Add property {} to rabbitmq node {} : {}", new Object[]{propsKey, exchangeNode.getNodeName(), exchange.getProperties().get(propsKey).toString()});
@@ -258,9 +545,12 @@ public class MappingActor extends UntypedActor {
             log.debug("");
             log.debug("binding {} on {} : {}", new Object[]{binding.getName(), binding.getVhost(), binding.getProperties().toString()});
             String bindingDestinationType = (String) binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_DESTINATION_TYPE);
+            String routingKey = (String)binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_ROUNTING_KEY);
+            String destination = (String)binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_DESTINATION);
+            String source = (String)binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_SOURCE);
 
             for (Node exchange : exchanges) {
-                if (exchange.getNodeName().equals(binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_SOURCE)) &&
+                if (exchange.getNodeName().equals(source+ " (exchange)") &&
                     exchange.getNodeParentNode().getNodeName().equals(binding.getVhost())) {
 
                     log.debug("");
@@ -271,41 +561,42 @@ public class MappingActor extends UntypedActor {
                                                                             exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY)});
 
                     String exchangeType = (String)exchange.getNodeProperties().get(ExchangeFromRabbitREST.JSON_RABBITMQ_EXCHANGE_TYPE);
+
                     if (bindingDestinationType.equals(BindingFromRabbitREST.RABBITMQ_BINDING_DESTINATION_TYPE_Q)) {
                         for (Node queue : queues) {
 
-                            if (queue.getNodeName().equals(binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_DESTINATION)) &&
+                            if (queue.getNodeName().equals(destination + " (queue)") &&
                                 queue.getNodeParentNode().getNodeName().equals(binding.getVhost()) &&
                                 exchange.getNodeContainer().equals(queue.getNodeContainer())) {
                                 log.debug("");
-                                log.debug("target queue ({},{},{},{})", new Object[]{queue.getNodeID(), queue.getNodeName(), queue.getNodeParentNode().getNodeName(),
+                                log.debug("target queue ({},{},{},{})", new Object[]{queue.getNodeID(), destination, queue.getNodeParentNode().getNodeName(),
                                                                                      queue.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY)});
 
                                 String exchangeSourceEndpointURL= null;
                                 String queueTargetEndpointURL = null;
-                                String routingKey = (String)binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_ROUNTING_KEY);
+
                                 log.debug("exchangeType : {} ; routingKey : {}", new Object[]{exchangeType, routingKey});
 
                                 if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_DIRECT)) {
                                     exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchange.getNodeName() + "/" + routingKey;
+                                                                source + "/" + routingKey;
                                     queueTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                             queue.getNodeName() + "/" + routingKey;
+                                                             destination + "/" + routingKey;
                                 } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_FANOUT)) {
                                     exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchange.getNodeName();
+                                                                source;
                                     queueTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                             queue.getNodeName();
+                                                             destination;
                                 } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_TOPIC)) {
                                     exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchange.getNodeName() + "/" + routingKey;
+                                                                source + "/" + routingKey;
                                     queueTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                             queue.getNodeName() + "/" + routingKey;
+                                                             destination + "/" + routingKey;
                                 } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_HEADER)) {
                                     exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchange.getNodeName();
+                                                                source;
                                     queueTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                             queue.getNodeName();
+                                                             destination;
                                 } else
                                     log.error("Unknown exchange type : {}", new Object[]{exchangeType});
 
@@ -338,7 +629,7 @@ public class MappingActor extends UntypedActor {
 
                     } else if (bindingDestinationType.equals(BindingFromRabbitREST.RABBITMQ_BINDING_DESTINATION_TYPE_E)) {
                         for (Node exchangeToLink : exchanges) {
-                            if (exchangeToLink.getNodeName().equals(binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_DESTINATION)) &&
+                            if (exchangeToLink.getNodeName().equals(destination + " (exchange)") &&
                                 exchangeToLink.getNodeParentNode().getNodeName().equals(binding.getVhost()) &&
                                 exchange.getNodeContainer().equals(exchangeToLink.getNodeContainer())) {
 
@@ -349,28 +640,27 @@ public class MappingActor extends UntypedActor {
 
                                 String exchangeSourceEndpointURL = null;
                                 String exchangeTargetEndpointURL = null;
-                                String routingKey = (String)binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_ROUNTING_KEY);
 
                                 if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_DIRECT)) {
                                     exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchange.getNodeName() + "/" + routingKey;
+                                                                source + "/" + routingKey;
                                     exchangeTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchangeToLink.getNodeName() + "/" + routingKey;
+                                                                destination + "/" + routingKey;
                                 } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_FANOUT)) {
                                     exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchange.getNodeName();
+                                                                source;
                                     exchangeTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchangeToLink.getNodeName();
+                                                                destination;
                                 } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_TOPIC)) {
                                     exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchange.getNodeName() + "/" + routingKey;
+                                                                source + "/" + routingKey;
                                     exchangeTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchangeToLink.getNodeName() + "/" + routingKey;
+                                                                destination + "/" + routingKey;
                                 } else if (exchangeType.equals(ExchangeFromRabbitREST.RABBITMQ_EXCHANGE_TYPE_HEADER)) {
                                     exchangeSourceEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchange.getNodeName();
+                                                                source;
                                     exchangeTargetEndpointURL = RABBITMQ_TRANSPORT_MEM_BINDING + exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY) + "/" +
-                                                                exchangeToLink.getNodeName();
+                                                                destination;
                                 } else
                                     log.error("Unknown exchange type : {}", new Object[]{exchangeType});
 
@@ -488,83 +778,88 @@ public class MappingActor extends UntypedActor {
                         else
                             transportName = RABBITMQ_TRANSPORT_TCP_STOMP;
 
-                    for (ChannelFromRabbitREST channelFromRabbitREST : entity.getChannels()) {
-                        HashMap<String, Object> connectionDetails = (HashMap<String, Object>)channelFromRabbitREST.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
-                        if (connectionFromRabbitREST.getName().equals(connectionDetails.get("name"))) {
-                            String channelName = channelFromRabbitREST.getName();
-                            String channelNumber = channelName.split("\\(")[1].split("\\)")[0];
+                    else
+                        log.error("Unknown protocol type : {} ", protocol);
 
-                            ArrayList<HashMap<String, Object>> consumers_details = (ArrayList)channelFromRabbitREST.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS);
-                            for (HashMap<String, Object> consumerDetails : consumers_details) {
-                                HashMap<String, Object> queue_details = (HashMap) consumerDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE);
-                                String consumerTag = (String) consumerDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_CONSUMER_TAG);
-                                String queueName = (String)queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_NAME);
-                                String vhostName = (String)queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_VHOST);
-                                log.debug("---");
-                                log.debug("channel consumer tag : {}", consumerTag);
-                                log.debug("channel consumer queue : {} on {}", new Object[]{queueName, vhostName});
+                    if (transportName!=null) {
+                        for (ChannelFromRabbitREST channelFromRabbitREST : entity.getChannels()) {
+                            HashMap<String, Object> connectionDetails = (HashMap<String, Object>) channelFromRabbitREST.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
+                            if (connectionFromRabbitREST.getName().equals(connectionDetails.get("name"))) {
+                                String channelName = channelFromRabbitREST.getName();
+                                String channelNumber = channelName.split("\\(")[1].split("\\)")[0];
 
-                                for (Node queue : queues) {
-                                    if (queue.getNodeName().equals(queueName) && queue.getNodeParentNode().getNodeName().equals(vhostName) &&
-                                        queue.getNodeContainer().equals(rbqBroker)) {
+                                ArrayList<HashMap<String, Object>> consumers_details = (ArrayList) channelFromRabbitREST.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS);
+                                for (HashMap<String, Object> consumerDetails : consumers_details) {
+                                    HashMap<String, Object> queue_details = (HashMap) consumerDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE);
+                                    String consumerTag = (String) consumerDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_CONSUMER_TAG);
+                                    String queueName = (String) queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_NAME);
+                                    String vhostName = (String) queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_VHOST);
+                                    log.debug("---");
+                                    log.debug("channel consumer tag : {}", consumerTag);
+                                    log.debug("channel consumer queue : {} on {}", new Object[]{queueName, vhostName});
 
-                                        String consumerNodeName = queueName + " consumer" ;
-                                        Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(consumerNodeName, rbqClient.getContainerID(), 0);
-                                        log.debug("Create or get node for consumer ({},{},{})", new Object[]{consumerNode.getNodeID(), consumerNodeName, rbqClient.getContainerID()});
+                                    for (Node queue : queues) {
+                                        if (queue.getNodeName().equals(queueName + " (queue)") && queue.getNodeParentNode().getNodeName().equals(vhostName) &&
+                                                    queue.getNodeContainer().equals(rbqBroker)) {
 
-                                        String sourceEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")/" + consumerTag;
-                                        Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(sourceEpUrl, queue.getNodeID());
-                                        log.debug("Create or get endpoint : ({},{},{})", new Object[]{sourceEp.getEndpointID(), sourceEpUrl, queue.getNodeID()});
-                                        String targetEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + consumerTag;
-                                        Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(targetEpUrl, consumerNode.getNodeID());
-                                        log.debug("Create or get endpoint : ({},{},{})", new Object[]{targetEp.getEndpointID(), targetEpUrl, consumerNode.getNodeID()});
+                                            String consumerNodeName = queueName + " consumer";
+                                            Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(consumerNodeName, rbqClient.getContainerID(), 0);
+                                            log.debug("Create or get node for consumer ({},{},{})", new Object[]{consumerNode.getNodeID(), consumerNodeName, rbqClient.getContainerID()});
 
-                                        Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(transportName);
-                                        log.debug("Create or get transport : ({},{})", new Object[]{transport.getTransportID(), transportName});
+                                            String sourceEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")/" + consumerTag;
+                                            Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(sourceEpUrl, queue.getNodeID());
+                                            log.debug("Create or get endpoint : ({},{},{})", new Object[]{sourceEp.getEndpointID(), sourceEpUrl, queue.getNodeID()});
+                                            String targetEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + consumerTag;
+                                            Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(targetEpUrl, consumerNode.getNodeID());
+                                            log.debug("Create or get endpoint : ({},{},{})", new Object[]{targetEp.getEndpointID(), targetEpUrl, consumerNode.getNodeID()});
 
-                                        Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
-                                                                                                                      transport.getTransportID(), 0);
-                                        log.debug("Create or get link : ({},{},{},{})", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
-                                                                                                     targetEp.getEndpointID(), transport.getTransportID()});
+                                            Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(transportName);
+                                            log.debug("Create or get transport : ({},{})", new Object[]{transport.getTransportID(), transportName});
 
-                                        break;
+                                            Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
+                                                                                                                                 transport.getTransportID(), 0);
+                                            log.debug("Create or get link : ({},{},{},{})", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
+                                                                                                                targetEp.getEndpointID(), transport.getTransportID()});
+
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            ArrayList<HashMap<String, Object>> publishes = (ArrayList)channelFromRabbitREST.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES);
-                            for (HashMap<String, Object> publish: publishes) {
-                                HashMap<String, Object> targetExchange = (HashMap)publish.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE);
-                                String exchangeName = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_NAME);
-                                String exchangeVhost = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_VHOST);
-                                log.debug("---");
-                                log.debug("channel publisher exchange name: {}", exchangeName);
-                                log.debug("channel publisher exchange vhost: {}", exchangeVhost);
+                                ArrayList<HashMap<String, Object>> publishes = (ArrayList) channelFromRabbitREST.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES);
+                                for (HashMap<String, Object> publish : publishes) {
+                                    HashMap<String, Object> targetExchange = (HashMap) publish.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE);
+                                    String exchangeName = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_NAME);
+                                    String exchangeVhost = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_VHOST);
+                                    log.debug("---");
+                                    log.debug("channel publisher exchange name: {}", exchangeName);
+                                    log.debug("channel publisher exchange vhost: {}", exchangeVhost);
 
-                                for (Node exchange : exchanges) {
-                                    if (exchange.getNodeName().equals(exchangeName) && exchange.getNodeParentNode().getNodeName().equals(exchangeVhost) &&
-                                        exchange.getNodeContainer().equals(rbqBroker)) {
+                                    for (Node exchange : exchanges) {
+                                        if (exchange.getNodeName().equals(exchangeName + " (exchange)") && exchange.getNodeParentNode().getNodeName().equals(exchangeVhost) &&
+                                                    exchange.getNodeContainer().equals(rbqBroker)) {
 
-                                        String publisherNodeName = exchangeName + " publisher";
-                                        Node publisherNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(publisherNodeName, rbqClient.getContainerID(), 0);
-                                        log.debug("Create or get node for publisher ({},{},{})", new Object[]{publisherNode.getNodeID(), publisherNodeName, rbqClient.getContainerID()});
+                                            String publisherNodeName = exchangeName + " publisher";
+                                            Node publisherNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(publisherNodeName, rbqClient.getContainerID(), 0);
+                                            log.debug("Create or get node for publisher ({},{},{})", new Object[]{publisherNode.getNodeID(), publisherNodeName, rbqClient.getContainerID()});
 
-                                        String sourceEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + exchangeName;
-                                        Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(sourceEpUrl, publisherNode.getNodeID());
-                                        log.debug("Create or get endpoint : ({},{},{})", new Object[]{sourceEp.getEndpointID(), sourceEpUrl, publisherNode.getNodeID()});
+                                            String sourceEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + exchangeName;
+                                            Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(sourceEpUrl, publisherNode.getNodeID());
+                                            log.debug("Create or get endpoint : ({},{},{})", new Object[]{sourceEp.getEndpointID(), sourceEpUrl, publisherNode.getNodeID()});
 
-                                        String targetEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")";
-                                        Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(targetEpUrl, exchange.getNodeID());
-                                        log.debug("Create or get endpoint : ({},{},{})", new Object[]{targetEp.getEndpointID(), targetEpUrl, exchange.getNodeID()});
+                                            String targetEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")";
+                                            Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(targetEpUrl, exchange.getNodeID());
+                                            log.debug("Create or get endpoint : ({},{},{})", new Object[]{targetEp.getEndpointID(), targetEpUrl, exchange.getNodeID()});
 
-                                        Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(transportName);
-                                        log.debug("Create or get transport : ({},{})", new Object[]{transport.getTransportID(), transportName});
+                                            Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(transportName);
+                                            log.debug("Create or get transport : ({},{})", new Object[]{transport.getTransportID(), transportName});
 
-                                        Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
-                                                                                                                      transport.getTransportID(), 0);
-                                        log.debug("Create or get link : ({},{},{},{})", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
-                                                                                                     targetEp.getEndpointID(), transport.getTransportID()});
+                                            Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
+                                                                                                                                 transport.getTransportID(), 0);
+                                            log.debug("Create or get link : ({},{},{},{})", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
+                                                                                                                targetEp.getEndpointID(), transport.getTransportID()});
 
-                                        break;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -583,8 +878,9 @@ public class MappingActor extends UntypedActor {
         }
     }
 
-    private void removeEntityFromMappingDS(RabbitmqCachedComponent entity) {
-
+    private void removeEntityFromMappingDS(RabbitmqCachedComponent entity) throws MappingDSException {
+        RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().deleteCluster(entity.getComponentId());
+        RabbitmqInjectorBootstrap.getComponentsRegistry().removeEntityFromCache(entity);
     }
 
     private void inject(RabbitmqCachedComponent entity) {

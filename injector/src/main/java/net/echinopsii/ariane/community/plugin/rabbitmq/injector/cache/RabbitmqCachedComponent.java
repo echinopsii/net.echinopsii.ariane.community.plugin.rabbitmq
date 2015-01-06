@@ -57,7 +57,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private List<BindingFromRabbitREST>    bindings    = new ArrayList<BindingFromRabbitREST>();
 
     private ClusterFromRabbitREST          lastCluster     = null;
-    private List<BrokerFromRabbitREST>     lastNodes       = null;
+    private List<BrokerFromRabbitREST>     lastBrokers     = null;
     private List<VhostFromRabbitREST>      lastVhosts      = null;
     private List<ConnectionFromRabbitREST> lastConnections = null;
     private List<ChannelFromRabbitREST>    lastChannels    = null;
@@ -101,8 +101,8 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         return lastCluster;
     }
 
-    public List<BrokerFromRabbitREST> getLastNodes() {
-        return lastNodes;
+    public List<BrokerFromRabbitREST> getLastBrokers() {
+        return lastBrokers;
     }
 
     public List<VhostFromRabbitREST> getLastVhosts() {
@@ -279,7 +279,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private void cloneCurrentRuntime() {
         this.lastCluster = this.cluster.clone();
 
-        this.lastNodes = new ArrayList<BrokerFromRabbitREST>(this.brokers);
+        this.lastBrokers = new ArrayList<BrokerFromRabbitREST>(this.brokers);
         this.brokers.clear();
 
         this.lastVhosts = new ArrayList<VhostFromRabbitREST>(this.vhosts);
@@ -328,7 +328,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
             case Component.ACTION_DELETE:
                 break;
             default:
-                log.error("Unknown entity refresh !");
+                log.error("Unknown entity refresh code !");
                 break;
         }
 
