@@ -7,7 +7,9 @@ class ChannelFromRabbitREST implements Serializable {
     private transient static final String REST_RABBITMQ_CHANNEL_PATH = "/api/channels/"
 
     private transient static final String JSON_RABBITMQ_CHANNEL_NAME                         = "name"
+    public transient static final String JSON_RABBITMQ_CHANNEL_NODE                          = "node"
     public transient static final String JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS            = "connection_details"
+    public transient static final String JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_NAME       = "name"
     public transient static final String JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS              = "consumer_details"
     public transient static final String JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE        = "queue"
     public transient static final String JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_VHOST  = "vhost"
