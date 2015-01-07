@@ -54,7 +54,6 @@ public class MappingActor extends UntypedActor {
         this.gear = gear;
     }
 
-
     private static final String RABBITMQ_COMPANY  = "Pivotal";
     private static final String RABBITMQ_PRODUCT  = "RabbitMQ";
 
@@ -72,10 +71,11 @@ public class MappingActor extends UntypedActor {
     private static final String RABBITMQ_TRANSPORT_MEM_BINDING = "mem-rbq-binding://";
 
     private void applyEntityDifferencesFromLastSniff(RabbitmqCachedComponent entity) {
-        Set<String> deletedBrk      = new HashSet<>();
-        Set<String> deletedVHTs     = new HashSet<>();
-        Set<String> deletedQ        = new HashSet<>();
-        Set<String> deletedExchange = new HashSet<>();
+        Set<String> deletedBrk        = new HashSet<>();
+        Set<String> deletedVHTs       = new HashSet<>();
+        Set<String> deletedQ          = new HashSet<>();
+        Set<String> deletedExchange   = new HashSet<>();
+        Set<String> deletedConnection = new HashSet<>();
 
         Cluster cluster = RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().getCluster(entity.getComponentId());
 
@@ -355,9 +355,287 @@ public class MappingActor extends UntypedActor {
             }
         }
 
-        /*
-        if (lastConnections!=null) {
+        if (entity.getLastConnections()!=null) {
+            for (ConnectionFromRabbitREST lastConnection : entity.getLastConnections()) {
 
+                String rbqBrokerNodeName = (String)lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_NODE);
+                if (!deletedBrk.contains(rbqBrokerNodeName) && cluster!=null) {
+
+                    ConnectionFromRabbitREST currentConnection = null;
+                    for (ConnectionFromRabbitREST curConn : entity.getConnections())
+                        if (curConn.equals(lastConnection)) {
+                            currentConnection = curConn;
+                            break;
+                        }
+
+                    if (currentConnection == null) {
+
+                        Container rbqBroker = null;
+                        for (Container broker : cluster.getClusterContainers()) {
+                            if (broker.getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY).equals(rbqBrokerNodeName)) {
+                                rbqBroker = broker;
+                                break;
+                            }
+                        }
+
+                        if (rbqBroker != null) {
+
+                            HashMap<String, Object> connection_client_props = (HashMap) lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES);
+                            String remoteCliPGURL = (String) connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PGURL);
+                            String remoteCliOSI = (String) connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OSI);
+                            String remoteCliOTM = (String) connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OTM);
+                            String remoteCliAPP = (String) connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_APP);
+                            String remoteCliCMP = (String) connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_CMP);
+
+                            if (remoteCliPGURL != null && remoteCliOSI != null && remoteCliOTM != null && remoteCliAPP != null && remoteCliCMP != null) {
+                                String serverName = remoteCliPGURL.split("://")[1].split("\\.")[0];
+
+                                Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().getContainer(remoteCliPGURL);
+                                if (rbqClient != null) {
+                                    String protocol = (String) lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_PROTOCOL);
+                                    String transportName = null;
+                                    boolean ssl = (Boolean) lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_SSL);
+                                    String peerHost = (String) lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_PEER_HOST);
+                                    int peerPort = (Integer) lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_PEER_PORT);
+                                    String brokerHost = (String) lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_HOST);
+                                    int brokerPort = (Integer) lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_PORT);
+
+                                    if (protocol.startsWith(ConnectionFromRabbitREST.RABBITMQ_CONNECTION_PROTOCOL_AMQP))
+                                        if (ssl)
+                                            transportName = RABBITMQ_TRANSPORT_SSL_AMQP;
+                                        else
+                                            transportName = RABBITMQ_TRANSPORT_TCP_AMQP;
+
+                                    else if (protocol.startsWith(ConnectionFromRabbitREST.RABBITMQ_CONNECTION_PROTOCOL_MQTT))
+                                        if (ssl)
+                                            transportName = RABBITMQ_TRANSPORT_SSL_MQTT;
+                                        else
+                                            transportName = RABBITMQ_TRANSPORT_TCP_MQTT;
+
+                                    else if (protocol.startsWith(ConnectionFromRabbitREST.RABBITMQ_CONNECTION_PROTOCOL_STOMP))
+                                        if (ssl)
+                                            transportName = RABBITMQ_TRANSPORT_SSL_STOMP;
+                                        else
+                                            transportName = RABBITMQ_TRANSPORT_TCP_STOMP;
+
+                                    else
+                                        log.error("Unknown protocol type : {} ", protocol);
+
+                                    if (transportName != null) {
+                                        for (ChannelFromRabbitREST lastChannel : entity.getLastChannels()) {
+                                            HashMap<String, Object> connectionDetails = (HashMap<String, Object>) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
+                                            if (lastConnection.getName().equals(connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_NAME))) {
+                                                String channelName = lastChannel.getName();
+                                                String channelNumber = channelName.split("\\(")[1].split("\\)")[0];
+
+                                                ArrayList<HashMap<String, Object>> consumers_details = (ArrayList) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS);
+                                                for (HashMap<String, Object> consumerDetails : consumers_details) {
+                                                    HashMap<String, Object> queue_details = (HashMap) consumerDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE);
+                                                    String consumerTag = (String) consumerDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_CONSUMER_TAG);
+                                                    String queueName = (String) queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_NAME);
+                                                    String vhostName = (String) queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_VHOST);
+
+                                                    if (!deletedVHTs.contains(vhostName)) {
+                                                        String consumerNodeName = queueName + " consumer";
+                                                        String sourceEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")/" + consumerTag;
+                                                        String targetEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + consumerTag;
+
+                                                        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
+                                                        if (vhostNode != null) {
+                                                            Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqClient, consumerNodeName);
+                                                            if (consumerNode != null) {
+                                                                Endpoint sourceEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(sourceEpUrl);
+                                                                if (sourceEP != null)
+                                                                    try {
+                                                                        log.debug("Deleting connection-channel source endpoint ({},{}).",
+                                                                                         new Object[]{vhostName, sourceEpUrl});
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEP.getEndpointID());
+                                                                    } catch (MappingDSException e) {
+                                                                        log.error("Error raised while deleting connection-channel source endpoint ({},{})... Continue",
+                                                                                         new Object[]{vhostName, sourceEpUrl});
+                                                                        e.printStackTrace();
+                                                                    }
+                                                                else log.error("Source endpoint {} doesn't exists... Continue", sourceEpUrl);
+
+                                                                Endpoint targetEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(targetEpUrl);
+                                                                if (targetEP != null)
+                                                                    try {
+                                                                        log.debug("Deleting connection-channel target endpoint ({},{}).",
+                                                                                         new Object[]{vhostName, targetEpUrl});
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEP.getEndpointID());
+                                                                    } catch (MappingDSException e) {
+                                                                        log.error("Error raised while deleting connection-channel target endpoint ({},{})... Continue",
+                                                                                         new Object[]{vhostName, targetEpUrl});
+                                                                        e.printStackTrace();
+                                                                    }
+
+                                                                if (consumerNode.getNodeChildNodes().size() == 0 && consumerNode.getNodeEndpoints().size() == 0)
+                                                                    try {
+                                                                        log.debug("Deleting consumer node {}.", consumerNodeName);
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(consumerNode.getNodeID());
+                                                                    } catch (MappingDSException e) {
+                                                                        log.debug("Error raised while deleting consumer node {}... Continue", consumerNodeName);
+                                                                        e.printStackTrace();
+                                                                    }
+
+                                                                else log.error("Target endpoint {} doesn't exists... Continue", targetEpUrl);
+
+                                                            } else log.error("Client consumer node {} doesn't exists.", consumerNodeName);
+
+                                                        } else log.error("Channel vhost {} node doesn't exits.", vhostName);
+                                                    }
+                                                }
+
+                                                ArrayList<HashMap<String, Object>> publishes = (ArrayList) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES);
+                                                for (HashMap<String, Object> publish : publishes) {
+                                                    HashMap<String, Object> targetExchange = (HashMap) publish.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE);
+                                                    String exchangeName = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_NAME);
+                                                    String vhostName = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_VHOST);
+
+                                                    if (!deletedVHTs.contains(vhostName)) {
+                                                        String publisherNodeName = exchangeName + " publisher";
+                                                        String sourceEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + exchangeName;
+                                                        String targetEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")";
+
+                                                        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
+                                                        if (vhostNode != null) {
+                                                            Node publisherNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqClient, publisherNodeName);
+                                                            if (publisherNode != null) {
+                                                                Endpoint sourceEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(sourceEpUrl);
+                                                                if (sourceEP != null)
+                                                                    try {
+                                                                        log.debug("Deleting connection-channel source endpoint ({},{}).",
+                                                                                         new Object[]{vhostName, sourceEpUrl});
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEP.getEndpointID());
+                                                                    } catch (MappingDSException e) {
+                                                                        log.error("Error raised while deleting connection-channel source endpoint ({},{})... Continue",
+                                                                                         new Object[]{vhostName, sourceEpUrl});
+                                                                        e.printStackTrace();
+                                                                    }
+
+                                                                else log.error("Source endpoint {} doesn't exists... Continue", sourceEpUrl);
+
+                                                                Endpoint targetEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(targetEpUrl);
+                                                                if (targetEP != null)
+                                                                    try {
+                                                                        log.debug("Deleting connection-channel target endpoint ({},{}).",
+                                                                                         new Object[]{vhostName, targetEpUrl});
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEP.getEndpointID());
+                                                                    } catch (MappingDSException e) {
+                                                                        log.error("Error raised while deleting connection-channel target endpoint ({},{})... Continue",
+                                                                                         new Object[]{vhostName, targetEpUrl});
+                                                                        e.printStackTrace();
+                                                                    }
+
+                                                                if (publisherNode.getNodeChildNodes().size() == 0 && publisherNode.getNodeEndpoints().size() == 0)
+                                                                    try {
+                                                                        log.debug("Deleting publisher node {}.", publisherNodeName);
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(publisherNode.getNodeID());
+                                                                    } catch (MappingDSException e) {
+                                                                        log.debug("Error raised while deleting publisher node {}... Continue", publisherNodeName);
+                                                                        e.printStackTrace();
+                                                                    }
+
+                                                                else log.error("Target endpoint {} doesn't exists... Continue", targetEpUrl);
+
+                                                            } else log.error("Client publisher node {} does't exists", publisherNodeName);
+
+                                                        } else log.error("Channel vhost {} node doesn't exits.", vhostName);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (rbqClient.getContainerChildContainers().size() <= 1) {
+                                        try {
+                                            log.debug("Deleting RabbitMQ client container {}.", remoteCliPGURL);
+                                            RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(remoteCliPGURL);
+                                        } catch (MappingDSException e) {
+                                            log.debug("Error raised while deleting RabbitMQ client container {}... Continue.", remoteCliPGURL);
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    deletedConnection.add(lastConnection.getName());
+
+                                } else log.error("Client container {} doesn't exists.", remoteCliPGURL);
+                            }
+                        }
+                    } else log.error("RabbitMQ broker container {} doesn't exists.", rbqBrokerNodeName);
+                }
+            }
+        }
+
+        /*
+        if (entity.getLastChannels()!=null) {
+            for (ChannelFromRabbitREST lastChannel : entity.getLastChannels()) {
+                HashMap<String, Object> connectionDetails = (HashMap<String, Object>) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
+                if (!deletedConnection.contains(connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_NAME))) {
+                    ChannelFromRabbitREST currentChannel = null;
+                    for (ChannelFromRabbitREST curChan : entity.getChannels()) {
+                        if (curChan.equals(lastChannel)) {
+                            currentChannel = curChan;
+                            break;
+                        }
+                    }
+
+                    if (currentChannel==null) {
+                        String rbqBrokerNodeName = (String)lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_NODE);
+                        Container rbqBroker = null;
+                        for (Container broker : cluster.getClusterContainers()) {
+                            if (broker.getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY).equals(rbqBrokerNodeName)) {
+                                rbqBroker = broker;
+                                break;
+                            }
+                        }
+
+                        if (rbqBroker != null) {
+
+                            String channelName = lastChannel.getName();
+                            String channelNumber = channelName.split("\\(")[1].split("\\)")[0];
+
+                            ArrayList<HashMap<String, Object>> consumers_details = (ArrayList) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS);
+                            for (HashMap<String, Object> consumerDetails : consumers_details) {
+                                HashMap<String, Object> queue_details = (HashMap) consumerDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE);
+                                String consumerTag = (String) consumerDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_CONSUMER_TAG);
+                                String queueName = (String) queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_NAME);
+                                String vhostName = (String) queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_VHOST);
+
+                                if (!deletedVHTs.contains(vhostName)) {
+                                    Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
+                                    if (vhostNode != null) {
+                                        Node queueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, vhostName + " (queue)");
+                                        if (queueNode!=null) {
+
+                                        } else log.error("Channel queue {} node doesn't exits.", queueName);
+
+                                    } else log.error("Channel vhost {} node doesn't exits.", vhostName);
+                                }
+                            }
+
+                            ArrayList<HashMap<String, Object>> publishes = (ArrayList) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES);
+                            for (HashMap<String, Object> publish : publishes) {
+                                HashMap<String, Object> targetExchange = (HashMap) publish.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE);
+                                String exchangeName = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_NAME);
+                                String vhostName = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_VHOST);
+
+                                if (!deletedVHTs.contains(vhostName)) {
+                                    Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
+                                    if (vhostNode != null) {
+                                        Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, exchangeName + " (exchange)");
+                                        if (exchangeNode != null) {
+
+                                        } else log.error("Channel exchange {} node doesn't exits.", exchangeName);
+
+                                    } else log.error("Channel vhost {} node doesn't exits.", vhostName);
+                                }
+                            }
+
+                        } else log.error("RabbitMQ broker container {} doesn't exists.", rbqBrokerNodeName);
+                    }
+                }
+            }
         }
         */
     }
@@ -784,7 +1062,7 @@ public class MappingActor extends UntypedActor {
                     if (transportName!=null) {
                         for (ChannelFromRabbitREST channelFromRabbitREST : entity.getChannels()) {
                             HashMap<String, Object> connectionDetails = (HashMap<String, Object>) channelFromRabbitREST.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
-                            if (connectionFromRabbitREST.getName().equals(connectionDetails.get("name"))) {
+                            if (connectionFromRabbitREST.getName().equals(connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_NAME))) {
                                 String channelName = channelFromRabbitREST.getName();
                                 String channelNumber = channelName.split("\\(")[1].split("\\)")[0];
 
