@@ -1,3 +1,22 @@
+/**
+ * RabbitMQ plugin jsonparser bundle
+ * RabbitMQ plugin jsonparser RabbitMQ exchange from REST api
+ * Copyright (C) 2014 Mathilde Ffrench
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
@@ -9,10 +28,14 @@ class ExchangeFromRabbitREST implements Serializable {
     private final transient static String JSON_RABBITMQ_EXCHANGE_NAME  = "name"
     private final transient static String JSON_RABBITMQ_EXCHANGE_VHOST = "vhost"
 
+    @SuppressWarnings("GroovyUnusedDeclaration")
     public final transient static String JSON_RABBITMQ_EXCHANGE_AUTO_DELETE = "auto_delete"
+    @SuppressWarnings("GroovyUnusedDeclaration")
     public final transient static String JSON_RABBITMQ_EXCHANGE_ARGUMENTS   = "arguments"
+    @SuppressWarnings("GroovyUnusedDeclaration")
     public final transient static String JSON_RABBITMQ_EXCHANGE_DURABLE     = "durable"
     public final transient static String JSON_RABBITMQ_EXCHANGE_TYPE        = "type"
+    @SuppressWarnings("GroovyUnusedDeclaration")
     public final transient static String JSON_RABBITMQ_EXCHANGE_INTERNAL    = "internal"
 
     public final transient static String RABBITMQ_EXCHANGE_TYPE_DIRECT = "direct"

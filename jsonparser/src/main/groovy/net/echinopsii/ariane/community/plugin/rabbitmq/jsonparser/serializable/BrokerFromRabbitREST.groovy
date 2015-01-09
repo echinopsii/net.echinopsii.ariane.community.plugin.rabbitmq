@@ -1,3 +1,22 @@
+/**
+ * RabbitMQ plugin jsonparser bundle
+ * RabbitMQ plugin jsonparser RabbitMQ Broker from REST api
+ * Copyright (C) 2014 Mathilde Ffrench
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
@@ -14,6 +33,7 @@ class BrokerFromRabbitREST implements Serializable {
     public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_RABBITMQ_VERSION    = "rabbitmq_version"
     public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_VERSION      = "erlang_version"
     public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_FULL_VERSION = "erlang_full_version"
+    @SuppressWarnings("GroovyUnusedDeclaration")
     public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS           = "listeners"
     public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_NODE      = "node"
     public transient static final String JSON_RABBITMQ_BROKER_OVERVIEW_LISTENERS_PROTOCOL  = "protocol"
@@ -23,8 +43,10 @@ class BrokerFromRabbitREST implements Serializable {
     private transient static final String JSON_RABBITMQ_NODE_PATH = "/api/nodes/"
     private transient static final String JSON_RABBITMQ_NODE_NAME = "name"
 
+    @SuppressWarnings("GroovyUnusedDeclaration")
     public transient static final int REST_NODE_INVALID_ID_NAME_OR_CLUSTER = -21;
 
+    @SuppressWarnings("GroovyUnusedDeclaration")
     private transient static final Logger log = LoggerFactory.getLogger(BrokerFromRabbitREST.class);
 
     transient RabbitClusterToConnect cluster;

@@ -1,3 +1,22 @@
+/**
+ * RabbitMQ plugin jsonparser bundle
+ * RabbitMQ plugin jsonparser RabbitMQ node where to connect
+ * Copyright (C) 2014 Mathilde Ffrench
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools
 
 import groovyx.net.http.HttpResponseException
@@ -79,24 +98,6 @@ class RabbitNodeToConnect {
         return this
     }
 
-    String getUser() {
-        return user
-    }
-
-    RabbitNodeToConnect setUser(String user) {
-        this.user = user
-        return this
-    }
-
-    String getPassword() {
-        return password
-    }
-
-    RabbitNodeToConnect setPassword(String password) {
-        this.password = password
-        return this
-    }
-
     RabbitClusterToConnect getCluster() {
         return cluster
     }
@@ -108,6 +109,7 @@ class RabbitNodeToConnect {
 
     int checkRabbitRESTClient() {
         this.connectionStatus = REST_CLI_NODE_OK;
+        //noinspection GroovyUnusedCatchParameter
         try {
             def overview_req = this.restCli.get(path : BrokerFromRabbitREST.REST_RABBITMQ_BROKER_OVERVIEW_PATH)
             this.errorOnProvidedNodeName = !overview_req.data.node.equals(this.name)
