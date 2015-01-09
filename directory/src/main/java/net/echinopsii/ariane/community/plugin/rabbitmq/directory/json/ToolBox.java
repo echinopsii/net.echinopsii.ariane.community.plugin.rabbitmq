@@ -1,8 +1,7 @@
 /**
- * Tibco rv addon directory bundle
+ * RabbitMQ plugin directory bundle
  * provide a REST tools
- *
- * Copyright (C) 2013  Mathilde Ffrench
+ * Copyright (C) 2014  Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as

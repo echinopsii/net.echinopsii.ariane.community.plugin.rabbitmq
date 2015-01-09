@@ -1,7 +1,6 @@
 /**
- * Tibco rv addon directory bundle
- * Tibco RV addon directory bootstrap
- *
+ * RabbitMQ plugin directory bundle
+ * RabbitMQ plugin directory bootstrap
  * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify

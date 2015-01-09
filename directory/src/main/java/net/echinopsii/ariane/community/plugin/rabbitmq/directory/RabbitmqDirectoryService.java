@@ -1,7 +1,7 @@
 /**
- * [DEFINE YOUR PROJECT NAME/MODULE HERE]
- * [DEFINE YOUR PROJECT DESCRIPTION HERE] 
- * Copyright (C) 08/12/14 echinopsii
+ * RabbitMQ plugin directory bundle
+ * RabbitMQ plugin directory service
+ * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,6 @@
 
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory;
 
-import net.echinopsii.ariane.community.core.directory.base.model.organisational.Team;
-import net.echinopsii.ariane.community.core.directory.base.model.technical.system.OSInstance;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 
@@ -33,14 +31,14 @@ public interface RabbitmqDirectoryService {
     /**
      * add provided node to rabbitmq node directory
      *
-     * @param node
+     * @param node RabbitMQ node to add
      */
     public void addNode(RabbitmqNode node);
 
     /**
      * add provided cluster to rabbitmq cluster directory
      *
-     * @param cluster
+     * @param cluster RabbitMQ cluster to add
      */
     public void addCluster(RabbitmqCluster cluster);
 
@@ -61,28 +59,28 @@ public interface RabbitmqDirectoryService {
     /**
      * delete provided rabbitmq node from rabbitmq node directory
      *
-     * @param node
+     * @param node delete RabbitMQ node to delete
      */
     public void delNode(RabbitmqNode node);
 
     /**
      * delete provided rabbitmq cluster from rabbitmq cluster directory
      *
-     * @param cluster
+     * @param cluster RabbitMQ cluster to delete
      */
     public void delCluster(RabbitmqCluster cluster);
 
     /**
      * update provided rabbitmq node in rabbitmq node directory
      *
-     * @param node
+     * @param node RabbitMQ node to update
      */
     public void updateNode(RabbitmqNode node);
 
     /**
      * update provided rabbitmq node in rabbitmq cluster directory
      *
-     * @param cluster
+     * @param cluster RabbitMQ cluster to update
      */
     public void updateCluster(RabbitmqCluster cluster);
 
@@ -92,15 +90,15 @@ public interface RabbitmqDirectoryService {
      * Get cluster from node. If no cluster is defined for this node return
      * a fake cluster with the node in the cluster node list.
      *
-     * @param node
-     * @return
+     * @param node RabbitMQ node in the cluster to return
+     * @return the cluster from node
      */
     public RabbitmqCluster getClusterFromNode(RabbitmqNode node);
 
     /**
      * Refresh a cluster according to the cluster ID
      *
-     * @param clusterID
+     * @param clusterID RabbitMQ cluster ID to refresh
      * @return refreshed cluster associated to cluster ID
      */
     public RabbitmqCluster refreshRabbitmqCluster(Long clusterID);
@@ -108,7 +106,7 @@ public interface RabbitmqDirectoryService {
     /**
      * Get fresh nodes list from a cluster according cluster ID
      *
-     * @param clusterID
+     * @param clusterID RabbitMQ cluster ID containing nodes to return
      * @return nodes list from a cluster according cluster ID
      */
     public Set<RabbitmqNode> getNodesFromCluster(Long clusterID);
@@ -116,8 +114,8 @@ public interface RabbitmqDirectoryService {
     /**
      * Get remote client container properties from its OS Instance Name and team name
      *
-     * @param osiName the rbq client OS instance provided from RabbitMQ Connection
-     * @param teamName the rbq client team name provided from RabbitMQ Connection
+     * @param osiName the RabbitMQ client OS instance provided from RabbitMQ Connection
+     * @param teamName the RabbitMQ client team name provided from RabbitMQ Connection
      *
      * @return properties
      */

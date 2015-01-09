@@ -1,7 +1,6 @@
 /**
  * RabbitMQ plugin directory bundle
  * RabbitMQ cluster to JSON
- *
  * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
