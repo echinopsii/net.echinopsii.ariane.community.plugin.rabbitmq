@@ -56,6 +56,10 @@ class ChannelFromRabbitREST implements Serializable {
         String channel_req_path =  REST_RABBITMQ_CHANNEL_PATH + this.name;
         def channel_req = cluster.get(channel_req_path)
         if (channel_req.status == 200 && channel_req.data != null) {
+            channel_req.data.publishes.each { publish ->
+                if (publish.exchange.name.equals(""))
+                    publish.exchange.name=ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME
+            }
             properties = channel_req.data
             properties.remove(JSON_RABBITMQ_CHANNEL_NAME)
         }
