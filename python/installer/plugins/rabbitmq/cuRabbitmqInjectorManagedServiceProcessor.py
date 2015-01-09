@@ -1,4 +1,4 @@
-# installer plugin rabbitmq directory jpa provider configuration unit processor
+# installer plugin RabbitMQ directory jpa provider configuration unit processor
 #
 # Copyright (C) 2014 Mathilde Ffrench
 #
