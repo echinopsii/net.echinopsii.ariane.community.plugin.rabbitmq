@@ -1,7 +1,7 @@
 /**
- * [DEFINE YOUR PROJECT NAME/MODULE HERE]
- * [DEFINE YOUR PROJECT DESCRIPTION HERE] 
- * Copyright (C) 08/12/14 echinopsii
+ * RabbitMQ plugin injector bundle
+ * RabbitMQ plugin injector bootstrap
+ * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Dictionary;
 
+@SuppressWarnings("ALL")
 @Component(managedservice="net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQInjectorManagedService")
 @Provides(properties= {@StaticServiceProperty(name="targetArianeComponent", type="java.lang.String", value="Portal")})
 @Instantiate
@@ -199,14 +200,10 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
                 for (String key: sgtGearsRegistry.keySetFromPrefix(INJ_TREE_ROOT_PATH))
                     sgtGearsRegistry.getEntityFromCache(key).start();
             } else {
-                //mappingSimpleGear = new MappingSimpleGear();
-                //mappingSimpleGear.start();
                 mappingAkkaGear = new MappingGear();
                 mappingAkkaGear.start();
                 sgtGearsRegistry.putEntityToCache(mappingAkkaGear);
 
-                //directorySimpleGear = new DirectorySimpleGear();
-                //directorySimpleGear.start();
                 directoryAkkaGear = new DirectoryGear(RabbitmqInjectorMainCfgLoader.getDirQI(), RabbitmqInjectorMainCfgLoader.getRbCompQI());
                 directoryAkkaGear.start();
                 sgtGearsRegistry.putEntityToCache(directoryAkkaGear);
@@ -303,32 +300,6 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
             rootInjectorRegistry.getLinkedMainMenuEntity().getDisplayPermissions().add("injMapMdwRabbitMQ:display");
 
             /*
-             * directories injector registration
-             */
-            /*
-            TreeMenuEntity directoriesRootInjectorMenuEntity = rootInjectorRegistry.getTreeMenuEntityFromValue("Directories");
-            if (directoriesRootInjectorMenuEntity == null) {
-                log.warn("Directories injectors root is missing ! ");
-            } else {
-                directoriesRootInjectorMenuEntity.addDisplayRole("mdwtibrvadmin").addDisplayRole("mdwtibrvreviewer").addDisplayPermission("injDirMdwTibRV:display");
-
-                TreeMenuEntity directoryMdwInjectorMenuEntity = directoriesRootInjectorMenuEntity.findTreeMenuEntityFromValue("Middleware");
-                if (directoryMdwInjectorMenuEntity ==null) {
-                    directoryMdwInjectorMenuEntity = new TreeMenuEntity().setId("dirmdwDir").setValue("Middleware").setType(MenuEntityType.TYPE_MENU_SUBMENU).setParentTreeMenuEntity(directoriesRootInjectorMenuEntity);
-                    directoriesRootInjectorMenuEntity.addChildTreeMenuEntity(directoryMdwInjectorMenuEntity);
-                }
-                directoryMdwInjectorMenuEntity.addDisplayRole("mdwtibrvadmin").addDisplayRole("mdwtibrvreviewer").addDisplayPermission("injDirMdwTibRV:display");
-
-                directoryMdwInjectorMenuEntity.addChildTreeMenuEntity(new TreeMenuEntity().setId("tibcorvDirTreeID").setValue("Tibco RendezVous").setParentTreeMenuEntity(directoryMdwInjectorMenuEntity).
-                                                                                           setIcon("icon-asterisk").setType(MenuEntityType.TYPE_MENU_ITEM).
-                                                                                           setContextAddress(MAIN_MENU_INJECTOR_CONTEXT + "views/injectors/main.jsf").
-                                                                                           setDescription("Inject data from your local Tibco RV CMDB to CC Tibco RV directory").
-                                                                                           addDisplayRole("mdwtibrvadmin").addDisplayRole("mdwtibrvreviewer").
-                                                                                           addDisplayPermission("injDirMdwTibRV:display"));
-            }
-            */
-
-            /*
              * mapping injector registration
              */
             TreeMenuEntity mappingRootInjectorMenuEntity = rootInjectorRegistry.getTreeMenuEntityFromValue("Mapping");
@@ -357,22 +328,6 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
 
     private void rootInjectorRegistryUnplug() {
         try {
-            /*
-            TreeMenuEntity directoriesRootInjectorMenuEntity = rootInjectorRegistry.getTreeMenuEntityFromValue("Directories");
-            if (directoriesRootInjectorMenuEntity == null) {
-                log.warn("Directories injectors root is missing ! ");
-            } else {
-                directoriesRootInjectorMenuEntity.removeDisplayRole("mdwtibrvadmin").removeDisplayRole("mdwtibrvreviewer").removeDisplayPermission("injDirMdwTibRV:display");
-
-                TreeMenuEntity directoryMdwInjectorMenuEntity = directoriesRootInjectorMenuEntity.findTreeMenuEntityFromValue("Middleware");
-                directoryMdwInjectorMenuEntity.getChildTreeMenuEntities().remove(directoryMdwInjectorMenuEntity.findTreeMenuEntityFromValue("Tibco RendezVous"));
-                if (directoryMdwInjectorMenuEntity.getChildTreeMenuEntities().size()==0)
-                    directoriesRootInjectorMenuEntity.getChildTreeMenuEntities().remove(directoryMdwInjectorMenuEntity);
-                else
-                    directoryMdwInjectorMenuEntity.removeDisplayRole("mdwtibrvadmin").removeDisplayRole("mdwtibrvreviewer").removeDisplayPermission("injDirMdwTibRV:display");
-            }
-            */
-
             TreeMenuEntity mappingRootInjectorMenuEntity = rootInjectorRegistry.getTreeMenuEntityFromValue("Mapping");
             mappingRootInjectorMenuEntity.removeDisplayRole("mdwrabbitadmin").removeDisplayRole("mdwrabbitreviewer").removeDisplayPermission("injMapMdwRabbitMQ:display");
 

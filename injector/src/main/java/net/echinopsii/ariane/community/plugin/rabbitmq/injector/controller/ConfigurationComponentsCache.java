@@ -39,8 +39,8 @@ public class ConfigurationComponentsCache implements Serializable {
     public void init() {
         componentsCacheConf = RabbitmqInjectorBootstrap.getComponentsRegistry().getConfiguration();
 
-        keys = new ArrayList<String>();
-        TreeSet<Object> sortedKeys = new TreeSet<Object>();
+        keys = new ArrayList<>();
+        TreeSet<Object> sortedKeys = new TreeSet<>();
         sortedKeys.addAll(componentsCacheConf.keySet());
         for (Object key: sortedKeys) {
             if (key instanceof String)

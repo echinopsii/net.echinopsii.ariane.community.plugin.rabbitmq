@@ -1,7 +1,7 @@
 /**
- * [DEFINE YOUR PROJECT NAME/MODULE HERE]
- * [DEFINE YOUR PROJECT DESCRIPTION HERE] 
- * Copyright (C) 08/12/14 echinopsii
+ * RabbitMQ plugin injector bundle
+ * RabbitMQ plugin injector RabbitMQ cached component
+ * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -48,13 +48,13 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private transient Set<RabbitmqNode> clusterNodes = null;
     private transient RabbitClusterToConnect clusterToConnect = null;
     private ClusterFromRabbitREST          cluster     = null;
-    private List<BrokerFromRabbitREST>     brokers     = new ArrayList<BrokerFromRabbitREST>();
-    private List<VhostFromRabbitREST>      vhosts      = new ArrayList<VhostFromRabbitREST>();
-    private List<ConnectionFromRabbitREST> connections = new ArrayList<ConnectionFromRabbitREST>();
-    private List<ChannelFromRabbitREST>    channels    = new ArrayList<ChannelFromRabbitREST>();
-    private List<QueueFromRabbitREST>      queues      = new ArrayList<QueueFromRabbitREST>();
-    private List<ExchangeFromRabbitREST>   exchanges   = new ArrayList<ExchangeFromRabbitREST>();
-    private List<BindingFromRabbitREST>    bindings    = new ArrayList<BindingFromRabbitREST>();
+    private List<BrokerFromRabbitREST>     brokers     = new ArrayList<>();
+    private List<VhostFromRabbitREST>      vhosts      = new ArrayList<>();
+    private List<ConnectionFromRabbitREST> connections = new ArrayList<>();
+    private List<ChannelFromRabbitREST>    channels    = new ArrayList<>();
+    private List<QueueFromRabbitREST>      queues      = new ArrayList<>();
+    private List<ExchangeFromRabbitREST>   exchanges   = new ArrayList<>();
+    private List<BindingFromRabbitREST>    bindings    = new ArrayList<>();
 
     private ClusterFromRabbitREST          lastCluster     = null;
     private List<BrokerFromRabbitREST>     lastBrokers     = null;
@@ -146,7 +146,7 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
             clusterToConnect.setName(rabbitmqComponent.getName());
 
         this.clusterNodes = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesFromCluster(rabbitmqComponent.getId());
-        HashSet<RabbitNodeToConnect> clusterNodesToConnect = new HashSet<RabbitNodeToConnect>();
+        HashSet<RabbitNodeToConnect> clusterNodesToConnect = new HashSet<>();
         for (RabbitmqNode node : clusterNodes) {
             RabbitNodeToConnect nodeToConnect = new RabbitNodeToConnect(node.getName(), node.getUrl(),
                                                                         node.getUser(), node.getPasswd());
@@ -279,25 +279,25 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
     private void cloneCurrentRuntime() {
         this.lastCluster = this.cluster.clone();
 
-        this.lastBrokers = new ArrayList<BrokerFromRabbitREST>(this.brokers);
+        this.lastBrokers = new ArrayList<>(this.brokers);
         this.brokers.clear();
 
-        this.lastVhosts = new ArrayList<VhostFromRabbitREST>(this.vhosts);
+        this.lastVhosts = new ArrayList<>(this.vhosts);
         this.vhosts.clear();
 
-        this.lastConnections = new ArrayList<ConnectionFromRabbitREST>(this.connections);
+        this.lastConnections = new ArrayList<>(this.connections);
         this.connections.clear();
 
-        this.lastChannels = new ArrayList<ChannelFromRabbitREST>(this.channels);
+        this.lastChannels = new ArrayList<>(this.channels);
         this.channels.clear();
 
-        this.lastExchanges = new ArrayList<ExchangeFromRabbitREST>(this.exchanges);
+        this.lastExchanges = new ArrayList<>(this.exchanges);
         this.exchanges.clear();
 
-        this.lastQueues = new ArrayList<QueueFromRabbitREST>(this.queues);
+        this.lastQueues = new ArrayList<>(this.queues);
         this.queues.clear();
 
-        this.lastBindings = new ArrayList<BindingFromRabbitREST>(this.bindings);
+        this.lastBindings = new ArrayList<>(this.bindings);
         this.bindings.clear();
     }
 

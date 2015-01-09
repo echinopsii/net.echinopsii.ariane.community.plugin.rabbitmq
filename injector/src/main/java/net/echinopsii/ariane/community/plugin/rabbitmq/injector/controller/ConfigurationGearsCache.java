@@ -37,8 +37,8 @@ public class ConfigurationGearsCache implements Serializable {
     public void init() {
         gearsCacheConf = RabbitmqInjectorBootstrap.getGearsRegisry().getConfiguration();
 
-        keys = new ArrayList<String>();
-        TreeSet<Object> sortedKeys = new TreeSet<Object>();
+        keys = new ArrayList<>();
+        TreeSet<Object> sortedKeys = new TreeSet<>();
         sortedKeys.addAll(gearsCacheConf.keySet());
         for (Object key: sortedKeys) {
             if (key instanceof String)

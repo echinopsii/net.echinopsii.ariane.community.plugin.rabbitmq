@@ -44,7 +44,7 @@ public class CacheComponents implements Serializable, Runnable{
 
     @PostConstruct
     public void init() {
-        cachedEntityList = new ArrayList<Component>();
+        cachedEntityList = new ArrayList<>();
         if (RabbitmqInjectorBootstrap.getComponentsRegistry()!=null) {
             for (String key: RabbitmqInjectorBootstrap.getComponentsRegistry().keySetFromPrefix(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH))
                 cachedEntityList.add(RabbitmqInjectorBootstrap.getComponentsRegistry().getEntityFromCache(key));
@@ -73,7 +73,7 @@ public class CacheComponents implements Serializable, Runnable{
     }
 
     private void refresh() {
-        cachedEntityList = new ArrayList<Component>();
+        cachedEntityList = new ArrayList<>();
         if (RabbitmqInjectorBootstrap.getComponentsRegistry()!=null) {
             for (String key: RabbitmqInjectorBootstrap.getComponentsRegistry().keySetFromPrefix(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH))
                 cachedEntityList.add(RabbitmqInjectorBootstrap.getComponentsRegistry().getEntityFromCache(key));
@@ -122,7 +122,7 @@ public class CacheComponents implements Serializable, Runnable{
     }
 
     public String getEntityLastRefresh(Component entity) {
-        String ret = null;
+        String ret ;
         if (entity.isRefreshing()) {
             ret = "NOW !";
         } else {

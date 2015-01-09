@@ -1,7 +1,7 @@
 /**
- * [DEFINE YOUR PROJECT NAME/MODULE HERE]
- * [DEFINE YOUR PROJECT DESCRIPTION HERE] 
- * Copyright (C) 08/12/14 echinopsii
+ * RabbitMQ plugin injector bundle
+ * RabbitMQ plugin injector RabbitMQ mapping actor
+ * Copyright (C) 2014 Mathilde Ffrench
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@SuppressWarnings("ALL")
 public class MappingActor extends UntypedActor {
 
     private static final Logger log = LoggerFactory.getLogger(MappingActor.class);
@@ -423,7 +424,7 @@ public class MappingActor extends UntypedActor {
 
                                     if (transportName != null) {
                                         for (ChannelFromRabbitREST lastChannel : entity.getLastChannels()) {
-                                            HashMap<String, Object> connectionDetails = (HashMap<String, Object>) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
+                                            HashMap<String, Object> connectionDetails = (HashMap) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
                                             if (lastConnection.getName().equals(connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_NAME))) {
                                                 String channelName = lastChannel.getName();
                                                 String channelNumber = channelName.split("\\(")[1].split("\\)")[0];
@@ -569,7 +570,7 @@ public class MappingActor extends UntypedActor {
 
         if (entity.getLastChannels()!=null) {
             for (ChannelFromRabbitREST lastChannel : entity.getLastChannels()) {
-                HashMap<String, Object> connectionDetails = (HashMap<String, Object>) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
+                HashMap<String, Object> connectionDetails = (HashMap) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
                 if (!deletedConnection.contains(connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_NAME))) {
                     ChannelFromRabbitREST currentChannel = null;
                     for (ChannelFromRabbitREST curChan : entity.getChannels()) {
@@ -1123,7 +1124,6 @@ public class MappingActor extends UntypedActor {
                 String remoteCliCMP   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_CMP);
 
                 if (remoteCliPGURL!=null && remoteCliOSI!=null && remoteCliOTM!=null && remoteCliAPP!=null && remoteCliCMP!=null) {
-                    String serverFQDN = remoteCliPGURL.split("://")[1].split(":")[0];
                     String serverName = remoteCliPGURL.split("://")[1].split("\\.")[0];
                     String adminGateName = "rbqcliadmingate." + serverName;
 

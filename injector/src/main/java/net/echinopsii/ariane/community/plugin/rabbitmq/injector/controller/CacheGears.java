@@ -46,7 +46,7 @@ public class CacheGears implements Serializable, Runnable{
 
     @PostConstruct
     public void init() {
-        gearList = new ArrayList<Gear>();
+        gearList = new ArrayList<>();
 
         if (RabbitmqInjectorBootstrap.getGearsRegisry()!=null) {
             for (String key: RabbitmqInjectorBootstrap.getGearsRegisry().keySetFromPrefix(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH))
