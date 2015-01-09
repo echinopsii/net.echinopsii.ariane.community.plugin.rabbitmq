@@ -567,7 +567,6 @@ public class MappingActor extends UntypedActor {
             }
         }
 
-        /*
         if (entity.getLastChannels()!=null) {
             for (ChannelFromRabbitREST lastChannel : entity.getLastChannels()) {
                 HashMap<String, Object> connectionDetails = (HashMap<String, Object>) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
@@ -590,10 +589,14 @@ public class MappingActor extends UntypedActor {
                             }
                         }
 
+                        Container rbqClientBroker = null;
+
                         if (rbqBroker != null) {
 
                             String channelName = lastChannel.getName();
                             String channelNumber = channelName.split("\\(")[1].split("\\)")[0];
+                            String channelPeerHost = (String)connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_PEER_HOST);
+                            String channelPeerPort = (String)connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_PEER_PORT);
 
                             ArrayList<HashMap<String, Object>> consumers_details = (ArrayList) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS);
                             for (HashMap<String, Object> consumerDetails : consumers_details) {
@@ -607,6 +610,55 @@ public class MappingActor extends UntypedActor {
                                     if (vhostNode != null) {
                                         Node queueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, vhostName + " (queue)");
                                         if (queueNode!=null) {
+                                            Endpoint sourceEndpoint = null;
+                                            for (Endpoint endpoint : queueNode.getNodeEndpoints())
+                                                if (endpoint.getEndpointURL().contains(channelPeerHost + ":" + channelPeerPort + "/(" + channelNumber + ")/" + consumerTag)) {
+                                                    sourceEndpoint = endpoint;
+                                                    break;
+                                                }
+
+                                            if (sourceEndpoint!=null) {
+                                                for (Link link : RabbitmqInjectorBootstrap.getMappingSce().getLinksBySourceEP(sourceEndpoint)) {
+                                                    Endpoint targetEndpoint = link.getLinkEndpointTarget();
+                                                    if (targetEndpoint!=null) {
+
+                                                        Node consumerNode = targetEndpoint.getEndpointParentNode();
+                                                        rbqClientBroker = consumerNode.getNodeContainer();
+
+                                                        try {
+                                                            log.debug("Deleting connection-channel source endpoint ({},{}).",
+                                                                             new Object[]{vhostName, sourceEndpoint.getEndpointURL()});
+                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEndpoint.getEndpointID());
+                                                        } catch (MappingDSException e) {
+                                                            log.error("Error raised while deleting connection-channel source endpoint ({},{})... Continue",
+                                                                             new Object[]{vhostName, sourceEndpoint.getEndpointURL()});
+                                                            e.printStackTrace();
+                                                        }
+
+                                                        try {
+                                                            log.debug("Deleting connection-channel target endpoint ({},{}).",
+                                                                             new Object[]{vhostName, targetEndpoint.getEndpointURL()});
+                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEndpoint.getEndpointID());
+                                                        } catch (MappingDSException e) {
+                                                            log.error("Error raised while deleting connection-channel target endpoint ({},{})... Continue",
+                                                                             new Object[]{vhostName, targetEndpoint.getEndpointURL()});
+                                                            e.printStackTrace();
+                                                        }
+
+                                                        if (consumerNode.getNodeEndpoints().size()==0 && consumerNode.getNodeChildNodes().size()==0) {
+                                                            try {
+                                                                log.debug("Deleting consumer node {}.", consumerNode.getNodeName());
+                                                                RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(consumerNode.getNodeID());
+                                                            } catch (MappingDSException e) {
+                                                                log.debug("Error raised while deleting consumer node {}... Continue", consumerNode.getNodeName());
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                    } else log.error("Channel target endpoint for consumerTag {} doesn't exits.", consumerTag);
+                                                }
+
+                                            } else log.error("Channel source endpoint for consumerTag {} doesn't exits.", consumerTag);
 
                                         } else log.error("Channel queue {} node doesn't exits.", queueName);
 
@@ -625,6 +677,56 @@ public class MappingActor extends UntypedActor {
                                     if (vhostNode != null) {
                                         Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, exchangeName + " (exchange)");
                                         if (exchangeNode != null) {
+                                            Endpoint targetEndpoint = null;
+                                            for (Endpoint ep : exchangeNode.getNodeEndpoints())
+                                                if (ep.getEndpointURL().contains(channelPeerHost + ":" + channelPeerPort) &&
+                                                            ep.getEndpointURL().contains("("+channelNumber+")")) {
+                                                    targetEndpoint = ep;
+                                                    break;
+                                                }
+
+                                            if (targetEndpoint!=null) {
+                                                for (Link link : RabbitmqInjectorBootstrap.getMappingSce().getLinksByDestinationEP(targetEndpoint)) {
+                                                    Endpoint sourceEndpoint = link.getLinkEndpointSource();
+
+                                                    if (sourceEndpoint!=null) {
+
+                                                        Node publisherNode = targetEndpoint.getEndpointParentNode();
+                                                        rbqClientBroker = publisherNode.getNodeContainer();
+
+                                                        try {
+                                                            log.debug("Deleting connection-channel source endpoint ({},{}).",
+                                                                             new Object[]{vhostName, sourceEndpoint.getEndpointURL()});
+                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEndpoint.getEndpointID());
+                                                        } catch (MappingDSException e) {
+                                                            log.error("Error raised while deleting connection-channel source endpoint ({},{})... Continue",
+                                                                             new Object[]{vhostName, sourceEndpoint.getEndpointURL()});
+                                                            e.printStackTrace();
+                                                        }
+
+                                                        try {
+                                                            log.debug("Deleting connection-channel target endpoint ({},{}).",
+                                                                             new Object[]{vhostName, targetEndpoint.getEndpointURL()});
+                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEndpoint.getEndpointID());
+                                                        } catch (MappingDSException e) {
+                                                            log.error("Error raised while deleting connection-channel target endpoint ({},{})... Continue",
+                                                                             new Object[]{vhostName, targetEndpoint.getEndpointURL()});
+                                                            e.printStackTrace();
+                                                        }
+
+                                                        if (publisherNode.getNodeChildNodes().size()==0 && publisherNode.getNodeEndpoints().size()==0) {
+                                                            try {
+                                                                log.debug("Deleting publisher node {}.", publisherNode.getNodeName());
+                                                                RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(publisherNode.getNodeID());
+                                                            } catch (MappingDSException e) {
+                                                                log.debug("Error raised while deleting publisher node {}... Continue", publisherNode.getNodeName());
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    } else log.error("Channel source endpoint {}:{}/({}) doesn't exits.", new Object[]{channelPeerHost, channelPeerPort, channelNumber});
+
+                                                }
+                                            } else log.error("Channel target endpoint {}:{}/({}) doesn't exits.", new Object[]{channelPeerHost, channelPeerPort, channelNumber});
 
                                         } else log.error("Channel exchange {} node doesn't exits.", exchangeName);
 
@@ -632,12 +734,23 @@ public class MappingActor extends UntypedActor {
                                 }
                             }
 
+                            if (rbqClientBroker!=null) {
+                                if (rbqClientBroker.getContainerChildContainers().size() <= 1) {
+                                    try {
+                                        log.debug("Deleting RabbitMQ client container {}.", rbqClientBroker.getContainerPrimaryAdminGateURL());
+                                        RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(rbqClientBroker.getContainerPrimaryAdminGateURL());
+                                    } catch (MappingDSException e) {
+                                        log.debug("Error raised while deleting RabbitMQ client container {}... Continue.", rbqClientBroker.getContainerPrimaryAdminGateURL());
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } else log.error("RabbitMQ Client broker container doesn't exists.");
+
                         } else log.error("RabbitMQ broker container {} doesn't exists.", rbqBrokerNodeName);
                     }
                 }
             }
         }
-        */
     }
 
     private void pushEntityToMappingDS(RabbitmqCachedComponent entity) throws MappingDSException {
