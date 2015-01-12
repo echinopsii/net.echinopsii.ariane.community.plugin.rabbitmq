@@ -441,8 +441,8 @@ public class MappingActor extends UntypedActor {
 
                                                         Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
                                                         if (vhostNode != null) {
-                                                            Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqClient, consumerNodeName);
-                                                            if (consumerNode != null) {
+                                                            Node consumedQueueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, queueName + " (queue)");
+                                                            if (consumedQueueNode!=null) {
                                                                 Endpoint sourceEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(sourceEpUrl);
                                                                 if (sourceEP != null)
                                                                     try {
@@ -455,7 +455,13 @@ public class MappingActor extends UntypedActor {
                                                                         e.printStackTrace();
                                                                     }
                                                                 else log.error("Source endpoint {} doesn't exists... Continue", sourceEpUrl);
+                                                            } else {
+                                                                if (!deletedQ.contains(queueName))
+                                                                    log.error("Consumed queue {} doesn't exists... Continue", queueName);
+                                                            }
 
+                                                            Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqClient, consumerNodeName);
+                                                            if (consumerNode != null) {
                                                                 Endpoint targetEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(targetEpUrl);
                                                                 if (targetEP != null)
                                                                     try {
@@ -479,7 +485,8 @@ public class MappingActor extends UntypedActor {
 
                                                                 else log.error("Target endpoint {} doesn't exists... Continue", targetEpUrl);
 
-                                                            } else log.error("Client consumer node {} doesn't exists.", consumerNodeName);
+                                                            } else //debug as this node could be removed by injector of the parent container
+                                                                log.debug("Client consumer node {} doesn't exists.", consumerNodeName);
 
                                                         } else log.error("Channel vhost {} node doesn't exits.", vhostName);
                                                     }
@@ -514,6 +521,11 @@ public class MappingActor extends UntypedActor {
 
                                                                 else log.error("Source endpoint {} doesn't exists... Continue", sourceEpUrl);
 
+                                                            } else //
+                                                                log.debug("Client publisher node {} does't exists", publisherNodeName);
+
+                                                            Node targetExchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNode(vhostNode, exchangeName + " (exchange)");
+                                                            if (targetExchangeNode!=null) {
                                                                 Endpoint targetEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpoint(targetEpUrl);
                                                                 if (targetEP != null)
                                                                     try {
@@ -537,7 +549,7 @@ public class MappingActor extends UntypedActor {
 
                                                                 else log.error("Target endpoint {} doesn't exists... Continue", targetEpUrl);
 
-                                                            } else log.error("Client publisher node {} does't exists", publisherNodeName);
+                                                            } else log.error("Target exchange {} doesn't exists ... Continue", exchangeName);
 
                                                         } else log.error("Channel vhost {} node doesn't exits.", vhostName);
                                                     }
@@ -560,8 +572,8 @@ public class MappingActor extends UntypedActor {
 
                                 } else log.error("Client container {} doesn't exists.", remoteCliPGURL);
                             }
-                        }
-                    } else log.error("RabbitMQ broker container {} doesn't exists.", rbqBrokerNodeName);
+                        } else log.error("RabbitMQ broker container {} doesn't exists.", rbqBrokerNodeName);
+                    }
                 }
             }
         }
@@ -595,7 +607,7 @@ public class MappingActor extends UntypedActor {
                             String channelName = lastChannel.getName();
                             String channelNumber = channelName.split("\\(")[1].split("\\)")[0];
                             String channelPeerHost = (String)connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_PEER_HOST);
-                            String channelPeerPort = (String)connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_PEER_PORT);
+                            int channelPeerPort = (Integer)connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_PEER_PORT);
 
                             ArrayList<HashMap<String, Object>> consumers_details = (ArrayList) lastChannel.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS);
                             for (HashMap<String, Object> consumerDetails : consumers_details) {
