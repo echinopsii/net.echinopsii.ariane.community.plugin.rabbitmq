@@ -1286,7 +1286,7 @@ public class MappingActor extends UntypedActor {
 
     private void inject(RabbitmqCachedComponent entity) {
         try {
-            log.error("Injection begin... Action {} on {}", new Object[]{entity.getNextAction(), entity.getComponentURL()});
+            log.debug("Injection begin... Action {} on {}", new Object[]{entity.getNextAction(), entity.getComponentURL()});
             switch (entity.getNextAction()) {
                 case RabbitmqCachedComponent.ACTION_UPDATE:
                     applyEntityDifferencesFromLastSniff(entity);
@@ -1302,7 +1302,7 @@ public class MappingActor extends UntypedActor {
                     log.error("Action {} unknown !", new Object[]{entity.getNextAction()});
                     break;
             }
-            log.error("Injection end...");
+            log.debug("Injection end...");
             RabbitmqInjectorBootstrap.getMappingSce().commit();
         } catch (Exception E) {
             String msg = "Exception catched while injecting RabbitMQ data into DB... Rollback injection !";
