@@ -301,6 +301,17 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         this.bindings.clear();
     }
 
+    public void rollback() {
+        this.cluster = this.lastCluster;
+        this.brokers = this.lastBrokers;
+        this.vhosts = this.lastVhosts;
+        this.connections = this.lastConnections;
+        this.channels = this.lastChannels;
+        this.exchanges = this.lastExchanges;
+        this.queues = this.lastQueues;
+        this.bindings = this.lastBindings;
+    }
+
     @Override
     public void refresh() {
         super.setRefreshing(true);

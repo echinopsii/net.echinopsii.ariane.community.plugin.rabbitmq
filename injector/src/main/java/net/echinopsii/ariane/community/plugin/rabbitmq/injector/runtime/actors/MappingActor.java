@@ -1308,6 +1308,7 @@ public class MappingActor extends UntypedActor {
             String msg = "Exception catched while injecting RabbitMQ data into DB... Rollback injection !";
             E.printStackTrace();
             log.error(msg);
+            entity.rollback();
             RabbitmqInjectorBootstrap.getMappingSce().rollback();
         }
     }
