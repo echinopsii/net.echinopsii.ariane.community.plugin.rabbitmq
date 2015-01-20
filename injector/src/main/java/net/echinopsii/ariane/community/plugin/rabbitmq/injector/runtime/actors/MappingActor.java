@@ -794,8 +794,10 @@ public class MappingActor extends UntypedActor {
             Map<String, Object> props = entity.getComponentProperties().get(broker.getName());
             for (String key : props.keySet()) {
                 Object value =  props.get(key);
-                log.debug("Add property {} to rabbitmq container {} : {}", new Object[]{key, adminGateUrl, value.toString()});
-                rbqBroker.addContainerProperty(key, value);
+                if (value != null) {
+                    log.debug("Add property {} to rabbitmq container {} : {}", new Object[]{key, adminGateUrl, value.toString()});
+                    rbqBroker.addContainerProperty(key, value);
+                }
             }
 
             for (String protocol : broker.getListeningAddress().keySet()) {
