@@ -765,6 +765,14 @@ public class MappingActor extends UntypedActor {
     }
 
     private void pushEntityToMappingDS(RabbitmqCachedComponent entity) throws MappingDSException {
+
+        ArrayList<VhostFromRabbitREST> entityVHosts = new ArrayList<>(entity.getVhosts());
+        ArrayList<QueueFromRabbitREST> entityQueues = new ArrayList<>(entity.getQueues());
+        ArrayList<ExchangeFromRabbitREST> entityExchanges = new ArrayList<>(entity.getExchanges());
+        ArrayList<BindingFromRabbitREST> entityBindings = new ArrayList<>(entity.getBindings());
+        ArrayList<ConnectionFromRabbitREST> entityConnections = new ArrayList<>(entity.getConnections());
+        ArrayList<ChannelFromRabbitREST> entityChannels = new ArrayList<>(entity.getChannels());
+
         log.debug("");
         log.debug("-----------------------------------");
         Cluster cluster = RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().createCluster(entity.getComponentName());
@@ -852,7 +860,7 @@ public class MappingActor extends UntypedActor {
         log.debug("");
         log.debug("");
         List<Node> vhosts = new ArrayList<>();
-        for (VhostFromRabbitREST vhost : entity.getVhosts()) {
+        for (VhostFromRabbitREST vhost : entityVHosts) {
             for (Container broker : cluster.getClusterContainers()) {
                 log.debug("");
                 log.debug("-----------------------------------");
@@ -882,7 +890,7 @@ public class MappingActor extends UntypedActor {
         log.debug("");
         log.debug("");
         List<Node> queues = new ArrayList<>();
-        for (QueueFromRabbitREST queue : entity.getQueues()) {
+        for (QueueFromRabbitREST queue : entityQueues) {
             for (Node vHost : vhosts) {
                 if (queue.getVhost().equals(vHost.getNodeName())) {
                     log.debug("");
@@ -917,7 +925,7 @@ public class MappingActor extends UntypedActor {
         log.debug("");
         log.debug("");
         List<Node> exchanges = new ArrayList<>();
-        for (ExchangeFromRabbitREST exchange : entity.getExchanges())
+        for (ExchangeFromRabbitREST exchange : entityExchanges)
             for (Node vHost : vhosts)
                 if (exchange.getVhost().equals(vHost.getNodeName())) {
                     log.debug("");
@@ -945,7 +953,7 @@ public class MappingActor extends UntypedActor {
                                          exchange.getNodeContainer().getContainerPrimaryAdminGate().getNodeName()+"-"+exchange.getNodeName());
                     }
 
-        for (BindingFromRabbitREST binding : entity.getBindings()) {
+        for (BindingFromRabbitREST binding : entityBindings) {
             log.debug("");
             log.debug("binding {} on {} : {}", new Object[]{binding.getName(), binding.getVhost(), binding.getProperties().toString()});
             String bindingDestinationType = (String) binding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_DESTINATION_TYPE);
@@ -1104,7 +1112,7 @@ public class MappingActor extends UntypedActor {
         log.debug("");
         log.debug("");
         log.debug("");
-        for (ConnectionFromRabbitREST connectionFromRabbitREST : entity.getConnections()) {
+        for (ConnectionFromRabbitREST connectionFromRabbitREST : entityConnections) {
 
             Container rbqBroker = null;
             for (Container broker : cluster.getClusterContainers()) {
@@ -1185,7 +1193,7 @@ public class MappingActor extends UntypedActor {
                         log.error("Unknown protocol type : {} ", protocol);
 
                     if (transportName!=null) {
-                        for (ChannelFromRabbitREST channelFromRabbitREST : entity.getChannels()) {
+                        for (ChannelFromRabbitREST channelFromRabbitREST : entityChannels) {
                             HashMap<String, Object> connectionDetails = (HashMap<String, Object>) channelFromRabbitREST.getProperties().get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS);
                             if (connectionFromRabbitREST.getName().equals(connectionDetails.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONNECTION_DETAILS_NAME))) {
                                 String channelName = channelFromRabbitREST.getName();
