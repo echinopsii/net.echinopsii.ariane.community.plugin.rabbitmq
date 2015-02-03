@@ -6,10 +6,10 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:ccidm="http://spectral.com/cc/idm">
+      xmlns:arianeidm="http://echinopsii.net/ariane/idm">
 <ui:composition template="/templates/directoryLayout.xhtml">
     <ui:define name="directoryContent">
-        <ui:fragment rendered="#{ccidm:isAuthenticated() and ccidm:hasPermission('dirMdwRabbitMQNode:display')}">
+        <ui:fragment rendered="#{arianeidm:isAuthenticated() and arianeidm:hasPermission('dirMdwRabbitMQNode:display')}">
         <h:form id="rabbitmqNodeTableForm">
             <p:growl id="rabbitmqNodeTableMessages" showDetail="true" />
             <p:dataTable id="rabbitmqNodeTable" var="rbmqc" value="#{rabbitmqNodesListController.lazyModel}"
@@ -41,25 +41,25 @@
                 <p:rowExpansion>
                     <h:panelGrid columns="2" columnClasses="colStyle10,colStyle90" cellpadding="5" styleClass="ui-widget-content grid">
                         <h:outputText value="Name : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <p:inplace editor="true">
                                 <p:inputText required="true" label="text" value="#{rbmqc.name}"/>
                                 <p:ajax event="save" listener="#{rabbitmqNodesListController.update(rbmqc)}" update="@form,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages" />
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rbmqc.name}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
+                        <h:outputText value="#{rbmqc.name}" rendered="#{!arianeidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
 
                         <h:outputText value="URL : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <p:inplace editor="true">
                                 <p:inputText required="true" label="text" value="#{rbmqc.url}"/>
                                 <p:ajax event="save" listener="#{rabbitmqNodesListController.update(rbmqc)}" update="@form,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages" />
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rbmqc.url}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
+                        <h:outputText value="#{rbmqc.url}" rendered="#{!arianeidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
 
                         <h:outputText value="Cluster : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <p:inplace label="#{rabbitmqNodesListController.getRabbitmqNodeClusterName(rbmqc)}" effectSpeed="fast" editor="true">
                                 <h:selectOneMenu value="#{rabbitmqNodesListController.changedRabbitmqCluster[rbmqc.id]}">
                                     <f:selectItems value="#{rabbitmqClustersListController.getAllForSelector()}"  var="clu"
@@ -68,17 +68,17 @@
                                 <p:ajax event="save" listener="#{rabbitmqNodesListController.syncRabbitmqNodeCluster(rbmqc)}" update="@form,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rabbitmqNodesListController.getRabbitmqNodeClusterName(rbmqc)}" rendered="#{!(ccidm:hasPermission('dirMdwRabbitMQNode:update'))}"/>
+                        <h:outputText value="#{rabbitmqNodesListController.getRabbitmqNodeClusterName(rbmqc)}" rendered="#{!(arianeidm:hasPermission('dirMdwRabbitMQNode:update'))}"/>
 
                         <h:outputText value="User : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <p:inplace editor="true">
                                 <p:inputText required="true" label="text" value="#{rbmqc.user}"/>
                             </p:inplace>
                         </h:form>
 
                         <h:outputText value="Password : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <h:outputText value="defined - " rendered="#{rbmqc.passwd!=null and
                                                                                 rbmqc.passwd!=''}"/>
                             <h:outputText value="none - " rendered="#{rbmqc.passwd==null or rbmqc.passwd==''}"/>
@@ -86,19 +86,19 @@
                                 <h:inputSecret required="true" label="text" value="#{rbmqc.passwd}"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value=" - " rendered="#{!ccidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
+                        <h:outputText value=" - " rendered="#{!arianeidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
 
                         <h:outputText value="Description : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <p:inplace editor="true">
                                 <p:inputText required="true" label="text" value="#{rbmqc.description}"/>
                                 <p:ajax event="save" listener="#{rabbitmqNodesListController.update(rbmqc)}" update="@form,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages" />
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rbmqc.description}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
+                        <h:outputText value="#{rbmqc.description}" rendered="#{!arianeidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
 
                         <h:outputText value="OS Instance : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <p:inplace label="#{rabbitmqNodesListController.getRabbitmqNodeOSInstanceName(rbmqc)}" effectSpeed="fast" editor="true">
                                 <h:selectOneMenu value="#{rabbitmqNodesListController.changedOSInstance[rbmqc.id]}">
                                     <f:selectItems value="#{OSInstancesListController.getAllForSelector()}" var="osi"
@@ -107,10 +107,10 @@
                                 <p:ajax event="save" listener="#{rabbitmqNodesListController.syncOSInstance(rbmqc)}" update="@form,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rabbitmqNodesListController.getRabbitmqNodeOSInstanceName(rbmqc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
+                        <h:outputText value="#{rabbitmqNodesListController.getRabbitmqNodeOSInstanceName(rbmqc)}" rendered="#{!arianeidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
 
                         <h:outputText value="Support team : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <p:inplace label="#{rabbitmqNodesListController.getRabbitmqNodeTeamName(rbmqc)}" effectSpeed="fast" editor="true">
                                 <h:selectOneMenu value="#{rabbitmqNodesListController.changedSupportTeam[rbmqc.id]}">
                                     <f:selectItems value="#{teamsListController.getAllForSelector()}" var="team"
@@ -119,16 +119,16 @@
                                 <p:ajax event="save" listener="#{rabbitmqNodesListController.syncSupportTeam(rbmqc)}" update="@form,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages"/>
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rabbitmqNodesListController.getRabbitmqNodeTeamName(rbmqc)}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
+                        <h:outputText value="#{rabbitmqNodesListController.getRabbitmqNodeTeamName(rbmqc)}" rendered="#{!arianeidm:hasPermission('dirMdwRabbitMQNode:update')}"/>
 
                     </h:panelGrid>
 
                 </p:rowExpansion>
 
                 <f:facet name="footer">
-                    <p:commandButton value="Create RabbitMQ Node" icon="ui-icon-disk" onclick="rabbitmqNodeCreateDialog.show()" rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:create')}"/>
+                    <p:commandButton value="Create RabbitMQ Node" icon="ui-icon-disk" onclick="rabbitmqNodeCreateDialog.show()" rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:create')}"/>
                     <p:commandButton value="Remove selected RabbitMQ Node" icon="ui-icon-closethick" onclick="rabbitmqNodeRemoveDialog.show()"
-                                     update=":removerabbitmqNodeDialogForm:display" rendered="#{ccidm:hasPermission('dirMdwRabbitMQNode:remove')}"/>
+                                     update=":removerabbitmqNodeDialogForm:display" rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:remove')}"/>
                     <p:commandButton value="Refresh table" id="rbmqcmpUpdate" icon="icon-refresh" styleClass="ui-priority-primary icon-large"
                                      update=":rabbitmqNodeTableForm:rabbitmqNodeTable"/>
                 </f:facet>

@@ -6,10 +6,10 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:ccidm="http://spectral.com/cc/idm">
+      xmlns:arianeidm="http://echinopsii.net/ariane/idm">
 <ui:composition template="/templates/directoryLayout.xhtml">
     <ui:define name="directoryContent">
-        <ui:fragment rendered="#{ccidm:isAuthenticated() and ccidm:hasPermission('dirMdwRabbitMQCluster:display')}">
+        <ui:fragment rendered="#{arianeidm:isAuthenticated() and arianeidm:hasPermission('dirMdwRabbitMQCluster:display')}">
         <h:form id="rabbitmqClusterTableForm">
             <p:growl id="rabbitmqClusterTableMessages" showDetail="true" />
             <p:dataTable id="rabbitmqClusterTable" var="rbmqc" value="#{rabbitmqClustersListController.lazyModel}"
@@ -37,22 +37,22 @@
                 <p:rowExpansion>
                     <h:panelGrid columns="2" columnClasses="colStyle10,colStyle90" cellpadding="5" styleClass="ui-widget-content grid">
                         <h:outputText value="Name : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQCluster:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQCluster:update')}">
                             <p:inplace editor="true">
                                 <p:inputText required="true" label="text" value="#{rbmqc.name}"/>
                                 <p:ajax event="save" listener="#{rabbitmqClustersListController.update(rbmqc)}" update="@form,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages" />
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rbmqc.name}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQCluster:update')}"/>
+                        <h:outputText value="#{rbmqc.name}" rendered="#{!arianeidm:hasPermission('dirMdwRabbitMQCluster:update')}"/>
 
                         <h:outputText value="Description : " styleClass="inputTitle"/>
-                        <h:form rendered="#{ccidm:hasPermission('dirMdwRabbitMQCluster:update')}">
+                        <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQCluster:update')}">
                             <p:inplace editor="true">
                                 <p:inputText required="true" label="text" value="#{rbmqc.description}"/>
                                 <p:ajax event="save" listener="#{rabbitmqClustersListController.update(rbmqc)}" update="@form,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages" />
                             </p:inplace>
                         </h:form>
-                        <h:outputText value="#{rbmqc.description}" rendered="#{!ccidm:hasPermission('dirMdwRabbitMQCluster:update')}"/>
+                        <h:outputText value="#{rbmqc.description}" rendered="#{!arianeidm:hasPermission('dirMdwRabbitMQCluster:update')}"/>
 
                         <h:outputText value="RabbitMQ Nodes : " styleClass="inputTitle"/>
                         <h:form>
@@ -64,7 +64,7 @@
                                 <p:column headerText="Description" sortBy="#{clu.description}" filterBy="#{clu.description}">
                                     <h:outputText id="itemDescription" value="#{clu.description}"/>
                                 </p:column>
-                                <c:if test="#{ccidm:hasPermission('dirMdwRabbitMQCluster:update')}">
+                                <c:if test="#{arianeidm:hasPermission('dirMdwRabbitMQCluster:update')}">
                                     <f:facet name="footer">
                                         <p:inplace label="Select RabbitMQ node to bind" effectSpeed="fast" editor="true">
                                             <h:selectOneMenu value="#{rabbitmqClustersListController.addedRBMQNode[rbmqc.id]}">
@@ -87,9 +87,9 @@
                 </p:rowExpansion>
 
                 <f:facet name="footer">
-                    <p:commandButton value="Create RabbitMQ Cluster" icon="ui-icon-disk" onclick="rabbitmqClusterCreateDialog.show()" rendered="#{ccidm:hasPermission('dirMdwRabbitMQCluster:create')}"/>
+                    <p:commandButton value="Create RabbitMQ Cluster" icon="ui-icon-disk" onclick="rabbitmqClusterCreateDialog.show()" rendered="#{arianeidm:hasPermission('dirMdwRabbitMQCluster:create')}"/>
                     <p:commandButton value="Remove selected RabbitMQ Cluster" icon="ui-icon-closethick" onclick="rabbitmqClusterRemoveDialog.show()"
-                                     update=":removerabbitmqClusterDialogForm:display" rendered="#{ccidm:hasPermission('dirMdwRabbitMQCluster:remove')}"/>
+                                     update=":removerabbitmqClusterDialogForm:display" rendered="#{arianeidm:hasPermission('dirMdwRabbitMQCluster:remove')}"/>
                     <p:commandButton value="Refresh table" id="rbmqcmpUpdate" icon="icon-refresh" styleClass="ui-priority-primary icon-large"
                                      update=":rabbitmqClusterTableForm:rabbitmqClusterTable"/>
                 </f:facet>
