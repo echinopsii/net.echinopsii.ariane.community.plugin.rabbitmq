@@ -265,14 +265,14 @@
             </h:form>
         </p:dialog>
 
-        <p:dialog header="Create a new multicast area" widgetVar="mareaCreateDialog"
+        <p:dialog header="Create a new routing area" widgetVar="rareaCreateDialog"
                   width="450" showEffect="fade" hideEffect="explode">
-            <h:form id="createMareaDialogForm">
-                <ui:insert name="createMulticastArea" >
-                    <ui:include src="/templates/multicastAreaNewForm.xhtml" />
+            <h:form id="createRareaDialogForm">
+                <ui:insert name="createRoutingArea" >
+                    <ui:include src="/templates/routingAreaNewForm.xhtml" />
                 </ui:insert>
-                <p:commandButton value="Save this multicast area" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
-                                 actionListener="#{multicastAreaNewController.save}" oncomplete="mareaCreateDialog.hide();"
+                <p:commandButton value="Save this routing area" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+                                 actionListener="#{routingAreaNewController.save}" oncomplete="rareaCreateDialog.hide();"
                                  update=":createSubnetDialogForm:subnetNewGrid,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages"/>
             </h:form>
         </p:dialog>
@@ -285,7 +285,7 @@
                 </ui:insert>
                 <p:commandButton value="Save this datacenter" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                  actionListener="#{datacenterNewController.save}" oncomplete="dcCreateDialog.hide();"
-                                 update=":createSubnetDialogForm:subnetNewGrid,:createMareaDialogForm:mareaNewGrid,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages"/>
+                                 update=":createSubnetDialogForm:subnetNewGrid,:createRareaDialogForm:rareaNewGrid,:rabbitmqNodeTableForm:rabbitmqNodeTableMessages"/>
             </h:form>
         </p:dialog>
         </ui:fragment>
