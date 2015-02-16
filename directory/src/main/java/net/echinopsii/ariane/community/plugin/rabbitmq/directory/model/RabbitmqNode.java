@@ -153,11 +153,11 @@ public class RabbitmqNode implements Serializable {
         return this;
     }
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @NotNull
     private OSInstance osInstance;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @NotNull
     private Team supportTeam;
 
