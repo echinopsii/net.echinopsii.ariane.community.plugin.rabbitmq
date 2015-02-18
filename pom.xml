@@ -33,11 +33,11 @@
     <distributionManagement>
         <repository>
             <id>echinopsii.community</id>
-            <url>http://nexus.lab.prod.dekatonshivr.echinopsii.net:8081/nexus/content/repositories/echinopsii.community.releases</url>
+            <url>http://nexus.echinopsii.net/nexus/content/repositories/echinopsii.community.releases</url>
         </repository>
         <snapshotRepository>
             <id>echinopsii.community</id>
-            <url>http://nexus.lab.prod.dekatonshivr.echinopsii.net:8081/nexus/content/repositories/echinopsii.community.snapshots</url>
+            <url>http://nexus.echinopsii.net/nexus/content/repositories/echinopsii.community.snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
