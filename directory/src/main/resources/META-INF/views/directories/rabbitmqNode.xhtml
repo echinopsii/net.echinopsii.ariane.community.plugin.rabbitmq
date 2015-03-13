@@ -10,7 +10,7 @@
 <ui:composition template="/templates/directoryLayout.xhtml">
     <ui:define name="directoryContent">
         <ui:fragment rendered="#{arianeidm:isAuthenticated() and arianeidm:hasPermission('dirMdwRabbitMQNode:display')}">
-        <h:form id="rabbitmqNodeTableForm">
+        <h:form id="rabbitmqNodeTableForm" styleClass="arianeTransparentBg0-uiwc">
             <p:growl id="rabbitmqNodeTableMessages" showDetail="true" />
             <p:dataTable id="rabbitmqNodeTable" var="rbmqc" value="#{rabbitmqNodesListController.lazyModel}"
                          selectionMode="multiple" selection="#{rabbitmqNodesListController.selectedRabbitmqNodeList}" rowKey="#{rbmqc.id}"

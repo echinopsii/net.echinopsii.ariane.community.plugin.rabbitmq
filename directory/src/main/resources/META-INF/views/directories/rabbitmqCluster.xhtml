@@ -8,9 +8,12 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:arianeidm="http://echinopsii.net/ariane/idm">
 <ui:composition template="/templates/directoryLayout.xhtml">
+    <ui:define name="moduleHeader">
+        <link type="text/css" rel="stylesheet" href="#{request.contextPath}/acss/plugins/rabbitmq.css"/>
+    </ui:define>
     <ui:define name="directoryContent">
         <ui:fragment rendered="#{arianeidm:isAuthenticated() and arianeidm:hasPermission('dirMdwRabbitMQCluster:display')}">
-        <h:form id="rabbitmqClusterTableForm">
+        <h:form id="rabbitmqClusterTableForm" styleClass="arianeTransparentBg0-uiwc">
             <p:growl id="rabbitmqClusterTableMessages" showDetail="true" />
             <p:dataTable id="rabbitmqClusterTable" var="rbmqc" value="#{rabbitmqClustersListController.lazyModel}"
                          selectionMode="multiple" selection="#{rabbitmqClustersListController.selectedRabbitmqClusterList}" rowKey="#{rbmqc.id}"
