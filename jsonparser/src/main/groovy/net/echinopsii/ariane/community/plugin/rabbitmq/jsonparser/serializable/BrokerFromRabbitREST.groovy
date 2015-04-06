@@ -120,4 +120,11 @@ class BrokerFromRabbitREST implements Serializable {
     int hashCode() {
         return name.hashCode()
     }
+
+    BrokerFromRabbitREST clone() {
+        BrokerFromRabbitREST ret = (cluster!=null) ? new BrokerFromRabbitREST(this.name, this.cluster) : new BrokerFromRabbitREST(this.name, this.node);
+        ret.setUrl(this.url)
+        ret.properties.putAll(this.properties)
+        return ret;
+    }
 }
