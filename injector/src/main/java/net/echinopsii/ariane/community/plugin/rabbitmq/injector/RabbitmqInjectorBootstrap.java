@@ -21,6 +21,7 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.injector;
 
 import net.echinopsii.ariane.community.core.injector.base.registry.InjectorComponentsRegistry;
 import net.echinopsii.ariane.community.core.injector.base.registry.InjectorGearsRegistry;
+import net.echinopsii.ariane.community.core.injector.base.registry.InjectorRegistryFactory;
 import net.echinopsii.ariane.community.core.mapping.ds.service.MappingSce;
 import net.echinopsii.ariane.community.core.portal.base.model.MenuEntityType;
 import net.echinopsii.ariane.community.core.portal.base.model.TreeMenuEntity;
@@ -145,48 +146,31 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
         rootInjectorRegistry = null;
     }
 
-    @Requires
-    private InjectorComponentsRegistry componentsRegistry;
     private static InjectorComponentsRegistry sgtComponentsRegistry;
-
-    @Bind
-    public void bindComponentsRegistry(InjectorComponentsRegistry registry) {
-        log.debug("Bound to injector components registry...");
-        componentsRegistry = registry;
-        sgtComponentsRegistry = registry;
-    }
-
-    @Unbind
-    public void unbindComponentsRegistry() {
-        log.debug("Unbound from injector components registry...");
-        componentsRegistry = null;
-        sgtComponentsRegistry = null;
-    }
-
+    private static InjectorGearsRegistry sgtGearsRegistry;
     public static InjectorComponentsRegistry getComponentsRegistry() {
         return sgtComponentsRegistry;
     }
+    public static InjectorGearsRegistry getGearsRegisry() {
+        return sgtGearsRegistry;
+    }
 
     @Requires
-    private InjectorGearsRegistry gearsRegistry;
-    private static InjectorGearsRegistry sgtGearsRegistry;
+    private InjectorRegistryFactory registryFactory;
+    private static InjectorRegistryFactory sgtRegistryFactory;
 
     @Bind
-    public void bindGearsRegistry(InjectorGearsRegistry registry) {
-        log.debug("Bound to injector gears registry...");
-        gearsRegistry = registry;
-        sgtGearsRegistry = registry;
+    public void bindRegistryFactory(InjectorRegistryFactory factory) {
+        log.debug("Bound to injector registry factory...");
+        registryFactory = factory;
+        sgtRegistryFactory = factory;
     }
 
     @Unbind
-    public void unbindGearsRegistry() {
-        log.debug("Unbound from injector gears registry...");
-        gearsRegistry = null;
-        sgtGearsRegistry = null;
-    }
-
-    public static InjectorGearsRegistry getGearsRegisry() {
-        return sgtGearsRegistry;
+    public void unbindRegistryFactory() {
+        log.debug("Unbound from injector registry factory...");
+        registryFactory = null;
+        sgtRegistryFactory = null;
     }
 
     private final static void start() throws IOException, InterruptedException {
@@ -195,6 +179,12 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
                 log.info("Config is missing to load RabbitMQ Injector. Sleep some times...");
                 Thread.sleep(1000);
             }
+
+            sgtGearsRegistry = sgtRegistryFactory.makeGearsRegistry(config);
+            sgtComponentsRegistry = sgtRegistryFactory.makeComponentsRegistry(config);
+
+            sgtGearsRegistry.startRegistry();
+            sgtComponentsRegistry.startRegistry();
 
             if (sgtGearsRegistry.keySetFromPrefix(INJ_TREE_ROOT_PATH).size()!=0) {
                 for (String key: sgtGearsRegistry.keySetFromPrefix(INJ_TREE_ROOT_PATH))
@@ -226,6 +216,8 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
             for (String key: sgtGearsRegistry.keySetFromPrefix(INJ_TREE_ROOT_PATH))
                 sgtGearsRegistry.getEntityFromCache(key).stop();
 
+            sgtGearsRegistry.stopRegistry();
+            sgtComponentsRegistry.stopRegistry();
             isStarted = false;
         }
     }
@@ -241,25 +233,25 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
     @Updated
     public static void updated(Dictionary properties) {
         log.debug("{} is being updated by {}", new Object[]{RABBITMQ_INJECTOR_SERVICE_NAME, Thread.currentThread().toString()});
-        if (RabbitmqInjectorMainCfgLoader.isValid(properties)) {
-            config=properties;
-            if (isStarted) {
-                final Runnable applyConfigUpdate = new Runnable() {
-                    @Override
-                    public void run() {
-                        log.debug("{} will be restart to apply configuration changes...",RABBITMQ_INJECTOR_SERVICE_NAME);
-                        try {
-                            stop();
-                            start();
-                        } catch (Exception e) {
-                            log.error("{} restart failed !", RABBITMQ_INJECTOR_SERVICE_NAME);
-                            e.printStackTrace();
-                        }
+        if (isStarted) {
+            config.put(RabbitmqInjectorMainCfgLoader.RABBITMQ_INJECTOR_CFG_DIRECTORY_QUERYINTERVAL_KEY, properties.get(RabbitmqInjectorMainCfgLoader.RABBITMQ_INJECTOR_CFG_DIRECTORY_QUERYINTERVAL_KEY));
+            config.put(RabbitmqInjectorMainCfgLoader.RABBITMQ_INJECTOR_CFG_COMPONENT_SNIFFINTERVAL_KEY, properties.get(RabbitmqInjectorMainCfgLoader.RABBITMQ_INJECTOR_CFG_COMPONENT_SNIFFINTERVAL_KEY));
+
+            final Runnable applyConfigUpdate = new Runnable() {
+                @Override
+                public void run() {
+                    log.debug("{} will be restart to apply configuration changes...",RABBITMQ_INJECTOR_SERVICE_NAME);
+                    try {
+                        stop();
+                        start();
+                    } catch (Exception e) {
+                        log.error("{} restart failed !", RABBITMQ_INJECTOR_SERVICE_NAME);
+                        e.printStackTrace();
                     }
-                };
-                new Thread(applyConfigUpdate).start();
-            }
-        }
+                }
+            };
+            new Thread(applyConfigUpdate).start();
+        } else if (RabbitmqInjectorMainCfgLoader.isValid(properties)) config=properties;
     }
 
     private static final String basePath = "/META-INF";
