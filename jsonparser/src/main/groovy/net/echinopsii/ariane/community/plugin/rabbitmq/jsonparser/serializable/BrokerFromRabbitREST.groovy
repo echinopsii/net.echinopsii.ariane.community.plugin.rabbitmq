@@ -50,6 +50,7 @@ class BrokerFromRabbitREST implements Serializable {
     private transient static final Logger log = LoggerFactory.getLogger(BrokerFromRabbitREST.class);
 
     transient RabbitClusterToConnect cluster;
+    transient RabbitNodeToConnect    node;
 
     String name;
     String url;
@@ -58,27 +59,42 @@ class BrokerFromRabbitREST implements Serializable {
     Map<String, String>  listeningAddress
     Map<String, Integer> listeningPorts
 
+    BrokerFromRabbitREST(String name, RabbitNodeToConnect node) {
+        this.node = node;
+        this.name = name;
+    }
+
     BrokerFromRabbitREST(String name, RabbitClusterToConnect cluster) {
         this.name = name;
         this.cluster = cluster;
     }
 
     BrokerFromRabbitREST parse() {
-        for (RabbitNodeToConnect node : cluster.getNodes())
-            if (node.getName().equals(this.name)) {
-                listeningAddress = node.getListeningAddress()
-                listeningPorts   = node.getListeningPorts()
-                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_STATISTICS_DB_NODE, node.statisticsDBNode)
-                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_VERSION, node.getErlangVersion())
-                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_FULL_VERSION, node.getErlangFullVersion())
-                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_MANAGEMENT_VERSION, node.getManagementVersion())
-                properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_RABBITMQ_VERSION, node.getRabbitmqVersion())
-                break;
-            }
+        if (cluster != null) {
+            for (RabbitNodeToConnect node : cluster.getNodes())
+                if (node.getName().equals(this.name)) {
+                    listeningAddress = node.getListeningAddress()
+                    listeningPorts = node.getListeningPorts()
+                    properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_STATISTICS_DB_NODE, node.statisticsDBNode)
+                    properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_VERSION, node.getErlangVersion())
+                    properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_FULL_VERSION, node.getErlangFullVersion())
+                    properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_MANAGEMENT_VERSION, node.getManagementVersion())
+                    properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_RABBITMQ_VERSION, node.getRabbitmqVersion())
+                    break;
+                }
+        } else if (node!=null) {
+            listeningAddress = node.getListeningAddress()
+            listeningPorts = node.getListeningPorts()
+            properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_STATISTICS_DB_NODE, node.statisticsDBNode)
+            properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_VERSION, node.getErlangVersion())
+            properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_ERLANG_FULL_VERSION, node.getErlangFullVersion())
+            properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_MANAGEMENT_VERSION, node.getManagementVersion())
+            properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_RABBITMQ_VERSION, node.getRabbitmqVersion())
+        }
 
         String node_req_path = JSON_RABBITMQ_NODE_PATH + this.name;
-        def node_req = cluster.get(node_req_path)
-        if (node_req.status == 200 && node_req.data != null)
+        def node_req = (clustet!=null) ? cluster.get(node_req_path) : ((node !=null) ? node.getRestCli().get(path: node_req_path) : null)
+        if (node_req!=null && node_req.status == 200 && node_req.data != null)
             properties.putAll((Map<String,Object>)node_req.data)
         properties.remove(JSON_RABBITMQ_NODE_NAME)
 

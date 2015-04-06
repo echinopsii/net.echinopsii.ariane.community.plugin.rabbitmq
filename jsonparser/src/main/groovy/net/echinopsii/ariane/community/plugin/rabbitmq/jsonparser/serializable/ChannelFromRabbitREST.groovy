@@ -20,6 +20,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 
 class ChannelFromRabbitREST implements Serializable {
 
@@ -43,9 +44,15 @@ class ChannelFromRabbitREST implements Serializable {
 
 
     transient RabbitClusterToConnect cluster;
+    transient RabbitNodeToConnect node;
 
     String name
     Map<String, Object> properties
+
+    ChannelFromRabbitREST(String name, RabbitNodeToConnect node) {
+        this.name = name;
+        this.node = node;
+    }
 
     ChannelFromRabbitREST(String name, RabbitClusterToConnect cluster) {
         this.name = name
@@ -54,8 +61,8 @@ class ChannelFromRabbitREST implements Serializable {
 
     ChannelFromRabbitREST parse() {
         String channel_req_path =  REST_RABBITMQ_CHANNEL_PATH + this.name;
-        def channel_req = cluster.get(channel_req_path)
-        if (channel_req.status == 200 && channel_req.data != null) {
+        def channel_req = (cluster!=null) ? cluster.get(channel_req_path) : ((node!=null) ? node.getRestCli().get(path: channel_req_path) : null);
+        if (channel_req != null && channel_req.status == 200 && channel_req.data != null) {
             channel_req.data.publishes.each { publish ->
                 if (publish.exchange.name.equals(""))
                     publish.exchange.name=ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME

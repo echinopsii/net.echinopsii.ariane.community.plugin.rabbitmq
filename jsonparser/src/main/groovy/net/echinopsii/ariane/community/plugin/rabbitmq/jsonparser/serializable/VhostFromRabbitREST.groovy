@@ -19,6 +19,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 
 class VhostFromRabbitREST implements Serializable {
 
@@ -27,9 +28,15 @@ class VhostFromRabbitREST implements Serializable {
     private transient static final String JSON_RABBITMQ_VHOST_NAME = "name"
 
     transient RabbitClusterToConnect cluster;
+    transient RabbitNodeToConnect    node;
 
     String name
     Map<String, Object> properties
+
+    VhostFromRabbitREST(String name, RabbitNodeToConnect node) {
+        this.name = name;
+        this.node = node
+    }
 
     VhostFromRabbitREST(String name, RabbitClusterToConnect cluster) {
         this.name = name;
@@ -37,8 +44,8 @@ class VhostFromRabbitREST implements Serializable {
     }
 
     VhostFromRabbitREST parse() {
-        def vhosts_req = cluster.get(REST_RABBITMQ_VHOST_PATH)
-        if (vhosts_req.status == 200 && vhosts_req.data != null) {
+        def vhosts_req = (cluster!=null) ? cluster.get(REST_RABBITMQ_VHOST_PATH) : (node!=null) ? node.getRestCli().get(path: REST_RABBITMQ_VHOST_PATH) : null
+        if (vhosts_req != null && vhosts_req.status == 200 && vhosts_req.data != null) {
             vhosts_req.data.each { vhost ->
                 if (vhost.name.equals(this.name))
                     properties = vhost

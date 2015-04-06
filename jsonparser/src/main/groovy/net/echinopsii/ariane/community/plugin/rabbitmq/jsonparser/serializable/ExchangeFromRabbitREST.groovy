@@ -20,6 +20,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 
 class ExchangeFromRabbitREST implements Serializable {
 
@@ -44,12 +45,19 @@ class ExchangeFromRabbitREST implements Serializable {
     public final transient static String RABBITMQ_EXCHANGE_TYPE_HEADER = "header"
 
     transient RabbitClusterToConnect cluster;
+    transient RabbitNodeToConnect    node;
 
     String name
     String vhost
     Map<String, Object> properties
 
     public static final String RABBITMQ_DEFAULT_EXCH_NAME = "[AMQP default]"
+
+    ExchangeFromRabbitREST(String name, String vhost, RabbitNodeToConnect node) {
+        this.name = name
+        this.vhost = vhost
+        this.node = node
+    }
 
     ExchangeFromRabbitREST(String name, String vhost, RabbitClusterToConnect cluster) {
         this.name = name
@@ -61,8 +69,8 @@ class ExchangeFromRabbitREST implements Serializable {
         // The following exchange_req_path should be used but there is a problem in the groovy HTTPBuilder
         // api/exchanges/%2F/exchangeName for vhost "/" is re-encoded api/exchanges/%252F/exchangeName and api/exchanges///exchangeName is re-encoded api/exchanges/exchangeName
         // String exchange_req_path =  'api/exchanges/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
-        def exchanges_req = cluster.get(REST_RABBITMQ_EXCHANGE_PATH)
-        if (exchanges_req.status == 200 && exchanges_req.data != null) {
+        def exchanges_req = (cluster != null) ? cluster.get(REST_RABBITMQ_EXCHANGE_PATH) : (node != null) ? node.getRestCli().get(path: REST_RABBITMQ_EXCHANGE_PATH) : null
+        if (exchanges_req != null && exchanges_req.status == 200 && exchanges_req.data != null) {
             exchanges_req.data.each { exchange ->
                 if (((this.name.equals(RABBITMQ_DEFAULT_EXCH_NAME) && exchange.name.equals("")) || (!this.name.equals(RABBITMQ_DEFAULT_EXCH_NAME) && exchange.name.equals(this.name)))
                     && exchange.vhost.equals(this.vhost))

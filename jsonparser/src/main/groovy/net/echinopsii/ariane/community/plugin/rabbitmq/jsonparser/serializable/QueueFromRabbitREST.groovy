@@ -20,6 +20,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -34,10 +35,17 @@ class QueueFromRabbitREST implements Serializable {
     private transient static final Logger log = LoggerFactory.getLogger(QueueFromRabbitREST.class);
 
     transient RabbitClusterToConnect cluster;
+    transient RabbitNodeToConnect    node;
 
     String name
     String vhost
     Map<String, Object> properties
+
+    QueueFromRabbitREST(String name, String vhost, RabbitNodeToConnect node) {
+        this.name = name
+        this.vhost = vhost
+        this.node = node
+    }
 
     QueueFromRabbitREST(String name, String vhost, RabbitClusterToConnect cluster) {
         this.name = name
@@ -49,8 +57,8 @@ class QueueFromRabbitREST implements Serializable {
         // The following queue_req_path should be used but there is a problem in the groovy HTTPBuilder
         // api/queues/%2F/queueName for vhost "/" is re-encoded api/queues/%252F/queueName and api/queues///queueName is re-encoded api/queues/queueName
         // String queue_req_path =  'api/queues/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
-        def queues_req = cluster.get(REST_RABBITMQ_QUEUE_PATH)
-        if (queues_req.status == 200 && queues_req.data != null) {
+        def queues_req = (cluster != null) ? cluster.get(REST_RABBITMQ_QUEUE_PATH) : (node != null) ? node.getRestCli().get(path: REST_RABBITMQ_QUEUE_PATH) : null
+        if (queues_req != null && queues_req.status == 200 && queues_req.data != null) {
             queues_req.data.each { queue ->
                 if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
                     properties = queue

@@ -20,6 +20,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
 
 class ConnectionFromRabbitREST implements Serializable {
 
@@ -50,9 +51,15 @@ class ConnectionFromRabbitREST implements Serializable {
     public transient static final String RABBITMQ_CONNECTION_PROTOCOL_STOMP = "STOMP"
 
     transient RabbitClusterToConnect cluster;
+    transient RabbitNodeToConnect    node;
 
     String name
     Map<String, Object> properties
+
+    ConnectionFromRabbitREST(String name, RabbitNodeToConnect node) {
+        this.node = node
+        this.name = name
+    }
 
     ConnectionFromRabbitREST(String name, RabbitClusterToConnect cluster) {
         this.cluster = cluster
@@ -61,8 +68,8 @@ class ConnectionFromRabbitREST implements Serializable {
 
     ConnectionFromRabbitREST parse() {
         String connection_req_path =  REST_RABBITMQ_CONNECTION_PATH + this.name;
-        def connection_req = cluster.get(connection_req_path)
-        if (connection_req.status == 200 && connection_req.data != null) {
+        def connection_req = (cluster!=null) ? cluster.get(connection_req_path) : (node!=null) ? node.getRestCli().get(path: connection_req_path) : null
+        if (connection_req != null && connection_req.status == 200 && connection_req.data != null) {
             properties = connection_req.data
             properties.remove(JSON_RABBITMQ_CONNECTION_NAME)
         }
