@@ -93,7 +93,7 @@ class BrokerFromRabbitREST implements Serializable {
         }
 
         String node_req_path = JSON_RABBITMQ_NODE_PATH + this.name;
-        def node_req = (clustet!=null) ? cluster.get(node_req_path) : ((node !=null) ? node.getRestCli().get(path: node_req_path) : null)
+        def node_req = (cluster!=null) ? cluster.get(node_req_path) : ((node !=null) ? node.getRestCli().get(path: node_req_path) : null)
         if (node_req!=null && node_req.status == 200 && node_req.data != null)
             properties.putAll((Map<String,Object>)node_req.data)
         properties.remove(JSON_RABBITMQ_NODE_NAME)

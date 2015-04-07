@@ -171,15 +171,11 @@ class RabbitRESTTools {
     }
 
     static List<String> getVhostNames(RabbitNodeToConnect node) {
-        Map<String,List<String>> ret = new HashMap<String, List<String>>()
-        def queues_list_req = node.getRestCli().get(path:'/api/queues')
-        if (queues_list_req.status == 200 && queues_list_req.data != null) {
-            queues_list_req.data.each { aqueue ->
-                if (ret.get(aqueue.vhost)==null)
-                    ret.put((String)aqueue.vhost, new ArrayList<String>())
-            }
-            queues_list_req.data.each { aqueue ->
-                ret.get((String)aqueue.vhost).add((String)aqueue.name)
+        List<String> ret = new ArrayList<String>()
+        def vhosts_list_req = node.getRestCli().get(path:'/api/vhosts')
+        if (vhosts_list_req.status == 200 && vhosts_list_req.data != null) {
+            vhosts_list_req.data.each { avhost ->
+                ret.add((String)avhost.name);
             }
         }
         return ret;
