@@ -21,6 +21,7 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears;
 
 import net.echinopsii.ariane.community.core.injector.base.model.AbstractAkkaGear;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqCluster;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.model.RabbitmqNode;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.cache.RabbitmqCachedComponent;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.actors.ComponentActor;
@@ -53,7 +54,25 @@ public class ComponentGear extends AbstractAkkaGear implements Serializable {
         }
         super.setGearId(this.cacheEntity.getComponentId());
         super.setGearName("Ariane RabbitMQ Plugin Injector Sniffing Gear (" + this.cacheEntity.getComponentName() + ")");
-        super.setGearDescription("Schedule sniff of a RabbitMQ container");
+        super.setGearDescription("Schedule sniff of a " + this.cacheEntity.getComponentType());
+        this.cacheEntity.setAttachedGearId(super.getGearId());
+    }
+
+    public ComponentGear(RabbitmqNode rabbitmqComponent, int sniffInterval) {
+        super();
+        this.componentSniffInterval = sniffInterval;
+        this.cacheEntity = (RabbitmqCachedComponent) RabbitmqInjectorBootstrap.getComponentsRegistry().getEntityFromCache(
+                                                     RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH + "_" + rabbitmqComponent.getName() + "_standalone_");
+
+        if (this.cacheEntity == null)
+            this.cacheEntity = new RabbitmqCachedComponent().setRabbitmqComponentFields(rabbitmqComponent);
+        else {
+            SimpleDateFormat ft = new SimpleDateFormat ("yyyy.MM.dd '-' hh:mm:ss a zzz");
+            log.debug("{} get from persisted cache. Last sniff : {}.", rabbitmqComponent.getName(), ft.format(cacheEntity.getLastRefresh()));
+        }
+        super.setGearId(this.cacheEntity.getComponentId());
+        super.setGearName("Ariane RabbitMQ Plugin Injector Sniffing Gear (" + this.cacheEntity.getComponentName() + ")");
+        super.setGearDescription("Schedule sniff of a " + this.cacheEntity.getComponentType());
         this.cacheEntity.setAttachedGearId(super.getGearId());
     }
 

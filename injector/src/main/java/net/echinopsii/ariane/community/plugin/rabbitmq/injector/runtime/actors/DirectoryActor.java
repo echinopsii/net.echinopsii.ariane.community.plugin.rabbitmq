@@ -58,12 +58,22 @@ public class DirectoryActor extends UntypedActor {
         HashSet<RabbitmqNode> nodesList = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesList();
         for (RabbitmqNode rabbitmqNode : nodesList) {
             RabbitmqCluster nodeCluster = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getClusterFromNode(rabbitmqNode);
-            ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH+"_"+nodeCluster.getName()+"_");
-            if (componentGear == null) {
-                componentGear = new ComponentGear(nodeCluster, this.gear.getDefaultComponentSniffInterval());
-                RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
-                componentGear.start();
-                log.debug("New RabbitMQ Node Gear has been started ({})", new Object[]{componentGear.getGearName()});
+            if (nodeCluster!=null) {
+                ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH + "_" + nodeCluster.getName() + "_");
+                if (componentGear == null) {
+                    componentGear = new ComponentGear(nodeCluster, this.gear.getDefaultComponentSniffInterval());
+                    RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
+                    componentGear.start();
+                    log.debug("New RabbitMQ Cluster Gear has been started ({})", new Object[]{componentGear.getGearName()});
+                }
+            } else {
+                ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH + "_" + rabbitmqNode.getName() + "_standalone_");
+                if (componentGear == null) {
+                    componentGear = new ComponentGear(rabbitmqNode, this.gear.getDefaultComponentSniffInterval());
+                    RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
+                    componentGear.start();
+                    log.debug("New RabbitMQ Node Gear has been started ({})", new Object[]{componentGear.getGearName()});
+                }
             }
         }
     }
