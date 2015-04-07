@@ -112,6 +112,14 @@ public interface RabbitmqDirectoryService {
     public Set<RabbitmqNode> getNodesFromCluster(Long clusterID);
 
     /**
+     * Refresh a node according to the node ID
+     *
+     * @param nodeID RabbitMQ node ID to refresh
+     * @return refreshed cluster associated to node ID
+     */
+    public RabbitmqNode refreshRabbitmqNode(Long nodeID);
+
+    /**
      * Get remote client container properties from its OS Instance Name and team name
      *
      * @param osiName the RabbitMQ client OS instance provided from RabbitMQ Connection

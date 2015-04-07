@@ -222,6 +222,13 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         }
     }
 
+    private void putLocationAndTeamPropertiesToRabbitmqNode(RabbitmqNode rabbitmqNode) {
+        HashMap<String, Object> props = new HashMap<>();
+        props.putAll(getLocationPropertiesFromOSI(rabbitmqNode.getOsInstance()));
+        props.putAll(getTeamPropertiesFromTeam(rabbitmqNode.getSupportTeam()));
+        rabbitmqNode.setProperties(props);
+    }
+
     @Override
     public RabbitmqCluster getClusterFromNode(RabbitmqNode node) {
         RabbitmqCluster ret = null;
@@ -234,7 +241,8 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         RabbitmqNode persistedNode = em.find(RabbitmqNode.class, node.getId());
         if (persistedNode!=null) {
             ret = persistedNode.getCluster();
-            putLocationAndTeamPropertiesToRabbitmqNodes(ret);
+            if (ret!=null) putLocationAndTeamPropertiesToRabbitmqNodes(ret);
+            else putLocationAndTeamPropertiesToRabbitmqNode(persistedNode);
         } else {
             Set<RabbitmqNode> vnodes = new HashSet<RabbitmqNode>();
             vnodes.add(node);
@@ -274,6 +282,37 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
         log.debug("Close entity manager ...");
         em.close();
         return freshRabbitmqCluster;
+    }
+
+    @Override
+    public RabbitmqNode refreshRabbitmqNode(Long nodeID) {
+        if (RabbitmqDirectoryBootstrap.getDirectoryJPAProvider()==null) {
+            log.error("Directory JPA provider has been unbounded !");
+            return null ;
+        }
+        EntityManager em = RabbitmqDirectoryBootstrap.getDirectoryJPAProvider().createEM();
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+
+        CriteriaQuery<RabbitmqNode> rbnc = builder.createQuery(RabbitmqNode.class);
+        Root<RabbitmqNode> rbncRoot = rbnc.from(RabbitmqNode.class);
+        rbnc.select(rbncRoot).where(builder.equal(rbncRoot.<String>get("id"), nodeID));
+        TypedQuery<RabbitmqNode> rbncQuery = em.createQuery(rbnc);
+
+        RabbitmqNode freshRabbitmqNode = null;
+        try {
+            freshRabbitmqNode = rbncQuery.getSingleResult();
+        } catch (NoResultException e) {
+            log.error("unable to retrieve RabbitMQ Node component {} from Directory DB!", nodeID);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        if (freshRabbitmqNode!=null)
+            putLocationAndTeamPropertiesToRabbitmqNode(freshRabbitmqNode);
+
+        log.debug("Close entity manager ...");
+        em.close();
+        return freshRabbitmqNode;
     }
 
     public Set<RabbitmqNode> getNodesFromCluster(Long clusterID) {
