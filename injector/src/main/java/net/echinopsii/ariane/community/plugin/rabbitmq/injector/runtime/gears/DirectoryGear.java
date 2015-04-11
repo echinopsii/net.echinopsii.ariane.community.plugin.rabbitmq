@@ -54,11 +54,10 @@ public class DirectoryGear extends AbstractAkkaGear implements Serializable {
         super.tell(DirectoryActor.MSG_REFRESH);
     }
 
-
     @Override
     public void start() {
         super.setGearActor(super.getGearActorRefFactory().actorOf(DirectoryActor.props(this), super.getGearId()));
-        super.scheduleMessage(DirectoryActor.MSG_REFRESH, directorySniffInterval*1000);
+        super.scheduleMessage(DirectoryActor.MSG_REFRESH, directorySniffInterval * 1000);
         super.setRunning(true);
         log.info("{} is started", super.getGearName());
     }

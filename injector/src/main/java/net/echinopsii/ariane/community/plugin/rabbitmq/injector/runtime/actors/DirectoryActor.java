@@ -38,6 +38,7 @@ public class DirectoryActor extends UntypedActor {
 
     public final static String            MSG_REFRESH = "REFRESH";
     private DirectoryGear gear;
+    private boolean firstRefresh = true;
 
     public static Props props(final DirectoryGear gear) {
         return Props.create(new Creator<DirectoryActor>() {
@@ -54,25 +55,39 @@ public class DirectoryActor extends UntypedActor {
         this.gear = gear;
     }
 
-    private void refresh() {
+    private static HashSet<String> rbqClusterStarted = new HashSet<>();
+    private static HashSet<String> rbqStandaloneStarted = new HashSet<>();
+    private void refresh() throws InterruptedException {
+        //at first Ariane startup Directory could be updated by others plugins.
+        //so it could result to getting exception while requesting the directory entity manager.
+        //sleep 30 sec before requesting the Directory entity manager...
+        if (firstRefresh) {
+            Thread.sleep(20 * 1000);
+            firstRefresh = false;
+        }
+
         HashSet<RabbitmqNode> nodesList = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getNodesList();
         for (RabbitmqNode rabbitmqNode : nodesList) {
             RabbitmqCluster nodeCluster = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getClusterFromNode(rabbitmqNode);
-            if (nodeCluster!=null) {
-                ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH + "_" + nodeCluster.getName() + "_");
-                if (componentGear == null) {
-                    componentGear = new ComponentGear(nodeCluster, this.gear.getDefaultComponentSniffInterval());
-                    RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
+            if (nodeCluster != null) {
+                if (!rbqClusterStarted.contains(nodeCluster.getName())) {
+                    ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH + "_" + nodeCluster.getName() + "_");
+                    if (componentGear == null) {
+                        componentGear = new ComponentGear(nodeCluster, this.gear.getDefaultComponentSniffInterval());
+                        RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
+                    }
                     componentGear.start();
-                    log.debug("New RabbitMQ Cluster Gear has been started ({})", new Object[]{componentGear.getGearName()});
+                    rbqClusterStarted.add(nodeCluster.getName());
                 }
             } else {
-                ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH + "_" + rabbitmqNode.getName() + "_standalone_");
-                if (componentGear == null) {
-                    componentGear = new ComponentGear(rabbitmqNode, this.gear.getDefaultComponentSniffInterval());
-                    RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
+                if (!rbqStandaloneStarted.contains(rabbitmqNode.getName())) {
+                    ComponentGear componentGear = (ComponentGear) RabbitmqInjectorBootstrap.getGearsRegisry().getEntityFromCache(RabbitmqInjectorBootstrap.INJ_TREE_ROOT_PATH + "_" + rabbitmqNode.getName() + "_standalone_");
+                    if (componentGear == null) {
+                        componentGear = new ComponentGear(rabbitmqNode, this.gear.getDefaultComponentSniffInterval());
+                        RabbitmqInjectorBootstrap.getGearsRegisry().putEntityToCache(componentGear);
+                    }
                     componentGear.start();
-                    log.debug("New RabbitMQ Node Gear has been started ({})", new Object[]{componentGear.getGearName()});
+                    rbqStandaloneStarted.add(rabbitmqNode.getName());
                 }
             }
         }
