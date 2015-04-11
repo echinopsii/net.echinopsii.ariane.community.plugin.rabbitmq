@@ -10,9 +10,9 @@
 <ui:composition template="/templates/directoryLayout.xhtml">
     <ui:define name="directoryContent">
         <ui:fragment rendered="#{arianeidm:isAuthenticated() and arianeidm:hasPermission('dirMdwRabbitMQNode:display')}">
-        <h:form id="rabbitmqNodeTableForm" styleClass="arianeTransparentBg0-uiwc">
+        <h:form id="rabbitmqNodeTableForm" styleClass="arianeTransparentBg0-uiwc-noi">
             <p:growl id="rabbitmqNodeTableMessages" showDetail="true" />
-            <p:dataTable id="rabbitmqNodeTable" var="rbmqc" value="#{rabbitmqNodesListController.lazyModel}"
+            <p:dataTable id="rabbitmqNodeTable" styleClass="arianeTableRow" var="rbmqc" value="#{rabbitmqNodesListController.lazyModel}"
                          selectionMode="multiple" selection="#{rabbitmqNodesListController.selectedRabbitmqNodeList}" rowKey="#{rbmqc.id}"
                          paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                          rowsPerPageTemplate="5,10,15,20,25" lazy="true" rows="25" paginator="true">
@@ -39,7 +39,7 @@
                 </p:column>
 
                 <p:rowExpansion>
-                    <h:panelGrid columns="2" columnClasses="colStyle10,colStyle90" cellpadding="5" styleClass="ui-widget-content grid">
+                    <h:panelGrid columns="2" columnClasses="colStyle10,colStyle90" cellpadding="5" styleClass="arianeEmbeddedGrid">
                         <h:outputText value="Name : " styleClass="inputTitle"/>
                         <h:form rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:update')}">
                             <p:inplace editor="true">
