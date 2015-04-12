@@ -214,8 +214,8 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
     }
 
     private void putLocationAndTeamPropertiesToRabbitmqNodes(RabbitmqCluster cluster) {
-        HashMap<String, Object> props = new HashMap<>();
         for (RabbitmqNode rabbitmqNode : cluster.getNodes()) {
+            HashMap<String, Object> props = new HashMap<>();
             props.putAll(getLocationPropertiesFromOSI(rabbitmqNode.getOsInstance()));
             props.putAll(getTeamPropertiesFromTeam(rabbitmqNode.getSupportTeam()));
             rabbitmqNode.setProperties(props);
