@@ -119,7 +119,7 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
     @Requires(from="ArianePortalFacesMBeanRegistry")
     private FacesMBeanRegistry portalPluginFacesMBeanRegistry = null;
 
-    @Bind
+    @Bind(from="ArianePortalFacesMBeanRegistry")
     public void bindPortalPluginFacesMBeanRegistry(FacesMBeanRegistry r) {
         log.debug("Bound to portal plugin faces managed bean registry...");
         portalPluginFacesMBeanRegistry = r;
@@ -134,7 +134,7 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
     @Requires(from="InjectorTreeMenuRootsRegistryImpl")
     private TreeMenuRootsRegistry rootInjectorRegistry;
 
-    @Bind
+    @Bind(from="InjectorTreeMenuRootsRegistryImpl")
     public void bindRootInjectorRegistry(TreeMenuRootsRegistry r) {
         log.debug("Bound to injector tree menu root registry...");
         rootInjectorRegistry = r;

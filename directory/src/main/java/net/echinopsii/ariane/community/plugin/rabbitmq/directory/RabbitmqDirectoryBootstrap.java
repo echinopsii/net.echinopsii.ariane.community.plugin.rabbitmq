@@ -80,7 +80,7 @@ public class RabbitmqDirectoryBootstrap implements FaceletsResourceResolverServi
     @Requires(from="ArianePortalFacesMBeanRegistry")
     private FacesMBeanRegistry portalPluginFacesMBeanRegistry = null;
 
-    @Bind
+    @Bind(from="ArianePortalFacesMBeanRegistry")
     public void bindDirectoryPluginFacesMBeanRegistry(FacesMBeanRegistry r) {
         log.debug("Bound to portal plugin faces managed bean registry...");
         portalPluginFacesMBeanRegistry = r;
@@ -96,7 +96,7 @@ public class RabbitmqDirectoryBootstrap implements FaceletsResourceResolverServi
     private TreeMenuRootsRegistry rootDirectoryRegistry;
     private TreeMenuEntity rabbitmqTreeMenuEntity;
 
-    @Bind
+    @Bind(from="DirectoryMenuRootsTreeRegistryImpl")
     public void bindRootDirectoryRegistry(TreeMenuRootsRegistry r) {
         log.debug("Bound to directory tree menu roots registry...");
         rootDirectoryRegistry = r;
