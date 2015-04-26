@@ -99,8 +99,8 @@
             </p:dataTable>
         </h:form>
 
-        <p:dialog styleClass="arianeDialog" header="Confirm your remove order !" widgetVar="rabbitmqClusterRemoveDialog"
-                  width="500" showEffect="fade" hideEffect="explode">
+        <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Confirm your remove order !" widgetVar="rabbitmqClusterRemoveDialog"
+                  width="500" showEffect="fade" hideEffect="explode" closeOnEscape="true">
             <h:form id="removerabbitmqClusterDialogForm">
                 <h:outputText value="Are you sure you want delete following RabbitMQ cluster ?" styleClass="inputTitle"/><br/>
                 <p:commandButton value="Yes" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
@@ -120,8 +120,8 @@
             </h:form>
         </p:dialog>
 
-        <p:dialog styleClass="arianeDialog" header="Create a new RabbitMQ Cluster" widgetVar="rabbitmqClusterCreateDialog"
-                  width="450" showEffect="fade" hideEffect="explode">
+        <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new RabbitMQ Cluster" widgetVar="rabbitmqClusterCreateDialog"
+                  width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
             <h:form id="createrabbitmqClusterDialogForm">
                 <ui:insert name="createrabbitmqCluster" >
                     <ui:include src="/templates/rabbitmqClusterNewForm.xhtml" />
@@ -132,8 +132,8 @@
             </h:form>
         </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new RabbitMQ Node" widgetVar="rabbitmqNodeCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new RabbitMQ Node" widgetVar="rabbitmqNodeCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createrabbitmqNodeDialogForm">
                     <ui:insert name="createrabbitmqNode" >
                         <ui:include src="/templates/rabbitmqNodeNewForm.xhtml" />
@@ -144,8 +144,8 @@
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new OS Instance" widgetVar="osInstanceCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new OS Instance" widgetVar="osInstanceCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createOSInstanceDialogForm">
                     <ui:insert name="createOSInstance" >
                         <ui:include src="/templates/osInstanceNewForm.xhtml" />
@@ -156,57 +156,57 @@
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new OS Type" widgetVar="osTypeCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new OS Type" widgetVar="osTypeCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createOSTypeDialogForm">
                     <ui:insert name="createOSType" >
                         <ui:include src="/templates/osTypeNewForm.xhtml" />
                     </ui:insert>
                     <p:commandButton value="Save this OS Type" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                      actionListener="#{OSTypeNewController.save}" oncomplete="osTypeCreateDialog.hide();"
-                                     update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                                     update=":createOSInstanceDialogForm:osInstanceNewTabView,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new environment" widgetVar="environmentCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new environment" widgetVar="environmentCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createEnvironmentDialogForm">
                     <ui:insert name="createEnvironment" >
                         <ui:include src="/templates/environmentNewForm.xhtml" />
                     </ui:insert>
                     <p:commandButton value="Save this environment" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                      actionListener="#{environmentNewController.save}" oncomplete="environmentCreateDialog.hide();"
-                                     update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                                     update=":createOSInstanceDialogForm:osInstanceNewTabView,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new application" widgetVar="appCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new application" widgetVar="appCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createApplicationDialogForm">
                     <ui:insert name="createApplication" >
                         <ui:include src="/templates/applicationNewForm.xhtml" />
                     </ui:insert>
                     <p:commandButton value="Save this application" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                      actionListener="#{applicationNewController.save}" oncomplete="appCreateDialog.hide();"
-                                     update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                                     update=":createOSInstanceDialogForm:osInstanceNewTabView,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new team" widgetVar="teamCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new team" widgetVar="teamCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createTeamDialogForm">
                     <ui:insert name="createTeam" >
                         <ui:include src="/templates/teamNewForm.xhtml" />
                     </ui:insert>
                     <p:commandButton value="Save this team" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                      actionListener="#{teamNewController.save}" oncomplete="teamCreateDialog.hide();"
-                                     update=":createrabbitmqNodeDialogForm:rabbitmqNodeNewGrid,:createOSInstanceDialogForm:osInstanceNewGrid,
+                                     update=":createrabbitmqNodeDialogForm:rabbitmqNodeNewGrid,:createOSInstanceDialogForm:osInstanceNewTabView,
                                          :rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new company" widgetVar="companyCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new company" widgetVar="companyCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createCompanyDialogForm">
                     <ui:insert name="createCompany" >
                         <ui:include src="/templates/companyNewForm.xhtml" />
@@ -217,20 +217,20 @@
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new subnet" widgetVar="subnetCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new subnet" widgetVar="subnetCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createSubnetDialogForm">
                     <ui:insert name="createSubnet" >
                         <ui:include src="/templates/subnetNewForm.xhtml" />
                     </ui:insert>
                     <p:commandButton value="Save this subnet" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                      actionListener="#{subnetNewController.save}" oncomplete="subnetCreateDialog.hide();"
-                                     update=":createOSInstanceDialogForm:osInstanceNewGrid,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
+                                     update=":createOSInstanceDialogForm:osInstanceNewTabView,:rabbitmqClusterTableForm:rabbitmqClusterTableMessages"/>
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new routing area" widgetVar="rareaCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new routing area" widgetVar="rareaCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="createRareaDialogForm">
                     <ui:insert name="createRoutingArea" >
                         <ui:include src="/templates/routingAreaNewForm.xhtml" />
@@ -241,8 +241,8 @@
                 </h:form>
             </p:dialog>
 
-            <p:dialog styleClass="arianeDialog" header="Create a new datacenter" widgetVar="dcCreateDialog"
-                      width="450" showEffect="fade" hideEffect="explode">
+            <p:dialog styleClass="arianeDialog arianeDialogTitleBar arianeDialogCloseButton" header="Create a new datacenter" widgetVar="dcCreateDialog"
+                      width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
                 <h:form id="creatDCDialogForm">
                     <ui:insert name="createDatacenter" >
                         <ui:include src="/templates/dcNewForm.xhtml" />

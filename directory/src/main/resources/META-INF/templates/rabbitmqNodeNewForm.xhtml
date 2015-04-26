@@ -4,20 +4,20 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <ui:composition>
-    <h:panelGrid id="rabbitmqNodeNewGrid" columns="2" columnClasses="colStyle25,colStyle75" cellpadding="5" styleClass="ui-widget-content grid">
-        <h:outputText value="Name : " styleClass="inputTitle"/>
-        <p:inputText id="name" label="Name" required="true" value="#{rabbitmqNodeNewController.name}"/>
+    <h:panelGrid id="rabbitmqNodeNewGrid" columns="1" cellpadding="3" styleClass="ui-widget-content grid arianeDialogGrid">
+        <h:outputText value="Name" styleClass="arianeDialogLabel"/>
+        <p:inputText label="Name" required="true" value="#{rabbitmqNodeNewController.name}"/>
 
-        <h:outputText value="URL : " styleClass="inputTitle"/>
-        <p:inputText id="url" label="URL" required="true" value="#{rabbitmqNodeNewController.url}"/>
+        <h:outputText value="URL" styleClass="arianeDialogLabel"/>
+        <p:inputText label="URL" required="true" value="#{rabbitmqNodeNewController.url}"/>
 
-        <h:outputText value="User : " styleClass="inputTitle"/>
-        <p:inputText id="user" label="User" required="true" value="#{rabbitmqNodeNewController.user}"/>
+        <h:outputText value="User" styleClass="arianeDialogLabel"/>
+        <p:inputText label="User" required="true" value="#{rabbitmqNodeNewController.user}"/>
 
-        <h:outputText value="Password : " styleClass="inputTitle"/>
-        <h:inputSecret id="password" label="Password" value="#{rabbitmqNodeNewController.password}"/>
+        <h:outputText value="Password" styleClass="arianeDialogLabel"/>
+        <p:password label="Password" value="#{rabbitmqNodeNewController.password}"/>
 
-        <h:outputText value="RabbitMQ cluster : " styleClass="inputTitle"/>
+        <h:outputText value="RabbitMQ cluster" styleClass="arianeDialogLabel"/>
         <h:panelGroup>
             <p:commandLink onclick="rabbitmqClusterCreateDialog.show()">
                 <h:outputText value=" create new RabbitMQ cluster"/>
@@ -28,7 +28,7 @@
             </h:selectOneMenu>
         </h:panelGroup>
 
-        <h:outputText value="OS Instance : " styleClass="inputTitle"/>
+        <h:outputText value="OS Instance" styleClass="arianeDialogLabel"/>
         <h:panelGroup>
             <p:commandLink onclick="osInstanceCreateDialog.show()">
                 <h:outputText value=" create new OS Instance"/>
@@ -39,7 +39,7 @@
             </h:selectOneMenu>
         </h:panelGroup>
 
-        <h:outputText value="Support team : " styleClass="inputTitle"/>
+        <h:outputText value="Support team" styleClass="arianeDialogLabel"/>
         <h:panelGroup>
             <p:commandLink onclick="teamCreateDialog.show()">
                 <h:outputText value=" create new team"/>
@@ -50,8 +50,8 @@
             </h:selectOneMenu>
         </h:panelGroup>
 
-        <h:outputText value="Description : " styleClass="inputTitle"/>
-        <p:inputText id="description" label="Description" required="true" value="#{rabbitmqNodeNewController.description}"/>
+        <h:outputText value="Description" styleClass="arianeDialogLabel"/>
+        <p:inputTextarea label="Description" styleClass="arianeDialogInputTitle" required="true" autoResize="false" style="resize:none" value="#{rabbitmqNodeNewController.description}"/>
 
     </h:panelGrid>
 </ui:composition>

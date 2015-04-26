@@ -4,23 +4,23 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <ui:composition>
-    <h:panelGrid id="rabbitmqClusterNewGrid" columns="2" columnClasses="colStyle25,colStyle75" cellpadding="5" styleClass="ui-widget-content grid">
-        <h:outputText value="Name : " styleClass="inputTitle"/>
-        <p:inputText id="name" label="Name" required="true" value="#{rabbitmqClusterNewController.name}"/>
+    <h:panelGrid id="rabbitmqClusterNewGrid" columns="1" cellpadding="3" styleClass="ui-widget-content grid arianeDialogGrid">
+        <h:outputText value="Name" styleClass="arianeDialogLabel"/>
+        <p:inputText label="Name" required="true" value="#{rabbitmqClusterNewController.name}"/>
 
-        <h:outputText value="RabbitMQ components : " styleClass="inputTitle"/>
+        <h:outputText value="RabbitMQ nodes" styleClass="arianeDialogLabel"/>
         <h:panelGroup>
             <p:commandLink onclick="rabbitmqNodeCreateDialog.show()">
                 <h:outputText value=" create new RabbitMQ node"/>
             </p:commandLink><br/>
-            <p:selectManyMenu id="basic" value="#{rabbitmqClusterNewController.rmqnodesToBind}" style="width:150px;height:100px">
+            <p:selectManyMenu  value="#{rabbitmqClusterNewController.rmqnodesToBind}" style="width:68.5%;height:100px">
                 <f:selectItems value="#{rabbitmqNodesListController.getAll()}"  var="rbmqc"
                                itemLabel="#{rbmqc.name}" itemValue="#{rbmqc.name}"/>
             </p:selectManyMenu>
         </h:panelGroup>
 
-        <h:outputText value="Description : " styleClass="inputTitle"/>
-        <p:inputText id="description" label="Description" required="true" value="#{rabbitmqClusterNewController.description}"/>
+        <h:outputText value="Description" styleClass="inputTitle"/>
+        <p:inputTextarea styleClass="arianeDialogInputTitle" label="Description" required="true" autoResize="false" style="resize:none" value="#{rabbitmqClusterNewController.description}"/>
 
     </h:panelGrid>
 </ui:composition>
