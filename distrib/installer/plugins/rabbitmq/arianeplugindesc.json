@@ -33,6 +33,20 @@
             "targetConf" : "repository/ariane-plugins/net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQnjectorManagedService.properties",
             "defaultValuesFP" : "resources/configvalues/plugins/rabbitmq/cuRabbitmqInjectorManagedService.json"
         },
+	{
+            "sqlScriptFP": "None",
+	    "deployCmdFP": "None",
+            "templateFP" : "resources/templates/plugins/rabbitmq/infinispan.components.cache.xml.tpl",
+            "targetConf" : "ariane/cache/plugins/rabbitmq/infinipan.components.cache.xml",
+            "defaultValuesFP": "None"
+	},
+        {
+            "sqlScriptFP": "None",
+            "deployCmdFP": "None",
+            "templateFP" : "resources/templates/plugins/rabbitmq/infinispan.gears.cache.xml.tpl",
+            "targetConf" : "ariane/cache/plugins/rabbitmq/infinipan.gears.cache.xml",
+            "defaultValuesFP": "None"
+        },
         {
             "sqlScriptFP": "None",
             "deployCmdFP": "resources/virgoscripts/deploy-plugin.rabbitmq.vsh",

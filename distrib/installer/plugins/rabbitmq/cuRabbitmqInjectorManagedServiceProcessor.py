@@ -75,36 +75,98 @@ class cpDirectoryQueryInterval(AConfParamNotNone):
             return True
 
 
+class cpRabbitmqInjectorComponentsCacheConfPath(AConfParamNotNone):
+    
+    name = "##rabbitmqInjectorComponentsCacheConfFilePath"
+    description = "Plugin RabbitMQ Injector Components Cache Configuration File Path"
+    hide = False
+    
+    def __init__(self):
+        self.value = None 
+
+    def isValid(self):
+        if not super().isValid:
+            return False
+        else:
+            if os.path.exists(self.value) and os.access(self.value, os.W_OK) and os.access(self.value, os.W_OK):
+                return True
+            else:
+                print(self.description + " (" + self.value + ") is not valid.Check if it exists and it has good rights.")
+                return False
+
+
+class cpRabbitmqInjectorGearsCacheConfPath(AConfParamNotNone):
+
+    name = "##rabbitmqInjectorGearsCacheConfFilePath"
+    description = "Plugin RabbitMQ Injector Gears Cache Configuration File Path"
+    hide = False
+
+    def __init__(self):
+        self.value = None
+
+    def isValid(self):
+        if not super().isValid:
+            return False
+        else:
+            if os.path.exists(self.value) and os.access(self.value, os.W_OK) and os.access(self.value, os.W_OK):
+                return True
+            else:
+                print(self.description + " (" + self.value + ") is not valid.Check if it exists and it has good rights.")
+                return False
+            
+
 class cuRabbitmqInjectorManagedServiceProcessor(AConfUnit):
 
-    def __init__(self, targetConfDir):
+    def __init__(self, arianeDir):
+        addonsRepositoryDirPath = arianeDir + "/repository/ariane-plugins/"
+        rbqCacheDirPath = arianeDir + "/ariane/cache/plugins/rabbitmq/"
+
         self.confUnitName = "Plugin RabbitMQ injector managed service"
         self.confTemplatePath = os.path.abspath("resources/templates/plugins/rabbitmq/net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQInjectorManagedService.properties.tpl")
-        self.confFinalPath = targetConfDir + "net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQInjectorManagedService.properties"
+        self.confFinalPath = addonsRepositoryDirPath + "net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQInjectorManagedService.properties"
         componentSniffInterval = cpComponentSniffInterval()
         directoryQueryInterval = cpDirectoryQueryInterval()
+        injectorComponentsConfPath = cpRabbitmqInjectorComponentsCacheConfPath()
+        injectorGearsConfPath = cpRabbitmqInjectorGearsCacheConfPath()
+
         self.paramsDictionary = {
             componentSniffInterval.name: componentSniffInterval,
-            directoryQueryInterval.name: directoryQueryInterval
+            directoryQueryInterval.name: directoryQueryInterval,
+            injectorComponentsConfPath.name: injectorComponentsConfPath,
+            injectorGearsConfPath.name: injectorGearsConfPath 
         }
 
 
 class rabbitmqInjectorManagedServiceSyringe:
 
-    def __init__(self, targetConfDir, silent):
-        self.tibcoRVInjectorManagedService = cuRabbitmqInjectorManagedServiceProcessor(targetConfDir)
-        tibcorvInjectorManagedServiceCUJSON = open("resources/configvalues/plugins/rabbitmq/cuRabbitmqInjectorManagedService.json")
-        self.tibcorvInjectorManagedServiceCUValues = json.load(tibcorvInjectorManagedServiceCUJSON)
-        tibcorvInjectorManagedServiceCUJSON.close()
+    def __init__(self, arianeDir, silent):
+        self.addonsRepositoryDirPath = arianeDir + "/repository/ariane-plugins/"
+        if not os.path.exists(self.addonsRepositoryDirPath):
+            os.makedirs(self.addonsRepositoryDirPath, 0o755)
+
+        self.rbqCacheDirPath = arianeDir + "/ariane/cache/plugins/rabbitmq/"
+        if not os.path.exists(self.rbqCacheDirPath):
+            os.makedirs(self.rbqCacheDirPath, 0o755)
+
+        self.rbqInjectorManagedService = cuRabbitmqInjectorManagedServiceProcessor(arianeDir)
+        rbqInjectorManagedServiceCUJSON = open("resources/configvalues/plugins/rabbitmq/cuRabbitmqInjectorManagedService.json")
+        self.rbqInjectorManagedServiceCUValues = json.load(rbqInjectorManagedServiceCUJSON)
+        rbqInjectorManagedServiceCUJSON.close()
         self.silent = silent
 
     def shootBuilder(self):
-        for key in self.tibcoRVInjectorManagedService.getParamsKeysList():
+        for key in self.rbqInjectorManagedService.getParamsKeysList():
 
-            if key == cpComponentSniffInterval.name:
+            if key == cpRabbitmqInjectorGearsCacheConfPath.name:
+                self.rbqInjectorManagedService.setKeyParamValue(key, self.rbqCacheDirPath + "infinispan.gears.cache.xml")
+
+            elif key == cpRabbitmqInjectorComponentsCacheConfPath.name:
+                self.rbqInjectorManagedService.setKeyParamValue(key, self.rbqCacheDirPath + "infinispan.components.cache.xml")
+
+            elif key == cpComponentSniffInterval.name:
                 if not self.silent:
                     componentSniffIntervalIsDefined = False
-                    componentSniffIntervalDefault = self.tibcorvInjectorManagedServiceCUValues[cpComponentSniffInterval.name]
+                    componentSniffIntervalDefault = self.rbqInjectorManagedServiceCUValues[cpComponentSniffInterval.name]
                     componentSniffIntervalDefaultUI = "[default - " + componentSniffIntervalDefault + "] "
 
                     while not componentSniffIntervalIsDefined:
@@ -112,29 +174,29 @@ class rabbitmqInjectorManagedServiceSyringe:
                         try:
                             if sniffInt is None or sniffInt == "":
                                 sniffInt = str(componentSniffIntervalDefault)
-                            self.tibcoRVInjectorManagedService.setKeyParamValue(key, sniffInt)
+                            self.rbqInjectorManagedService.setKeyParamValue(key, sniffInt)
                             componentSniffIntervalIsDefined = True
                         except Exception:
                             pass
                 else:
-                    self.tibcoRVInjectorManagedService.setKeyParamValue(key, self.tibcorvInjectorManagedServiceCUValues[cpComponentSniffInterval.name])
+                    self.rbqInjectorManagedService.setKeyParamValue(key, self.rbqInjectorManagedServiceCUValues[cpComponentSniffInterval.name])
 
             elif key == cpDirectoryQueryInterval.name:
                 if not self.silent:
                     directoryQueryIntervalIsDefined = False
-                    directoryQueryIntervalDefault = self.tibcorvInjectorManagedServiceCUValues[cpDirectoryQueryInterval.name]
+                    directoryQueryIntervalDefault = self.rbqInjectorManagedServiceCUValues[cpDirectoryQueryInterval.name]
                     directoryQueryIntervalDefaultUI = "[default - " + directoryQueryIntervalDefault + "] "
                     while not directoryQueryIntervalIsDefined:
                         queryInt = input("%-- >> Define Plugin RabbitMQ directory query interval " + directoryQueryIntervalDefaultUI + ": ")
                         try:
                             if queryInt is None or queryInt == "":
                                 queryInt = str(directoryQueryIntervalDefault)
-                            self.tibcoRVInjectorManagedService.setKeyParamValue(key, queryInt)
+                            self.rbqInjectorManagedService.setKeyParamValue(key, queryInt)
                             directoryQueryIntervalIsDefined = True
                         except Exception:
-                            pass
+                            pass                
                 else:
-                    self.tibcoRVInjectorManagedService.setKeyParamValue(key, self.tibcorvInjectorManagedServiceCUValues[cpDirectoryQueryInterval.name])
+                    self.rbqInjectorManagedService.setKeyParamValue(key, self.rbqInjectorManagedServiceCUValues[cpDirectoryQueryInterval.name])
 
     def inject(self):
-        self.tibcoRVInjectorManagedService.process()
+        self.rbqInjectorManagedService.process()

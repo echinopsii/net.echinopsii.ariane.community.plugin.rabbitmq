@@ -18,6 +18,8 @@ import os
 from plugins.rabbitmq.dbRabbitmqDirectoryMySQLInitiator import dbRabbitmqDirectoryMySQLInitiator
 from plugins.rabbitmq.dbIDMMySQLPopulator import dbIDMMySQLPopulator
 from plugins.rabbitmq.cuRabbitmqInjectorManagedServiceProcessor import rabbitmqInjectorManagedServiceSyringe
+from plugins.rabbitmq.cuRabbitmqInjectorComponentsCacheProcessor import cuInjectorComponentsCacheProcessor
+from plugins.rabbitmq.cuRabbitmqInjectorGearsCacheProcessor import cuInjectorGearsCacheProcessor, cpInjectorGearsCacheDir
 
 __author__ = 'mffrench'
 
@@ -29,14 +31,15 @@ class rabbitmqProcessor:
         print("%-- Plugin RabbitMQ configuration : \n")
         self.homeDirPath = homeDirPath
         self.silent = silent
-        addonsRepositoryDirPath = self.homeDirPath + "/repository/ariane-plugins/"
-        if not os.path.exists(addonsRepositoryDirPath):
-            os.makedirs(addonsRepositoryDirPath, 0o755)
-        self.rabbitmqInjectorManagedServiceSyringe = rabbitmqInjectorManagedServiceSyringe(addonsRepositoryDirPath, silent)
+        self.rabbitmqInjectorGearsCache = cuInjectorGearsCacheProcessor(self.homeDirPath + "/ariane/cache/plugins/rabbitmq/")
+        self.rabbitmqInjectorComponentsCache = cuInjectorComponentsCacheProcessor(self.homeDirPath + "/ariane/cache/plugins/rabbitmq/")
+        self.rabbitmqInjectorManagedServiceSyringe = rabbitmqInjectorManagedServiceSyringe(homeDirPath, silent)
         self.rabbitmqDirectoryMySQLInitiator = dbRabbitmqDirectoryMySQLInitiator(directoryDBConfig)
         self.rabbitmqIDMMySQLPopulator = dbIDMMySQLPopulator(idmDBConfig)
 
     def process(self):
+        self.rabbitmqInjectorGearsCache.process()
+        self.rabbitmqInjectorComponentsCache.process()
         self.rabbitmqInjectorManagedServiceSyringe.shootBuilder()
         self.rabbitmqInjectorManagedServiceSyringe.inject()
         self.rabbitmqDirectoryMySQLInitiator.process()
