@@ -9,7 +9,7 @@
       xmlns:arianeidm="http://echinopsii.net/ariane/idm">
 <ui:composition template="/templates/directoryLayout.xhtml">
     <ui:define name="directoryContent">
-        <ui:fragment rendered="#{arianeidm:isAuthenticated() and arianeidm:hasPermission('dirMdwRabbitMQNode:display')}">
+        <ui:fragment rendered="#{arianeidm:hasPermission('dirMdwRabbitMQNode:display')}">
         <h:form id="rabbitmqNodeTableForm" styleClass="arianeTransparentBg0-uiwc-noi">
             <p:growl id="rabbitmqNodeTableMessages" showDetail="true" />
             <p:dataTable id="rabbitmqNodeTable" styleClass="arianeTableRow" var="rbmqc" value="#{rabbitmqNodesListController.lazyModel}"

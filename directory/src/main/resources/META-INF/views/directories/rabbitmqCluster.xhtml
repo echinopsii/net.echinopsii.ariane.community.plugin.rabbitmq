@@ -14,7 +14,7 @@
     </ui:define>
     -->
     <ui:define name="directoryContent">
-        <ui:fragment rendered="#{arianeidm:isAuthenticated() and arianeidm:hasPermission('dirMdwRabbitMQCluster:display')}">
+        <ui:fragment rendered="#{arianeidm:hasPermission('dirMdwRabbitMQCluster:display')}">
         <h:form id="rabbitmqClusterTableForm" styleClass="arianeTransparentBg0-uiwc-noi">
             <p:growl id="rabbitmqClusterTableMessages" showDetail="true" />
             <p:dataTable id="rabbitmqClusterTable" styleClass="arianeTableRow" var="rbmqc" value="#{rabbitmqClustersListController.lazyModel}"
