@@ -31,6 +31,8 @@ class rabbitmqProcessor:
         print("%-- Plugin RabbitMQ configuration : \n")
         self.homeDirPath = homeDirPath
         self.silent = silent
+        if not os.path.exists(self.homeDirPath + "/ariane/cache/plugins/rabbitmq/"):
+            os.makedirs(self.homeDirPath + "/ariane/cache/plugins/rabbitmq/", 0o755)
         self.rabbitmqInjectorGearsCache = cuInjectorGearsCacheProcessor(self.homeDirPath + "/ariane/cache/plugins/rabbitmq/")
         self.rabbitmqInjectorComponentsCache = cuInjectorComponentsCacheProcessor(self.homeDirPath + "/ariane/cache/plugins/rabbitmq/")
         self.rabbitmqInjectorManagedServiceSyringe = rabbitmqInjectorManagedServiceSyringe(homeDirPath, silent)
