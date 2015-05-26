@@ -35,7 +35,7 @@ class RabbitRESTTestSetup {
         hostname  = cmdReader.readLine();
 
 
-        validNode = new RabbitNodeToConnect("rabbit@"+hostname, "http://localhost:15672/", "guest", "guest")
+        validNode = new RabbitNodeToConnect("rabbit@localhost", "http://localhost:15672/", "guest", "guest")
         Set<RabbitNodeToConnect> vnodes = new HashSet<RabbitNodeToConnect>();
         vnodes.add(validNode);
         validCluster = new RabbitClusterToConnect("rabbit@"+hostname)
