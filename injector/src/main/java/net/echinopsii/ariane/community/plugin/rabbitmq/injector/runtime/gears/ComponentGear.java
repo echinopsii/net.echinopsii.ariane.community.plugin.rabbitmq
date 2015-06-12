@@ -85,6 +85,16 @@ public class ComponentGear extends AbstractAkkaGear implements Serializable {
     }
 
     @Override
+    public int getSleepingPeriod() {
+        return 0;
+    }
+
+    @Override
+    public void setSleepingPeriod(int sleepingPeriod) {
+
+    }
+
+    @Override
     public void start() {
         super.setGearActor(super.getGearActorRefFactory().actorOf(ComponentActor.props(this), super.getGearId()));
         super.scheduleMessage(ComponentActor.MSG_REFRESH, componentSniffInterval*1000);

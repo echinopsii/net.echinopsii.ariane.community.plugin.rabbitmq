@@ -41,6 +41,16 @@ public class MappingGear extends AbstractAkkaGear implements Serializable {
     }
 
     @Override
+    public int getSleepingPeriod() {
+        return 0;
+    }
+
+    @Override
+    public void setSleepingPeriod(int sleepingPeriod) {
+
+    }
+
+    @Override
     public void start() {
         super.setGearActor(super.getGearActorRefFactory().actorOf(MappingActor.props(this), super.getGearId()));
         super.setRunning(true);
