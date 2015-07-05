@@ -308,7 +308,7 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
             }
             mappingMdwInjectorMenuEntity.addDisplayRole("mdwrabbitadmin").addDisplayRole("mdwrabbitreviewer").addDisplayPermission("injMapMdwRabbitMQ:display");
             mappingMdwInjectorMenuEntity.addChildTreeMenuEntity(new TreeMenuEntity().setId("rabbitmqMapTreeID").setValue("RabbitMQ").setParentTreeMenuEntity(mappingMdwInjectorMenuEntity).
-                                                                                     setIcon("icon-asterisk").setType(MenuEntityType.TYPE_MENU_ITEM).
+                                                                                     setIcon("icon-rabbitmq-injector").setType(MenuEntityType.TYPE_MENU_ITEM).
                                                                                      setContextAddress(MAIN_MENU_INJECTOR_CONTEXT + "views/injectors/rabbitmq.jsf").
                                                                                      setDescription("Inject data from your local RabbitMQ infrastructure to Ariane mapping").
                                                                                      addDisplayRole("mdwrabbitmqadmin").addDisplayRole("mdwrabbitmqreviewer").

@@ -251,13 +251,13 @@ public class RabbitmqDirectoryBootstrap implements FaceletsResourceResolverServi
                                                          addDisplayPermission("dirMdwRabbitMQNode:display").addDisplayPermission("dirMdwRabbitMQCluster:display");
             middlewareRootTreeMenuEntity.addChildTreeMenuEntity(rabbitmqTreeMenuEntity);
             rabbitmqTreeMenuEntity.addChildTreeMenuEntity(new TreeMenuEntity().setId("rabbitMQNodeTreeID").setValue("RabbitMQ Node").
-                                                                               setParentTreeMenuEntity(rabbitmqTreeMenuEntity).setIcon("icon-cogs").
+                                                                               setParentTreeMenuEntity(rabbitmqTreeMenuEntity).setIcon("icon-rabbitmq-node").
                                                                                setType(MenuEntityType.TYPE_MENU_ITEM).setContextAddress(MAIN_MENU_DIRECTORY_CONTEXT + "views/directories/rabbitmqNode.jsf").
                                                                                setDescription("Your RabbitMQ Node definitions").
                                                                                addDisplayRole("mdwrabbitadmin").addDisplayRole("mdwrabbitreviewer").
                                                                                addDisplayPermission("dirMdwRabbitMQNode:display"));
             rabbitmqTreeMenuEntity.addChildTreeMenuEntity(new TreeMenuEntity().setId("rabbitMQClusterTreeID").setValue("RabbitMQ Cluster").
-                                                                               setParentTreeMenuEntity(rabbitmqTreeMenuEntity).setIcon("icon-sitemap").
+                                                                               setParentTreeMenuEntity(rabbitmqTreeMenuEntity).setIcon("icon-rabbitmq-cluster").
                                                                                setType(MenuEntityType.TYPE_MENU_ITEM).setContextAddress(MAIN_MENU_DIRECTORY_CONTEXT + "views/directories/rabbitmqCluster.jsf").
                                                                                setDescription("Your RabbitMQ Cluster definitions").
                                                                                addDisplayRole("mdwrabbitadmin").addDisplayRole("mdwrabbitreviewer").
