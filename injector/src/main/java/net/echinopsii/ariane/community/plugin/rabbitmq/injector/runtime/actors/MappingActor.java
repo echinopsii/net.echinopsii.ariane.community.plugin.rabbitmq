@@ -866,7 +866,7 @@ public class MappingActor extends UntypedActor {
                             log.debug("");
                             log.debug("---");
                             RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEndpoint.getEndpointID(), targetEndpoint.getEndpointID(),
-                                                                                                     clusterTransport.getTransportID(), 0);
+                                                                                                     clusterTransport.getTransportID());
                             log.debug("Create or get link ({},{},{})", new Object[]{sourceEndpoint.getEndpointParentNode().getNodeID(),
                                                                                            targetEndpoint.getEndpointParentNode().getNodeID(),
                                                                                            clusterTransport.getTransportID()});
@@ -1089,7 +1089,7 @@ public class MappingActor extends UntypedActor {
                                     log.debug("Create or get transport ({},{}).", new Object[]{transport.getTransportID(), RABBITMQ_TRANSPORT_MEM_BINDING});
 
                                     Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
-                                                                                                      transport.getTransportID(), 0);
+                                                                                                      transport.getTransportID());
                                     log.debug("Link endpoints together ({},{},{},{}).", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                      targetEp.getEndpointID(), transport.getTransportID()});
                                 }
@@ -1153,7 +1153,7 @@ public class MappingActor extends UntypedActor {
                                     log.debug("Create or get transport ({},{}).", new Object[]{transport.getTransportID(), RABBITMQ_TRANSPORT_MEM_BINDING});
 
                                     Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
-                                                                                                             transport.getTransportID(), 0);
+                                                                                                             transport.getTransportID());
                                     log.debug("Link endpoints together ({},{},{},{}).", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                             targetEp.getEndpointID(), transport.getTransportID()});
                                 }
@@ -1289,7 +1289,7 @@ public class MappingActor extends UntypedActor {
                                             log.debug("Create or get transport : ({},{})", new Object[]{transport.getTransportID(), transportName});
 
                                             Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
-                                                                                                                                 transport.getTransportID(), 0);
+                                                                                                                                 transport.getTransportID());
                                             log.debug("Create or get link : ({},{},{},{})", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                                 targetEp.getEndpointID(), transport.getTransportID()});
 
@@ -1326,7 +1326,7 @@ public class MappingActor extends UntypedActor {
                                             log.debug("Create or get transport : ({},{})", new Object[]{transport.getTransportID(), transportName});
 
                                             Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
-                                                                                                                                 transport.getTransportID(), 0);
+                                                                                                                                 transport.getTransportID());
                                             log.debug("Create or get link : ({},{},{},{})", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                                 targetEp.getEndpointID(), transport.getTransportID()});
 
