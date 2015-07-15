@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.echinopsii.ariane.community.plugin</groupId>
         <artifactId>net.echinopsii.ariane.community.plugin.rabbitmq</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
+        <version>0.2.3</version>
         <relativePath>..</relativePath>
     </parent>
 
