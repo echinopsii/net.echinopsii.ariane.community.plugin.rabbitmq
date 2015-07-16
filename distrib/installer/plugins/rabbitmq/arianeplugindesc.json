@@ -1,10 +1,10 @@
 {
     "id": "ariane.community.plugin.rabbitmq",
-    "version": "0.2.3",
+    "version": "master.SNAPSHOT",
     "type": "community",
     "deployCommandsFile": "resources/virgoscripts/deploy-plugin.rabbitmq.vsh",
     "distribs": [
-        "0.6.3"
+        "master.SNAPSHOT"
     ],
     "hook": {
         "package": "plugins.rabbitmq",
