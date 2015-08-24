@@ -7,5 +7,5 @@
 {% block bundle %}
         {% for s in submodules -%}
         <artifact type="bundle" name="net.echinopsii.ariane.community.plugin.{{module.name}}.{{s.name}}" version="[{{vmin}},{{vmax}})"/>
-        {%- endfor %}
+        {% endfor %}
 {% endblock %}
