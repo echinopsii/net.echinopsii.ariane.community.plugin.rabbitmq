@@ -1,11 +1,12 @@
-{% extends "plan_module_parent_tpl.xml" %}
-{% block name %}"net.echinopsii.ariane.community.plugin.{{module.name}}"{% endblock %}
-{% block version %}"{{version}}"{% endblock %}
-{%- block configuration -%}
-<artifact type="configuration" name="net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQInjectorManagedService"/>
-{%- endblock -%}
-{% block bundle %}
-        {% for s in submodules -%}
-        <artifact type="bundle" name="net.echinopsii.ariane.community.plugin.{{module.name}}.{{s.name}}" version="[{{vmin}},{{vmax}})"/>
-        {% endfor %}
-{% endblock %}
+<plan name="net.echinopsii.ariane.community.plugin.{{module.name}}" version="{{version}}" scoped="false" atomic="false"
+                xmlns="http://www.eclipse.org/virgo/schema/plan"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				xsi:schemaLocation="
+				        http://www.eclipse.org/virgo/schema/plan
+				        http://www.eclipse.org/virgo/schema/plan/eclipse-virgo-plan.xsd">
+
+    <artifact type="configuration" name="net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQInjectorManagedService"/>
+	{% for s in submodules -%}
+            <artifact type="bundle" name="net.echinopsii.ariane.community.plugin.{{module.name}}.{{s.name}}" version="[{{vmin}},{{vmax}})"/>
+    {% endfor -%}
+</plan>
