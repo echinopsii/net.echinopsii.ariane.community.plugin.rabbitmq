@@ -281,7 +281,7 @@
                   width="450" showEffect="fade" hideEffect="explode" closeOnEscape="true">
             <h:form id="creatDCDialogForm">
                 <ui:insert name="createDatacenter" >
-                    <ui:include src="/templates/dcNewForm.xhtml" />
+                    <ui:include src="/templates/locNewForm.xhtml" />
                 </ui:insert>
                 <p:commandButton value="Save this datacenter" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
                                  actionListener="#{datacenterNewController.save}" oncomplete="dcCreateDialog.hide();"
