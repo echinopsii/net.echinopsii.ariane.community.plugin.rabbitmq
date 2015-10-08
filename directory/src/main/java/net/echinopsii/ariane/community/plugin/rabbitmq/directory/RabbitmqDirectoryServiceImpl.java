@@ -20,7 +20,7 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.directory;
 
 import net.echinopsii.ariane.community.core.directory.base.model.organisational.Team;
-import net.echinopsii.ariane.community.core.directory.base.model.technical.network.Datacenter;
+import net.echinopsii.ariane.community.core.directory.base.model.technical.network.Location;
 import net.echinopsii.ariane.community.core.directory.base.model.technical.network.Subnet;
 import net.echinopsii.ariane.community.core.directory.base.model.technical.system.OSInstance;
 import net.echinopsii.ariane.community.plugin.rabbitmq.directory.controller.rabbitmqcluster.RabbitmqClustersListController;
@@ -192,13 +192,13 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
 
     private HashMap<String, Object> getLocationPropertiesFromOSI(OSInstance osInstance) {
         HashMap<String, Object> props = new HashMap<>();
-        HashSet<Datacenter> dcs = new HashSet<>();
+        HashSet<Location> locs = new HashSet<>();
         HashSet<Subnet> subnets = new HashSet<>();
         for (Subnet subnet : osInstance.getNetworkSubnets()) {
-            for(Datacenter datacenter : subnet.getDatacenters()) if (!dcs.contains(datacenter)) dcs.add(datacenter);
+            for(Location location : subnet.getLocations()) if (!locs.contains(location)) locs.add(location);
             if (!subnets.contains(subnet)) subnets.add(subnet);
         }
-        for (Datacenter datacenter : dcs) props.put(Datacenter.DC_MAPPING_PROPERTIES,datacenter.toMappingProperties());
+        for (Location location : locs) props.put(Location.DC_MAPPING_PROPERTIES, location.toMappingProperties());
         for (Subnet subnet : subnets) {
             HashMap<String, Object> subnetProps = subnet.toMappingProperties();
             props.put(Subnet.SUBNET_MAPPING_PROPERTIES, subnetProps);
