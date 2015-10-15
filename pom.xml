@@ -6,7 +6,7 @@
     <groupId>net.echinopsii.ariane.community.plugin</groupId>
     <artifactId>net.echinopsii.ariane.community.plugin.rabbitmq</artifactId>
     <name>Ariane Community Plugin For RabbitMQ</name>
-    <version>0.2.4-SNAPSHOT</version>
+    <version>0.2.4</version>
     <packaging>pom</packaging>
 
     <modules>
