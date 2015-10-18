@@ -1,10 +1,10 @@
 {
     "id": "ariane.community.plugin.rabbitmq",
-    "version": "0.2.4",
+    "version": "master.SNAPSHOT",
     "type": "community",
     "deployCommandsFile": "resources/virgoscripts/deploy-plugin.rabbitmq.vsh",
     "distribs": [
-        "0.7.0"
+        "master.SNAPSHOT"
     ],
     "hook": {
         "package": "plugins.rabbitmq",
@@ -33,13 +33,13 @@
             "targetConf" : "repository/ariane-plugins/net.echinopsii.ariane.community.plugin.rabbitmq.RabbitMQnjectorManagedService.properties",
             "defaultValuesFP" : "resources/configvalues/plugins/rabbitmq/cuRabbitmqInjectorManagedService.json"
         },
-	{
+        {
             "sqlScriptFP": "None",
-	    "deployCmdFP": "None",
+            "deployCmdFP": "None",
             "templateFP" : "resources/templates/plugins/rabbitmq/infinispan.components.cache.xml.tpl",
             "targetConf" : "ariane/cache/plugins/rabbitmq/infinipan.components.cache.xml",
             "defaultValuesFP": "None"
-	},
+        },
         {
             "sqlScriptFP": "None",
             "deployCmdFP": "None",
