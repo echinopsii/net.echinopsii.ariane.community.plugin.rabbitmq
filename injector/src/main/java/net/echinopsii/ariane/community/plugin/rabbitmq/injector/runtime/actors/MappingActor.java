@@ -22,6 +22,7 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.actors;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import com.sun.corba.se.pept.broker.Broker;
 import net.echinopsii.ariane.community.core.mapping.ds.MappingDSException;
 import net.echinopsii.ariane.community.core.mapping.ds.domain.*;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
@@ -915,10 +916,11 @@ public class MappingActor extends UntypedActor {
         log.debug("");
         log.debug("");
         ArrayList<Gate> clusterGates = new ArrayList<>();
-        if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE))
-            for (BrokerFromRabbitREST broker : entity.getBrokers())
+        if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE)) {
+            ArrayList<BrokerFromRabbitREST> brokers = new ArrayList(entity.getBrokers());
+            for (BrokerFromRabbitREST broker : brokers)
                 cluster.addClusterContainer(pushBrokerToMappingDS(entity, clusterGates, broker));
-        else standaloneRBQ = pushBrokerToMappingDS(entity, clusterGates, entity.getBroker());
+        } else standaloneRBQ = pushBrokerToMappingDS(entity, clusterGates, entity.getBroker());
 
         log.debug("");
         log.debug("");
