@@ -112,7 +112,7 @@ class RabbitClusterToConnect {
 
         if (this.selectedNodeForREST!=null && maxRetry>0) {
             try {
-                ret = this.selectedNodeForREST.get(path)
+                ret = this.selectedNodeForREST.getRestCli().get(path: path)
             } catch (UnknownHostException urlpb) {
                 this.retryGetOnException(urlpb, path, maxRetry)
             } catch (NoHttpResponseException noHttpResponseException) {

@@ -57,20 +57,14 @@ class QueueFromRabbitREST implements Serializable {
         // The following queue_req_path should be used but there is a problem in the groovy HTTPBuilder
         // api/queues/%2F/queueName for vhost "/" is re-encoded api/queues/%252F/queueName and api/queues///queueName is re-encoded api/queues/queueName
         // String queue_req_path =  'api/queues/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
-        try {
-            def queues_req = (cluster != null) ? cluster.get(REST_RABBITMQ_QUEUE_PATH) : (node != null) ? node.get(REST_RABBITMQ_QUEUE_PATH) : null
-            if (queues_req != null && queues_req.status == 200 && queues_req.data != null) {
-                queues_req.data.each { queue ->
-                    if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
-                        properties = queue
-                }
-                properties.remove(JSON_RABBITMQ_QUEUE_NAME)
-                properties.remove(JSON_RABBITMQ_QUEUE_VHOST)
+        def queues_req = (cluster != null) ? cluster.get(REST_RABBITMQ_QUEUE_PATH) : (node != null) ? node.getRestCli().get(path: REST_RABBITMQ_QUEUE_PATH) : null
+        if (queues_req != null && queues_req.status == 200 && queues_req.data != null) {
+            queues_req.data.each { queue ->
+                if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
+                    properties = queue
             }
-        } catch (Exception e) {
-            if (log.isDebugEnabled())
-                e.printStackTrace();
-            log.error("PB with node " + name + " (" + node.getUrl() + "):" + e.getMessage())
+            properties.remove(JSON_RABBITMQ_QUEUE_NAME)
+            properties.remove(JSON_RABBITMQ_QUEUE_VHOST)
         }
         return this
     }

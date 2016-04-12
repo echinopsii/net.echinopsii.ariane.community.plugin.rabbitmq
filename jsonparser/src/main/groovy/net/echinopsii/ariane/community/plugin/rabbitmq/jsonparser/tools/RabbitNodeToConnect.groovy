@@ -31,9 +31,6 @@ class RabbitNodeToConnect {
 
     private static final Logger log = LoggerFactory.getLogger(RabbitNodeToConnect.class)
 
-    static final MAX_COUNT_BEFORE_REINIT = 20
-    int getCountBeforeReInit = MAX_COUNT_BEFORE_REINIT
-
     String name
     String url
     String user
@@ -77,9 +74,8 @@ class RabbitNodeToConnect {
             this.restCli = new RESTClient( this.url )
             this.restCli.auth.basic this.user, this.password;
         } catch (Exception e) {
-            if (log.isDebugEnabled())
-                e.printStackTrace();
-            log.error("PB with node " + name + " (" + url + "):" + e.getMessage())
+            e.printStackTrace();
+            log.error(e.getMessage())
         }
         log.debug("[init done]new node to connect : " + name);
     }
@@ -158,18 +154,5 @@ class RabbitNodeToConnect {
             this.connectionProblemDescription = "SOME ERROR : " + e.getMessage()
         }
         return this.connectionStatus;
-    }
-
-    public Object get(String path) {
-        if (this.getCountBeforeReInit == 0) {
-            this.restCli.shutdown()
-            this.restCli = new RESTClient( this.url )
-            this.restCli.auth.basic this.user, this.password;
-            this.getCountBeforeReInit = MAX_COUNT_BEFORE_REINIT
-        } else {
-            this.getCountBeforeReInit--
-        }
-
-        this.restCli.get(path: path)
     }
 }

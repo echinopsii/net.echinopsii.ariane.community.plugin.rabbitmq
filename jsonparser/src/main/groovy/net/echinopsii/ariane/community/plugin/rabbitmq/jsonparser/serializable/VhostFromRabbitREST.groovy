@@ -20,12 +20,8 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 class VhostFromRabbitREST implements Serializable {
-
-    private static final Logger log = LoggerFactory.getLogger(VhostFromRabbitREST.class)
 
     private transient static final String REST_RABBITMQ_VHOST_PATH = "/api/vhosts/"
 
@@ -48,19 +44,13 @@ class VhostFromRabbitREST implements Serializable {
     }
 
     VhostFromRabbitREST parse() {
-        try {
-            def vhosts_req = (cluster != null) ? cluster.get(REST_RABBITMQ_VHOST_PATH) : (node != null) ? node.get(REST_RABBITMQ_VHOST_PATH) : null
-            if (vhosts_req != null && vhosts_req.status == 200 && vhosts_req.data != null) {
-                vhosts_req.data.each { vhost ->
-                    if (vhost.name.equals(this.name))
-                        properties = vhost
-                }
-                properties.remove(JSON_RABBITMQ_VHOST_NAME)
+        def vhosts_req = (cluster!=null) ? cluster.get(REST_RABBITMQ_VHOST_PATH) : (node!=null) ? node.getRestCli().get(path: REST_RABBITMQ_VHOST_PATH) : null
+        if (vhosts_req != null && vhosts_req.status == 200 && vhosts_req.data != null) {
+            vhosts_req.data.each { vhost ->
+                if (vhost.name.equals(this.name))
+                    properties = vhost
             }
-        } catch (Exception e) {
-            if (log.isDebugEnabled())
-                e.printStackTrace();
-            log.error("PB with node " + name + " (" + node.getUrl() + "):" + e.getMessage())
+            properties.remove(JSON_RABBITMQ_VHOST_NAME)
         }
         return this
     }
