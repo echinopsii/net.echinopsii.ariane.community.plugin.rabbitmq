@@ -65,18 +65,25 @@ class BindingFromRabbitREST implements Serializable {
         // The following binding_req_path should be used but there is a problem in the groovy HTTPBuilder
         // api/bindings/%2F/bindingName for vhost "/" is re-encoded api/bindings/%252F/bindingName and api/bindings///bindingName is re-encoded api/bindings/bindingName
         // String binding_req_path =  'api/bindings/' + URLEncoder.encode(this.vhost, "ASCII") + "/" + URLEncoder.encode(this.name, "ASCII")
-        def bindings_req = (cluster!=null) ? cluster.get(REST_RABBITMQ_BINDING_PATH) : ((node!=null) ? node.getRestCli().get(path: REST_RABBITMQ_BINDING_PATH) : null)
-        if (bindings_req != null && bindings_req.status == 200 && bindings_req.data != null) {
-            bindings_req.data.each { binding ->
-                if (binding.source.equals(""))
-                    binding.source = ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME
-                if (((String)binding.source +
-                     "-[" + (String)binding.destination_type + "/{" + (String)binding.routing_key + "," + (String)binding.properties_key + "}]->"
-                     + (String)binding.destination).equals(this.name) && binding.vhost.equals(this.vhost))
-                    properties = binding
+        try {
+            def bindings_req = (cluster != null) ? cluster.get(REST_RABBITMQ_BINDING_PATH) : ((node != null) ? node.get(REST_RABBITMQ_BINDING_PATH) : null)
+            if (bindings_req != null && bindings_req.status == 200 && bindings_req.data != null) {
+                bindings_req.data.each { binding ->
+                    if (binding.source.equals(""))
+                        binding.source = ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME
+                    if (((String) binding.source +
+                            "-[" + (String) binding.destination_type + "/{" + (String) binding.routing_key + "," + (String) binding.properties_key + "}]->"
+                            + (String) binding.destination).equals(this.name) && binding.vhost.equals(this.vhost))
+                        properties = binding
+                }
+                properties.remove(JSON_RABBITMQ_BINDING_VHOST)
             }
-            properties.remove(JSON_RABBITMQ_BINDING_VHOST)
+        } catch (Exception e) {
+            if (log.isDebugEnabled())
+                e.printStackTrace();
+            log.error("PB with node " + name + " (" + node.getUrl() + "):" + e.getMessage())
         }
+
         return this;
     }
 

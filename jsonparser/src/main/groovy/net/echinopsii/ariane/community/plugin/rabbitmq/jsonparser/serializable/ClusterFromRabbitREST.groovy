@@ -20,6 +20,8 @@
 package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class ClusterFromRabbitREST implements Serializable {
 
@@ -29,25 +31,32 @@ class ClusterFromRabbitREST implements Serializable {
     List<String> nodes        = new ArrayList<String>();
     List<String> runningNodes = new ArrayList<String>();
 
+    private static final Logger log = LoggerFactory.getLogger(ClusterFromRabbitREST.class)
+
     ClusterFromRabbitREST(RabbitClusterToConnect cluster) {
         this.cluster = cluster;
     }
 
     ClusterFromRabbitREST parse() {
-        def cluster_name_req = this.cluster.get('/api/cluster-name')
-        if (cluster_name_req!=null && cluster_name_req.status == 200 && cluster_name_req.data != null && cluster_name_req.data.name!=null ) this.name = cluster_name_req.data.name;
+        try {
+            def cluster_name_req = this.cluster.get('/api/cluster-name')
+            if (cluster_name_req != null && cluster_name_req.status == 200 && cluster_name_req.data != null && cluster_name_req.data.name != null) this.name = cluster_name_req.data.name;
 
-        if (this.name != null)  {
-            def cluster_nodes_req = this.cluster.get('/api/nodes')
-            if (cluster_name_req!=null && cluster_nodes_req.status == 200 && cluster_nodes_req.data != null && cluster_nodes_req.data instanceof List) {
-                cluster_nodes_req.data.each { node ->
-                    nodes.add((String)node.name)
-                    if (node.running)
-                        runningNodes.add((String)node.name)
+            if (this.name != null) {
+                def cluster_nodes_req = this.cluster.get('/api/nodes')
+                if (cluster_name_req != null && cluster_nodes_req.status == 200 && cluster_nodes_req.data != null && cluster_nodes_req.data instanceof List) {
+                    cluster_nodes_req.data.each { node ->
+                        nodes.add((String) node.name)
+                        if (node.running)
+                            runningNodes.add((String) node.name)
+                    }
                 }
             }
+        } catch (Exception e) {
+            if (log.isDebugEnabled())
+                e.printStackTrace();
+            log.error("PB with node " + name + " (" + node.getUrl() + "):" + e.getMessage())
         }
-
         return this;
     }
 

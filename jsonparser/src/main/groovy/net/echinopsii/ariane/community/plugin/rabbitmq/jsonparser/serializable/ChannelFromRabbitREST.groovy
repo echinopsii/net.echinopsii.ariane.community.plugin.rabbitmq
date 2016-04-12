@@ -21,6 +21,8 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class ChannelFromRabbitREST implements Serializable {
 
@@ -42,6 +44,7 @@ class ChannelFromRabbitREST implements Serializable {
     public transient static final String JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_VHOST      = "vhost"
     public transient static final String JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_NAME       = "name"
 
+    private static final Logger log = LoggerFactory.getLogger(ChannelFromRabbitREST.class)
 
     transient RabbitClusterToConnect cluster;
     transient RabbitNodeToConnect node;
@@ -60,17 +63,22 @@ class ChannelFromRabbitREST implements Serializable {
     }
 
     ChannelFromRabbitREST parse() {
-        String channel_req_path =  REST_RABBITMQ_CHANNEL_PATH + this.name;
-        def channel_req = (cluster!=null) ? cluster.get(channel_req_path) : ((node!=null) ? node.getRestCli().get(path: channel_req_path) : null);
-        if (channel_req != null && channel_req.status == 200 && channel_req.data != null) {
-            channel_req.data.publishes.each { publish ->
-                if (publish.exchange.name.equals(""))
-                    publish.exchange.name=ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME
+        try {
+            String channel_req_path = REST_RABBITMQ_CHANNEL_PATH + this.name;
+            def channel_req = (cluster != null) ? cluster.get(channel_req_path) : ((node != null) ? node.get(channel_req_path) : null);
+            if (channel_req != null && channel_req.status == 200 && channel_req.data != null) {
+                channel_req.data.publishes.each { publish ->
+                    if (publish.exchange.name.equals(""))
+                        publish.exchange.name = ExchangeFromRabbitREST.RABBITMQ_DEFAULT_EXCH_NAME
+                }
+                properties = channel_req.data
+                properties.remove(JSON_RABBITMQ_CHANNEL_NAME)
             }
-            properties = channel_req.data
-            properties.remove(JSON_RABBITMQ_CHANNEL_NAME)
+        } catch (Exception e) {
+            if (log.isDebugEnabled())
+                e.printStackTrace();
+            log.error("PB with node " + name + " (" + node.getUrl() + "):" + e.getMessage())
         }
-
         return this
     }
 
