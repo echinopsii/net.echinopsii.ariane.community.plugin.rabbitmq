@@ -814,7 +814,7 @@ public class MappingActor extends UntypedActor {
 
         log.debug("");
         log.debug("-----------------------------------");
-        Container rbqBroker = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(adminGateUrl, adminGateName);
+        Container rbqBroker = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(serverName, adminGateUrl, adminGateName);
         log.debug("Create or get container ({},{},{})", new Object[]{rbqBroker.getContainerID(), adminGateUrl, adminGateName});
         rbqBroker.setContainerCompany(RABBITMQ_COMPANY);
         rbqBroker.setContainerProduct(RABBITMQ_PRODUCT);
@@ -1212,7 +1212,7 @@ public class MappingActor extends UntypedActor {
 
                     log.debug("");
                     log.debug("---");
-                    Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(remoteCliPGURL, adminGateName);
+                    Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(serverName, remoteCliPGURL, adminGateName);
                     log.debug("Create or get container ({},{},{})", new Object[]{rbqClient.getContainerID(), remoteCliPGURL, adminGateName});
                     rbqClient.setContainerCompany(remoteCliCMP);
                     rbqClient.setContainerProduct((String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PRODUCT));
