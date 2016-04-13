@@ -21,6 +21,8 @@ package net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.serializable
 
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitClusterToConnect
 import net.echinopsii.ariane.community.plugin.rabbitmq.jsonparser.tools.RabbitNodeToConnect
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class ConnectionFromRabbitREST implements Serializable {
 
@@ -50,6 +52,8 @@ class ConnectionFromRabbitREST implements Serializable {
     public transient static final String RABBITMQ_CONNECTION_PROTOCOL_MQTT  = "MQTT"
     public transient static final String RABBITMQ_CONNECTION_PROTOCOL_STOMP = "STOMP"
 
+    private static final Logger log = LoggerFactory.getLogger(ConnectionFromRabbitREST.class)
+
     transient RabbitClusterToConnect cluster;
     transient RabbitNodeToConnect    node;
 
@@ -67,11 +71,17 @@ class ConnectionFromRabbitREST implements Serializable {
     }
 
     ConnectionFromRabbitREST parse() {
-        String connection_req_path =  REST_RABBITMQ_CONNECTION_PATH + this.name;
-        def connection_req = (cluster!=null) ? cluster.get(connection_req_path) : (node!=null) ? node.getRestCli().get(path: connection_req_path) : null
-        if (connection_req != null && connection_req.status == 200 && connection_req.data != null) {
-            properties = connection_req.data
-            properties.remove(JSON_RABBITMQ_CONNECTION_NAME)
+        try {
+            String connection_req_path = REST_RABBITMQ_CONNECTION_PATH + this.name;
+            def connection_req = (cluster != null) ? cluster.get(connection_req_path) : (node != null) ? node.get(connection_req_path) : null
+            if (connection_req != null && connection_req.status == 200 && connection_req.data != null) {
+                properties = connection_req.data
+                properties.remove(JSON_RABBITMQ_CONNECTION_NAME)
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled())
+                e.printStackTrace();
+            log.error("PB with node " + name + " (" + node.getUrl() + "):" + e.getMessage())
         }
         return this;
     }

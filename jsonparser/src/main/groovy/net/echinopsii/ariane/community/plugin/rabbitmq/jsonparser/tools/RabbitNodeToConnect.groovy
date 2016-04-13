@@ -74,8 +74,9 @@ class RabbitNodeToConnect {
             this.restCli = new RESTClient( this.url )
             this.restCli.auth.basic this.user, this.password;
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error(e.getMessage())
+            if (log.isDebugEnabled())
+                e.printStackTrace();
+            log.error("PB with node " + name + " (" + url + "):" + e.getMessage())
         }
         log.debug("[init done]new node to connect : " + name);
     }
@@ -111,7 +112,7 @@ class RabbitNodeToConnect {
         this.connectionStatus = REST_CLI_NODE_OK;
         //noinspection GroovyUnusedCatchParameter
         try {
-            def overview_req = this.restCli.get(path : BrokerFromRabbitREST.REST_RABBITMQ_BROKER_OVERVIEW_PATH)
+            def overview_req = this.get(BrokerFromRabbitREST.REST_RABBITMQ_BROKER_OVERVIEW_PATH)
             this.errorOnProvidedNodeName = !overview_req.data.node.equals(this.name)
             this.validNodeNameFromTarget = overview_req.data.node
             this.statisticsDBNode = overview_req.data.node.equals(overview_req.data.statistics_db_node)
@@ -154,5 +155,12 @@ class RabbitNodeToConnect {
             this.connectionProblemDescription = "SOME ERROR : " + e.getMessage()
         }
         return this.connectionStatus;
+    }
+
+    public Object get(String path) {
+        //if (this.restCli!=null) this.restCli.shutdown()
+        //this.restCli = new RESTClient( this.url )
+        //this.restCli.auth.basic this.user, this.password;
+        this.restCli.get(path: path)
     }
 }
