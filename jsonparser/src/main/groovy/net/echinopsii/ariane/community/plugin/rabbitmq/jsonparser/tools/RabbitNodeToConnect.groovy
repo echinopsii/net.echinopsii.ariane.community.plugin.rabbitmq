@@ -69,15 +69,6 @@ class RabbitNodeToConnect {
         this.url  = url
         this.user = user
         this.password = password
-
-        try {
-            this.restCli = new RESTClient( this.url )
-            this.restCli.auth.basic this.user, this.password;
-        } catch (Exception e) {
-            if (log.isDebugEnabled())
-                e.printStackTrace();
-            log.error("PB with node " + name + " (" + url + "):" + e.getMessage())
-        }
         log.debug("[init done]new node to connect : " + name);
     }
 
@@ -158,9 +149,12 @@ class RabbitNodeToConnect {
     }
 
     public Object get(String path) {
-        //if (this.restCli!=null) this.restCli.shutdown()
-        //this.restCli = new RESTClient( this.url )
-        //this.restCli.auth.basic this.user, this.password;
-        this.restCli.get(path: path)
+        this.restCli = new RESTClient( this.url )
+        this.restCli.auth.basic this.user, this.password;
+        Object ret = this.restCli.get(path: path)
+        this.restCli.shutdown()
+        this.restCli = null
+
+        ret
     }
 }
