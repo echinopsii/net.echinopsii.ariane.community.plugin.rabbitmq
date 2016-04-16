@@ -1390,7 +1390,10 @@ public class MappingActor extends UntypedActor {
     public void onReceive(Object rabbitmqComponent) throws Exception {
         log.debug("Actor {} receive message {}", new Object[]{getSelf().path().toStringWithoutAddress(), rabbitmqComponent.toString()});
         if (rabbitmqComponent instanceof RabbitmqCachedComponent) {
-            inject((RabbitmqCachedComponent)rabbitmqComponent);
+            Thread.currentThread().setName("RabbitMQ Mapping Actor - " + Thread.currentThread().getId());
+            RabbitmqInjectorBootstrap.getMappingSce().setAutoCommit(false);
+            inject((RabbitmqCachedComponent) rabbitmqComponent);
+            RabbitmqInjectorBootstrap.getMappingSce().unsetAutoCommit();
         } else {
             log.debug("Unhandled message type {} !", rabbitmqComponent.getClass().toString());
             unhandled(rabbitmqComponent);

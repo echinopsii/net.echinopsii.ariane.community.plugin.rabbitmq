@@ -73,7 +73,7 @@
         <version.ipojo.plugin>1.11.0</version.ipojo.plugin>
 
         <!-- Ariane module dependencies -->
-        <version.net.echinopsii.ariane.community.core.mapping>0.7.2-SNAPSHOT</version.net.echinopsii.ariane.community.core.mapping>
+        <version.net.echinopsii.ariane.community.core.mapping>0.7.4-SNAPSHOT</version.net.echinopsii.ariane.community.core.mapping>
         <version.net.echinopsii.ariane.community.core.mapping.min>0.7.0</version.net.echinopsii.ariane.community.core.mapping.min>
         <version.net.echinopsii.ariane.community.core.mapping.max>0.8.0</version.net.echinopsii.ariane.community.core.mapping.max>
         <version.net.echinopsii.ariane.community.core.directory>0.7.2-SNAPSHOT</version.net.echinopsii.ariane.community.core.directory>
