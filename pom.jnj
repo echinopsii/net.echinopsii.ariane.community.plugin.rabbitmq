@@ -77,14 +77,14 @@
         {% block dependencies -%}
         <!-- Ariane module dependencies -->
         {% for d in dependencies -%}
-        {% if d.module.type == 'none' %}
-        <version.net.echinopsii.ariane.community.{{ d.module.name }}>{{ d.version }}</version.net.echinopsii.ariane.community.{{ d.module.name }}>
-        <version.net.echinopsii.ariane.community.{{ d.module.name }}.min>{{ d.version_min }} </version.net.echinopsii.ariane.community.{{ d.module.name }}.min>
-        <version.net.echinopsii.ariane.community.{{ d.module.name }}.max>{{ d.version_max }} </version.net.echinopsii.ariane.community.{{ d.module.name }}.max>
-        {% else -%}
+        {% if d.module.type == 'core' %}
         <version.net.echinopsii.ariane.community.{{ d.module.type}}.{{ d.module.name }}>{{ d.version }}</version.net.echinopsii.ariane.community.{{ d.module.type}}.{{ d.module.name }}>
         <version.net.echinopsii.ariane.community.{{ d.module.type}}.{{ d.module.name }}.min>{{ d.version_min }}</version.net.echinopsii.ariane.community.{{ d.module.type}}.{{ d.module.name }}.min>
         <version.net.echinopsii.ariane.community.{{ d.module.type}}.{{ d.module.name }}.max>{{ d.version_max }}</version.net.echinopsii.ariane.community.{{ d.module.type}}.{{ d.module.name }}.max>
+        {% else -%}
+        <version.net.echinopsii.ariane.community.{{ d.module.name }}>{{ d.version }}</version.net.echinopsii.ariane.community.{{ d.module.name }}>
+        <version.net.echinopsii.ariane.community.{{ d.module.name }}.min>{{ d.version_min }} </version.net.echinopsii.ariane.community.{{ d.module.name }}.min>
+        <version.net.echinopsii.ariane.community.{{ d.module.name }}.max>{{ d.version_max }} </version.net.echinopsii.ariane.community.{{ d.module.name }}.max>
         {% endif -%}
         {%- endfor -%}
         {%- endblock %}
