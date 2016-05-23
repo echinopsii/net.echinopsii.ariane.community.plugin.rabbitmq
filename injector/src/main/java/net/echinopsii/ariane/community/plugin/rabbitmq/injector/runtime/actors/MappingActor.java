@@ -72,12 +72,12 @@ public class MappingActor extends UntypedActor {
     private static final String RABBITMQ_TRANSPORT_SSL_STOMP   = "ssl-rbq-stomp://";
     private static final String RABBITMQ_TRANSPORT_MEM_BINDING = "mem-rbq-binding://";
 
-    private void applyDifferencesOnVHost(Container container, VhostFromRabbitREST lastVHost, Set<String> deletedVHTs, Session mappingSession) throws MappingDSException {
-        Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, container, lastVHost.getName());
+    private void applyDifferencesOnVHost(Container container, VhostFromRabbitREST lastVHost, Set<String> deletedVHTs) throws MappingDSException {
+        Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(container, lastVHost.getName());
         if (nodeToDelete!=null) {
             try {
                 log.debug("Deleting VHost node ({},{})", new Object[]{container.getContainerID(), lastVHost.getName()});
-                RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(mappingSession, nodeToDelete.getNodeID());
+                RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(nodeToDelete.getNodeID());
                 deletedVHTs.add(lastVHost.getName());
             } catch (MappingDSException e) {
                 log.error("Error raised while deleting VHost node ({},{})... Continue", new Object[]{container.getContainerID(), lastVHost.getName()});
@@ -86,14 +86,14 @@ public class MappingActor extends UntypedActor {
         } else log.error("VHost node ({},{}) doesn't exist.", new Object[]{container.getContainerID(), lastVHost.getName()});
     }
 
-    private void applyDifferencesOnQueues(Container container, QueueFromRabbitREST lastQueue, Set<String> deletedQ, Session mappingSession) throws MappingDSException {
-        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, container, lastQueue.getVhost());
+    private void applyDifferencesOnQueues(Container container, QueueFromRabbitREST lastQueue, Set<String> deletedQ) throws MappingDSException {
+        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(container, lastQueue.getVhost());
         if (vhostNode != null) {
-            Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, lastQueue.getName() + " (queue)");
+            Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, lastQueue.getName() + " (queue)");
             if (nodeToDelete != null) {
                 try {
                     log.debug("Deleting queue node ({}/{},{})", new Object[]{container.getContainerID(), lastQueue.getVhost(), lastQueue.getName()});
-                    RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(mappingSession, nodeToDelete.getNodeID());
+                    RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(nodeToDelete.getNodeID());
                     deletedQ.add(lastQueue.getName());
                 } catch (MappingDSException e) {
                     log.error("Error raised while deleting queue node ({}/{},{})... Continue", new Object[]{container.getContainerID(), lastQueue.getVhost(), lastQueue.getName()});
@@ -103,15 +103,15 @@ public class MappingActor extends UntypedActor {
         } else log.error("Deleting queue {} : vhost {} doesn't exist.", new Object[]{lastQueue.getName(), lastQueue.getVhost()});
     }
 
-    private void applyDifferencesOnExchanges(Container container, ExchangeFromRabbitREST lastExchange, Set<String> deletedExchange, Session mappingSession) throws MappingDSException {
-        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, container, lastExchange.getVhost());
+    private void applyDifferencesOnExchanges(Container container, ExchangeFromRabbitREST lastExchange, Set<String> deletedExchange) throws MappingDSException {
+        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(container, lastExchange.getVhost());
         if (vhostNode != null) {
-            Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, lastExchange.getName() + " (exchange)");
+            Node nodeToDelete = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, lastExchange.getName() + " (exchange)");
             if (nodeToDelete!=null) {
                 try {
                     log.debug("Deleting exchange node ({}/{},{})",
                                      new Object[]{container.getContainerID(), lastExchange.getVhost(), lastExchange.getName()});
-                    RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(mappingSession, nodeToDelete.getNodeID());
+                    RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(nodeToDelete.getNodeID());
                     deletedExchange.add(lastExchange.getName());
                 } catch (MappingDSException e) {
                     log.error("Error raised while deleting exchange node ({}/{},{})... Continue",
@@ -124,12 +124,12 @@ public class MappingActor extends UntypedActor {
     }
 
     private void applyDifferencesOnBindings(Container container, BindingFromRabbitREST lastBinding,Set<String> deletedQ,Set<String> deletedExchange,
-                                            String bindingDestinationType, String destination, String  exchangeSrc, String routingKey, Session mappingSession) throws MappingDSException {
-        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, container, lastBinding.getVhost());
+                                            String bindingDestinationType, String destination, String  exchangeSrc, String routingKey) throws MappingDSException {
+        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(container, lastBinding.getVhost());
         if (bindingDestinationType.equals(BindingFromRabbitREST.RABBITMQ_BINDING_DESTINATION_TYPE_Q)) {
             if (!deletedQ.contains(destination) && !deletedExchange.contains(exchangeSrc)) {
-                Node sourceNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, exchangeSrc + " (exchange)");
-                Node destNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, destination + " (queue)");
+                Node sourceNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, exchangeSrc + " (exchange)");
+                Node destNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, destination + " (queue)");
 
                 if (destNode != null && sourceNode != null) {
                     String exchangeType = (String) sourceNode.getNodeProperties().get(ExchangeFromRabbitREST.JSON_RABBITMQ_EXCHANGE_TYPE);
@@ -159,23 +159,23 @@ public class MappingActor extends UntypedActor {
                     } else log.error("Unknown exchange type : {}", new Object[]{exchangeType});
 
                     if (exchangeSourceEndpointURL != null) {
-                        Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(mappingSession, exchangeSourceEndpointURL);
+                        Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(exchangeSourceEndpointURL);
                         if (sourceEp!=null)
                             try {
                                 log.debug("Deleting binding source endpoint ({}/{},{})",
                                                  new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
-                                RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, sourceEp.getEndpointID());
+                                RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEp.getEndpointID());
                             } catch (MappingDSException e) {
                                 log.error("Error raised whilde deleting binding source endpoint ({}/{},{})... Continue",
                                                  new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
                                 e.printStackTrace();
                             }
-                        Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(mappingSession, queueTargetEndpointURL);
+                        Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(queueTargetEndpointURL);
                         if (targetEp!=null)
                             try {
                                 log.debug("Deleting binding target endpoint ({}/{},{})",
                                                  new Object[]{container.getContainerID(), lastBinding.getVhost(), queueTargetEndpointURL});
-                                RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, targetEp.getEndpointID());
+                                RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEp.getEndpointID());
                             } catch (MappingDSException e) {
                                 log.debug("Error raised while deleting binding target endpoint ({}/{},{})... Continue",
                                                  new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
@@ -192,8 +192,8 @@ public class MappingActor extends UntypedActor {
             }
         } else if (bindingDestinationType.equals(BindingFromRabbitREST.RABBITMQ_BINDING_DESTINATION_TYPE_E)) {
             if (!deletedExchange.contains(destination) && !deletedExchange.contains(exchangeSrc)) {
-                Node sourceNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, exchangeSrc + " (exchange)");
-                Node destNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, destination + " (exchange)");
+                Node sourceNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, exchangeSrc + " (exchange)");
+                Node destNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, destination + " (exchange)");
 
                 if (destNode != null && sourceNode != null) {
                     String exchangeType = (String) sourceNode.getNodeProperties().get(ExchangeFromRabbitREST.JSON_RABBITMQ_EXCHANGE_TYPE);
@@ -223,23 +223,23 @@ public class MappingActor extends UntypedActor {
                     } else log.error("Unknown exchange type : {}", new Object[]{exchangeType});
 
                     if (exchangeSourceEndpointURL != null) {
-                        Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(mappingSession, exchangeSourceEndpointURL);
+                        Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(exchangeSourceEndpointURL);
                         if (sourceEp!=null)
                             try {
                                 log.debug("Deleting binding source endpoint ({}/{},{})",
                                                  new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
-                                RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, sourceEp.getEndpointID());
+                                RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEp.getEndpointID());
                             } catch (MappingDSException e) {
                                 log.error("Error raised whilde deleting binding source endpoint ({}/{},{})... Continue",
                                                  new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
                                 e.printStackTrace();
                             }
-                        Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(mappingSession, exchangeTargetEndpointURL);
+                        Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(exchangeTargetEndpointURL);
                         if (targetEp!=null)
                             try {
                                 log.debug("Deleting binding target endpoint ({}/{},{})",
                                                  new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeTargetEndpointURL});
-                                RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, targetEp.getEndpointID());
+                                RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEp.getEndpointID());
                             } catch (MappingDSException e) {
                                 log.debug("Error raised while deleting binding target endpoint ({}/{},{})... Continue",
                                                  new Object[]{container.getContainerID(), lastBinding.getVhost(), exchangeSourceEndpointURL});
@@ -257,7 +257,7 @@ public class MappingActor extends UntypedActor {
         } else log.error("Unknown binding destination type : {}", new Object[]{bindingDestinationType});
     }
 
-    private void applyEntityDifferencesFromLastSniff(RabbitmqCachedComponent entity, Session mappingSession) throws MappingDSException {
+    private void applyEntityDifferencesFromLastSniff(RabbitmqCachedComponent entity) throws MappingDSException {
         Set<String> deletedBrk        = new HashSet<>();
         Set<String> deletedVHTs       = new HashSet<>();
         Set<String> deletedQ          = new HashSet<>();
@@ -268,7 +268,7 @@ public class MappingActor extends UntypedActor {
         Container standaloneNode = null;
 
         if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE)) {
-            cluster = RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().getClusterByName(mappingSession, entity.getComponentName());
+            cluster = RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().getClusterByName(entity.getComponentName());
             if (cluster==null) {
                 log.error("Cluster {} doesn't exists... Exit", entity.getComponentName());
                 return;
@@ -286,7 +286,7 @@ public class MappingActor extends UntypedActor {
                     if (currentBroker==null) {
                         try {
                             log.debug("Deleting broker ({},{})...", new Object[]{lastBroker.getName(), lastBroker.getUrl()});
-                            RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(mappingSession, lastBroker.getUrl());
+                            RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(lastBroker.getUrl());
                             deletedBrk.add(lastBroker.getName());
                         } catch (MappingDSException e) {
                             log.error("Error raised while deleting broker ({},{})... Continue.", new Object[]{lastBroker.getName(), lastBroker.getUrl()});
@@ -297,7 +297,7 @@ public class MappingActor extends UntypedActor {
             }
         } else {
             String adminGateUrl = entity.getBroker().getUrl();
-            standaloneNode = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().getContainerByPrimaryAdminURL(mappingSession, adminGateUrl);
+            standaloneNode = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().getContainerByPrimaryAdminURL(adminGateUrl);
             if (standaloneNode==null){
                 log.error("RabbitMQ Node {} doesn't exists... Exit", adminGateUrl);
                 return;
@@ -316,9 +316,9 @@ public class MappingActor extends UntypedActor {
                 if (currentVHost==null) {
                     if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE))
                         for (Container container : cluster.getClusterContainers())
-                            applyDifferencesOnVHost(container, lastVHost, deletedVHTs, mappingSession);
+                            applyDifferencesOnVHost(container, lastVHost, deletedVHTs);
                     else
-                        applyDifferencesOnVHost(standaloneNode, lastVHost, deletedVHTs, mappingSession);
+                        applyDifferencesOnVHost(standaloneNode, lastVHost, deletedVHTs);
                 }
             }
         }
@@ -336,9 +336,9 @@ public class MappingActor extends UntypedActor {
                     if (currentQueue == null) {
                         if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE))
                             for (Container container : cluster.getClusterContainers())
-                                applyDifferencesOnQueues(container, lastQueue, deletedQ, mappingSession);
+                                applyDifferencesOnQueues(container, lastQueue, deletedQ);
                         else
-                            applyDifferencesOnQueues(standaloneNode, lastQueue, deletedQ, mappingSession);
+                            applyDifferencesOnQueues(standaloneNode, lastQueue, deletedQ);
                     }
                 } // else VHost has been deleted with the child nodes and so the queue
             }
@@ -357,9 +357,9 @@ public class MappingActor extends UntypedActor {
                     if (currentExchange == null) {
                         if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE))
                             for (Container container : cluster.getClusterContainers())
-                                applyDifferencesOnExchanges(container, lastExchange, deletedExchange, mappingSession);
+                                applyDifferencesOnExchanges(container, lastExchange, deletedExchange);
                         else
-                            applyDifferencesOnExchanges(standaloneNode, lastExchange, deletedExchange, mappingSession);
+                            applyDifferencesOnExchanges(standaloneNode, lastExchange, deletedExchange);
                     }
                 }
             } // else VHost has been deleted with the child nodes and so the exchange
@@ -382,9 +382,9 @@ public class MappingActor extends UntypedActor {
                         String destination = (String) lastBinding.getProperties().get(BindingFromRabbitREST.JSON_RABBITMQ_BINDING_DESTINATION);
                         if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE))
                             for (Container container : cluster.getClusterContainers())
-                                applyDifferencesOnBindings(container, lastBinding, deletedQ, deletedExchange, bindingDestinationType, destination, exchangeSrc, routingKey, mappingSession);
+                                applyDifferencesOnBindings(container, lastBinding, deletedQ, deletedExchange, bindingDestinationType, destination, exchangeSrc, routingKey);
                         else
-                            applyDifferencesOnBindings(standaloneNode, lastBinding, deletedQ, deletedExchange, bindingDestinationType, destination, exchangeSrc, routingKey, mappingSession);
+                            applyDifferencesOnBindings(standaloneNode, lastBinding, deletedQ, deletedExchange, bindingDestinationType, destination, exchangeSrc, routingKey);
                     }
                 }
             }
@@ -428,7 +428,7 @@ public class MappingActor extends UntypedActor {
                             if (remoteCliPGURL != null && remoteCliOSI != null && remoteCliOTM != null && remoteCliAPP != null && remoteCliCMP != null) {
                                 String serverName = remoteCliPGURL.split("://")[1].split("\\.")[0];
 
-                                Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().getContainerByPrimaryAdminURL(mappingSession, remoteCliPGURL);
+                                Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().getContainerByPrimaryAdminURL(remoteCliPGURL);
                                 if (rbqClient != null) {
                                     String protocol = (String) lastConnection.getProperties().get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_PROTOCOL);
                                     String transportName = null;
@@ -478,16 +478,16 @@ public class MappingActor extends UntypedActor {
                                                         String sourceEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")/" + consumerTag;
                                                         String targetEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + consumerTag;
 
-                                                        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, rbqBroker, vhostName);
+                                                        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
                                                         if (vhostNode != null) {
-                                                            Node consumedQueueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, queueName + " (queue)");
+                                                            Node consumedQueueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, queueName + " (queue)");
                                                             if (consumedQueueNode!=null) {
-                                                                Endpoint sourceEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(mappingSession, sourceEpUrl);
+                                                                Endpoint sourceEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(sourceEpUrl);
                                                                 if (sourceEP != null)
                                                                     try {
                                                                         log.debug("Deleting connection-channel source endpoint ({},{}).",
                                                                                          new Object[]{vhostName, sourceEpUrl});
-                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, sourceEP.getEndpointID());
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEP.getEndpointID());
                                                                     } catch (MappingDSException e) {
                                                                         log.error("Error raised while deleting connection-channel source endpoint ({},{})... Continue",
                                                                                          new Object[]{vhostName, sourceEpUrl});
@@ -499,14 +499,14 @@ public class MappingActor extends UntypedActor {
                                                                     log.error("Consumed queue {} doesn't exists... Continue", queueName);
                                                             }
 
-                                                            Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, rbqClient, consumerNodeName);
+                                                            Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqClient, consumerNodeName);
                                                             if (consumerNode != null) {
-                                                                Endpoint targetEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(mappingSession, targetEpUrl);
+                                                                Endpoint targetEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(targetEpUrl);
                                                                 if (targetEP != null)
                                                                     try {
                                                                         log.debug("Deleting connection-channel target endpoint ({},{}).",
                                                                                          new Object[]{vhostName, targetEpUrl});
-                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, targetEP.getEndpointID());
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEP.getEndpointID());
                                                                     } catch (MappingDSException e) {
                                                                         log.error("Error raised while deleting connection-channel target endpoint ({},{})... Continue",
                                                                                          new Object[]{vhostName, targetEpUrl});
@@ -516,7 +516,7 @@ public class MappingActor extends UntypedActor {
                                                                 if (consumerNode.getNodeChildNodes().size() == 0 && consumerNode.getNodeEndpoints().size() == 0)
                                                                     try {
                                                                         log.debug("Deleting consumer node {}.", consumerNodeName);
-                                                                        RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(mappingSession, consumerNode.getNodeID());
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(consumerNode.getNodeID());
                                                                     } catch (MappingDSException e) {
                                                                         log.debug("Error raised while deleting consumer node {}... Continue", consumerNodeName);
                                                                         e.printStackTrace();
@@ -542,16 +542,16 @@ public class MappingActor extends UntypedActor {
                                                         String sourceEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + exchangeName;
                                                         String targetEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")";
 
-                                                        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, rbqBroker, vhostName);
+                                                        Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
                                                         if (vhostNode != null) {
-                                                            Node publisherNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, rbqClient, publisherNodeName);
+                                                            Node publisherNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqClient, publisherNodeName);
                                                             if (publisherNode != null) {
-                                                                Endpoint sourceEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(mappingSession, sourceEpUrl);
+                                                                Endpoint sourceEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(sourceEpUrl);
                                                                 if (sourceEP != null)
                                                                     try {
                                                                         log.debug("Deleting connection-channel source endpoint ({},{}).",
                                                                                          new Object[]{vhostName, sourceEpUrl});
-                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, sourceEP.getEndpointID());
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEP.getEndpointID());
                                                                     } catch (MappingDSException e) {
                                                                         log.error("Error raised while deleting connection-channel source endpoint ({},{})... Continue",
                                                                                          new Object[]{vhostName, sourceEpUrl});
@@ -563,14 +563,14 @@ public class MappingActor extends UntypedActor {
                                                             } else //
                                                                 log.debug("Client publisher node {} does't exists", publisherNodeName);
 
-                                                            Node targetExchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, exchangeName + " (exchange)");
+                                                            Node targetExchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, exchangeName + " (exchange)");
                                                             if (targetExchangeNode!=null) {
-                                                                Endpoint targetEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(mappingSession, targetEpUrl);
+                                                                Endpoint targetEP = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().getEndpointByURL(targetEpUrl);
                                                                 if (targetEP != null)
                                                                     try {
                                                                         log.debug("Deleting connection-channel target endpoint ({},{}).",
                                                                                          new Object[]{vhostName, targetEpUrl});
-                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, targetEP.getEndpointID());
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEP.getEndpointID());
                                                                     } catch (MappingDSException e) {
                                                                         log.error("Error raised while deleting connection-channel target endpoint ({},{})... Continue",
                                                                                          new Object[]{vhostName, targetEpUrl});
@@ -580,7 +580,7 @@ public class MappingActor extends UntypedActor {
                                                                 if (publisherNode.getNodeChildNodes().size() == 0 && publisherNode.getNodeEndpoints().size() == 0)
                                                                     try {
                                                                         log.debug("Deleting publisher node {}.", publisherNodeName);
-                                                                        RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(mappingSession, publisherNode.getNodeID());
+                                                                        RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(publisherNode.getNodeID());
                                                                     } catch (MappingDSException e) {
                                                                         log.debug("Error raised while deleting publisher node {}... Continue", publisherNodeName);
                                                                         e.printStackTrace();
@@ -600,7 +600,7 @@ public class MappingActor extends UntypedActor {
                                     if (rbqClient.getContainerChildContainers().size() <= 1) {
                                         try {
                                             log.debug("Deleting RabbitMQ client container {}.", remoteCliPGURL);
-                                            RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(mappingSession, remoteCliPGURL);
+                                            RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(remoteCliPGURL);
                                         } catch (MappingDSException e) {
                                             log.debug("Error raised while deleting RabbitMQ client container {}... Continue.", remoteCliPGURL);
                                             e.printStackTrace();
@@ -659,9 +659,9 @@ public class MappingActor extends UntypedActor {
                                 String vhostName = (String) queue_details.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_CONSUMER_DETAILS_QUEUE_VHOST);
 
                                 if (!deletedVHTs.contains(vhostName)) {
-                                    Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, rbqBroker, vhostName);
+                                    Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
                                     if (vhostNode != null) {
-                                        Node queueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, vhostName + " (queue)");
+                                        Node queueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, vhostName + " (queue)");
                                         if (queueNode!=null) {
                                             Endpoint sourceEndpoint = null;
                                             for (Endpoint endpoint : queueNode.getNodeEndpoints())
@@ -671,7 +671,7 @@ public class MappingActor extends UntypedActor {
                                                 }
 
                                             if (sourceEndpoint!=null) {
-                                                for (Link link : RabbitmqInjectorBootstrap.getMappingSce().getLinksBySourceEP(mappingSession, sourceEndpoint)) {
+                                                for (Link link : RabbitmqInjectorBootstrap.getMappingSce().getLinksBySourceEP(sourceEndpoint)) {
                                                     Endpoint targetEndpoint = link.getLinkEndpointTarget();
                                                     if (targetEndpoint!=null) {
 
@@ -681,7 +681,7 @@ public class MappingActor extends UntypedActor {
                                                         try {
                                                             log.debug("Deleting connection-channel source endpoint ({},{}).",
                                                                              new Object[]{vhostName, sourceEndpoint.getEndpointURL()});
-                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, sourceEndpoint.getEndpointID());
+                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEndpoint.getEndpointID());
                                                         } catch (MappingDSException e) {
                                                             log.error("Error raised while deleting connection-channel source endpoint ({},{})... Continue",
                                                                              new Object[]{vhostName, sourceEndpoint.getEndpointURL()});
@@ -691,7 +691,7 @@ public class MappingActor extends UntypedActor {
                                                         try {
                                                             log.debug("Deleting connection-channel target endpoint ({},{}).",
                                                                              new Object[]{vhostName, targetEndpoint.getEndpointURL()});
-                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, targetEndpoint.getEndpointID());
+                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEndpoint.getEndpointID());
                                                         } catch (MappingDSException e) {
                                                             log.error("Error raised while deleting connection-channel target endpoint ({},{})... Continue",
                                                                              new Object[]{vhostName, targetEndpoint.getEndpointURL()});
@@ -701,7 +701,7 @@ public class MappingActor extends UntypedActor {
                                                         if (consumerNode.getNodeEndpoints().size()==0 && consumerNode.getNodeChildNodes().size()==0) {
                                                             try {
                                                                 log.debug("Deleting consumer node {}.", consumerNode.getNodeName());
-                                                                RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(mappingSession, consumerNode.getNodeID());
+                                                                RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(consumerNode.getNodeID());
                                                             } catch (MappingDSException e) {
                                                                 log.debug("Error raised while deleting consumer node {}... Continue", consumerNode.getNodeName());
                                                                 e.printStackTrace();
@@ -726,9 +726,9 @@ public class MappingActor extends UntypedActor {
                                 String vhostName = (String) targetExchange.get(ChannelFromRabbitREST.JSON_RABBITMQ_CHANNEL_PUBLISHES_EXCHANGE_VHOST);
 
                                 if (!deletedVHTs.contains(vhostName)) {
-                                    Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(mappingSession, rbqBroker, vhostName);
+                                    Node vhostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeByName(rbqBroker, vhostName);
                                     if (vhostNode != null) {
-                                        Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(mappingSession, vhostNode, exchangeName + " (exchange)");
+                                        Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().getNodeByName(vhostNode, exchangeName + " (exchange)");
                                         if (exchangeNode != null) {
                                             Endpoint targetEndpoint = null;
                                             for (Endpoint ep : exchangeNode.getNodeEndpoints())
@@ -739,7 +739,7 @@ public class MappingActor extends UntypedActor {
                                                 }
 
                                             if (targetEndpoint!=null) {
-                                                for (Link link : RabbitmqInjectorBootstrap.getMappingSce().getLinksByDestinationEP(mappingSession, targetEndpoint)) {
+                                                for (Link link : RabbitmqInjectorBootstrap.getMappingSce().getLinksByDestinationEP(targetEndpoint)) {
                                                     Endpoint sourceEndpoint = link.getLinkEndpointSource();
 
                                                     if (sourceEndpoint!=null) {
@@ -750,7 +750,7 @@ public class MappingActor extends UntypedActor {
                                                         try {
                                                             log.debug("Deleting connection-channel source endpoint ({},{}).",
                                                                              new Object[]{vhostName, sourceEndpoint.getEndpointURL()});
-                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, sourceEndpoint.getEndpointID());
+                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(sourceEndpoint.getEndpointID());
                                                         } catch (MappingDSException e) {
                                                             log.error("Error raised while deleting connection-channel source endpoint ({},{})... Continue",
                                                                              new Object[]{vhostName, sourceEndpoint.getEndpointURL()});
@@ -760,7 +760,7 @@ public class MappingActor extends UntypedActor {
                                                         try {
                                                             log.debug("Deleting connection-channel target endpoint ({},{}).",
                                                                              new Object[]{vhostName, targetEndpoint.getEndpointURL()});
-                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(mappingSession, targetEndpoint.getEndpointID());
+                                                            RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().deleteEndpoint(targetEndpoint.getEndpointID());
                                                         } catch (MappingDSException e) {
                                                             log.error("Error raised while deleting connection-channel target endpoint ({},{})... Continue",
                                                                              new Object[]{vhostName, targetEndpoint.getEndpointURL()});
@@ -770,7 +770,7 @@ public class MappingActor extends UntypedActor {
                                                         if (publisherNode.getNodeChildNodes().size()==0 && publisherNode.getNodeEndpoints().size()==0) {
                                                             try {
                                                                 log.debug("Deleting publisher node {}.", publisherNode.getNodeName());
-                                                                RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(mappingSession, publisherNode.getNodeID());
+                                                                RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().deleteNode(publisherNode.getNodeID());
                                                             } catch (MappingDSException e) {
                                                                 log.debug("Error raised while deleting publisher node {}... Continue", publisherNode.getNodeName());
                                                                 e.printStackTrace();
@@ -791,7 +791,7 @@ public class MappingActor extends UntypedActor {
                                 if (rbqClientBroker.getContainerChildContainers().size() <= 1) {
                                     try {
                                         log.debug("Deleting RabbitMQ client container {}.", rbqClientBroker.getContainerPrimaryAdminGateURL());
-                                        RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(mappingSession, rbqClientBroker.getContainerPrimaryAdminGateURL());
+                                        RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().deleteContainer(rbqClientBroker.getContainerPrimaryAdminGateURL());
                                     } catch (MappingDSException e) {
                                         log.debug("Error raised while deleting RabbitMQ client container {}... Continue.", rbqClientBroker.getContainerPrimaryAdminGateURL());
                                         e.printStackTrace();
@@ -806,7 +806,7 @@ public class MappingActor extends UntypedActor {
         }
     }
 
-    private Container pushBrokerToMappingDS(RabbitmqCachedComponent entity, ArrayList<Gate> clusterGates, BrokerFromRabbitREST broker, Session mappingSession) throws MappingDSException {
+    private Container pushBrokerToMappingDS(RabbitmqCachedComponent entity, ArrayList<Gate> clusterGates, BrokerFromRabbitREST broker) throws MappingDSException {
         String adminGateUrl = broker.getUrl();
         String serverFQDN = adminGateUrl.split("://")[1].split(":")[0];
         String serverName = adminGateUrl.split("://")[1].split("\\.")[0];
@@ -814,21 +814,21 @@ public class MappingActor extends UntypedActor {
 
         log.debug("");
         log.debug("-----------------------------------");
-        Container rbqBroker = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(mappingSession, serverName, adminGateUrl, adminGateName);
+        Container rbqBroker = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(serverName, adminGateUrl, adminGateName);
         log.debug("Create or get container ({},{},{})", new Object[]{rbqBroker.getContainerID(), adminGateUrl, adminGateName});
-        rbqBroker.setContainerCompany(mappingSession, RABBITMQ_COMPANY);
-        rbqBroker.setContainerProduct(mappingSession, RABBITMQ_PRODUCT);
-        rbqBroker.setContainerType(mappingSession, entity.getComponentType());
+        rbqBroker.setContainerCompany(RABBITMQ_COMPANY);
+        rbqBroker.setContainerProduct(RABBITMQ_PRODUCT);
+        rbqBroker.setContainerType(entity.getComponentType());
 
         log.debug("");
         log.debug("Add property {} to rabbitmq container {} : {}", new Object[]{RABBITMQ_BROKER_NAME_KEY, adminGateUrl, broker.getName()});
-        rbqBroker.addContainerProperty(mappingSession, RABBITMQ_BROKER_NAME_KEY, broker.getName());
+        rbqBroker.addContainerProperty(RABBITMQ_BROKER_NAME_KEY, broker.getName());
         Map<String, Object> props = entity.getComponentProperties().get(broker.getName());
         for (String key : props.keySet()) {
             Object value =  props.get(key);
             if (value != null) {
                 log.debug("Add property {} to rabbitmq container {} : {}", new Object[]{key, adminGateUrl, value.toString()});
-                rbqBroker.addContainerProperty(mappingSession, key, value);
+                rbqBroker.addContainerProperty(key, value);
             }
         }
 
@@ -840,7 +840,7 @@ public class MappingActor extends UntypedActor {
             String value = protocol+"://"+ip_addr+":"+port;
             log.debug("");
             log.debug("Add property {} to rabbitmq container {} : {}", new Object[]{key, adminGateUrl, value});
-            rbqBroker.addContainerProperty(mappingSession, RABBITMQ_BROKER_LISTENER_KEY+"_"+protocol, value);
+            rbqBroker.addContainerProperty(RABBITMQ_BROKER_LISTENER_KEY+"_"+protocol, value);
 
             String gateURL = (ip_addr.equals("::"))?protocol+"://"+serverFQDN+":"+port:protocol+"://"+ip_addr+":"+port;
             // NOTE1: we don't have currently the way to get real cluster connection definitions
@@ -853,12 +853,12 @@ public class MappingActor extends UntypedActor {
             String gateName = protocol+"."+serverName;
             log.debug("");
             log.debug("---");
-            Gate gate = RabbitmqInjectorBootstrap.getMappingSce().getGateSce().createGate(mappingSession, gateURL, gateName, rbqBroker.getContainerID(), false);
+            Gate gate = RabbitmqInjectorBootstrap.getMappingSce().getGateSce().createGate(gateURL, gateName, rbqBroker.getContainerID(), false);
             log.debug("Create or get gate for container listening addr ({},{},{},{})", new Object[]{gate.getNodeID(), gateURL, gateName, rbqBroker.getContainerID()});
             if (protocol.equals(RABBITMQ_BROKER_CLUSTERING_P)) {
                 log.debug("");
                 log.debug("---");
-                Transport clusterTransport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(mappingSession, RABBITMQ_TRANSPORT_TCP_CLUSTER);
+                Transport clusterTransport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(RABBITMQ_TRANSPORT_TCP_CLUSTER);
                 log.debug("Create of get transport ({},{})", new Object[]{clusterTransport.getTransportID(), RABBITMQ_TRANSPORT_TCP_CLUSTER});
 
                 for (Gate gateToLink : clusterGates) {
@@ -866,7 +866,7 @@ public class MappingActor extends UntypedActor {
                         for (Endpoint targetEndpoint : gateToLink.getNodeEndpoints()) {
                             log.debug("");
                             log.debug("---");
-                            RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(mappingSession, sourceEndpoint.getEndpointID(), targetEndpoint.getEndpointID(),
+                            RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEndpoint.getEndpointID(), targetEndpoint.getEndpointID(),
                                                                                                      clusterTransport.getTransportID());
                             log.debug("Create or get link ({},{},{})", new Object[]{sourceEndpoint.getEndpointParentNode().getNodeID(),
                                                                                            targetEndpoint.getEndpointParentNode().getNodeID(),
@@ -880,20 +880,20 @@ public class MappingActor extends UntypedActor {
         return rbqBroker;
     }
 
-    private void pushVHostToMappingDS(RabbitmqCachedComponent entity, List<Node> vhosts, VhostFromRabbitREST vhost, Container broker, Session mappingSession) throws MappingDSException {
+    private void pushVHostToMappingDS(RabbitmqCachedComponent entity, List<Node> vhosts, VhostFromRabbitREST vhost, Container broker) throws MappingDSException {
         log.debug("");
         log.debug("-----------------------------------");
-        Node vHostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(mappingSession, vhost.getName(), broker.getContainerID(), null);
+        Node vHostNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(vhost.getName(), broker.getContainerID(), null);
         log.debug("Create or get node for vhost ({},{},{})", new Object[]{vHostNode.getNodeID(), vhost.getName(), broker.getContainerID()});
         log.debug("");
         for (String propsKey : vhost.getProperties().keySet()) {
             log.debug("Add property {} to rabbitmq node {} : {}", new Object[]{propsKey, vHostNode.getNodeName(), vhost.getProperties().get(propsKey).toString()});
-            vHostNode.addNodeProperty(mappingSession, propsKey, vhost.getProperties().get(propsKey));
+            vHostNode.addNodeProperty(propsKey, vhost.getProperties().get(propsKey));
         }
         vhosts.add(vHostNode);
     }
 
-    private void pushEntityToMappingDS(RabbitmqCachedComponent entity, Session mappingSession) throws MappingDSException {
+    private void pushEntityToMappingDS(RabbitmqCachedComponent entity) throws MappingDSException {
 
         ArrayList<VhostFromRabbitREST> entityVHosts = new ArrayList<>(entity.getVhosts());
         ArrayList<QueueFromRabbitREST> entityQueues = new ArrayList<>(entity.getQueues());
@@ -908,7 +908,7 @@ public class MappingActor extends UntypedActor {
         if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE)) {
             log.debug("");
             log.debug("-----------------------------------");
-            cluster = RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().createCluster(mappingSession, entity.getComponentName());
+            cluster = RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().createCluster(entity.getComponentName());
             log.debug("Create or get cluster ({},{})", new Object[]{cluster.getClusterContainers(), entity.getComponentName()});
         }
 
@@ -919,8 +919,8 @@ public class MappingActor extends UntypedActor {
         if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE)) {
             ArrayList<BrokerFromRabbitREST> brokers = new ArrayList(entity.getBrokers());
             for (BrokerFromRabbitREST broker : brokers)
-                cluster.addClusterContainer(mappingSession, pushBrokerToMappingDS(entity, clusterGates, broker, mappingSession));
-        } else standaloneRBQ = pushBrokerToMappingDS(entity, clusterGates, entity.getBroker(), mappingSession);
+                cluster.addClusterContainer(pushBrokerToMappingDS(entity, clusterGates, broker));
+        } else standaloneRBQ = pushBrokerToMappingDS(entity, clusterGates, entity.getBroker());
 
         log.debug("");
         log.debug("");
@@ -929,9 +929,9 @@ public class MappingActor extends UntypedActor {
         for (VhostFromRabbitREST vhost : entityVHosts) {
             if (cluster!=null)
                 for (Container broker : cluster.getClusterContainers())
-                    pushVHostToMappingDS(entity, vhosts, vhost, broker, mappingSession);
+                    pushVHostToMappingDS(entity, vhosts, vhost, broker);
             else if (standaloneRBQ!=null)
-                pushVHostToMappingDS(entity, vhosts, vhost, standaloneRBQ, mappingSession);
+                pushVHostToMappingDS(entity, vhosts, vhost, standaloneRBQ);
         }
 
         if (vhosts.size()>1)
@@ -940,7 +940,7 @@ public class MappingActor extends UntypedActor {
                     if (!twinVHost.equals(vHost) && twinVHost.getNodeName().equals(vHost.getNodeName())) {
                         log.debug("");
                         log.debug("---");
-                        vHost.addTwinNode(mappingSession, twinVHost);
+                        vHost.addTwinNode(twinVHost);
                         log.debug("Twin vHosts node together ({},{})", new Object[]{vHost.getNodeContainer().getContainerPrimaryAdminGate().getNodeName()+"-"+vHost.getNodeName()},
                                          twinVHost.getNodeContainer().getContainerPrimaryAdminGate().getNodeName()+"-"+twinVHost.getNodeName());
                     }
@@ -954,15 +954,15 @@ public class MappingActor extends UntypedActor {
                 if (queue.getVhost().equals(vHost.getNodeName())) {
                     log.debug("");
                     log.debug("-----------------------------------");
-                    Node queueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(mappingSession, queue.getName() + " (queue)", vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
+                    Node queueNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(queue.getName() + " (queue)", vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
                     log.debug("Create or get node for queue ({},{},{},{})", new Object[]{queueNode.getNodeID(), queue.getName(), vHost.getNodeContainer().getContainerID(), vHost.getNodeID()});
                     for (String propsKey : queue.getProperties().keySet()) {
                         log.debug("Add property {} to rabbitmq node {} : {}", new Object[]{propsKey, queueNode.getNodeName(), queue.getProperties().get(propsKey).toString()});
-                        queueNode.addNodeProperty(mappingSession, propsKey, queue.getProperties().get(propsKey));
+                        queueNode.addNodeProperty(propsKey, queue.getProperties().get(propsKey));
                     }
 
                     queues.add(queueNode);
-                    vHost.addNodeChildNode(mappingSession, queueNode);
+                    vHost.addNodeChildNode(queueNode);
                 }
             }
         }
@@ -975,7 +975,7 @@ public class MappingActor extends UntypedActor {
                         twinQueue.getNodeParentNode().getNodeName().equals(queue.getNodeParentNode().getNodeName())) {
                         log.debug("");
                         log.debug("---");
-                        queue.addTwinNode(mappingSession, twinQueue);
+                        queue.addTwinNode(twinQueue);
                         log.debug("Twin queues node together ({},{})", new Object[]{queue.getNodeContainer().getContainerPrimaryAdminGate().getNodeName()+"-"+queue.getNodeName()},
                                          twinQueue.getNodeContainer().getContainerPrimaryAdminGate().getNodeName()+"-"+twinQueue.getNodeName());
                     }
@@ -989,14 +989,14 @@ public class MappingActor extends UntypedActor {
                 if (exchange.getVhost().equals(vHost.getNodeName())) {
                     log.debug("");
                     log.debug("-----------------------------------");
-                    Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(mappingSession, exchange.getName() + " (exchange)", vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
+                    Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(exchange.getName() + " (exchange)", vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
                     log.debug("Create or get node for exchange ({},{},{},{})", new Object[]{exchangeNode.getNodeID(), exchange.getName(), vHost.getNodeContainer().getContainerID(), vHost.getNodeID()});
                     for (String propsKey : exchange.getProperties().keySet()) {
                         log.debug("Add property {} to rabbitmq node {} : {}", new Object[]{propsKey, exchangeNode.getNodeName(), exchange.getProperties().get(propsKey).toString()});
-                        exchangeNode.addNodeProperty(mappingSession, propsKey, exchange.getProperties().get(propsKey));
+                        exchangeNode.addNodeProperty(propsKey, exchange.getProperties().get(propsKey));
                     }
                     exchanges.add(exchangeNode);
-                    vHost.addNodeChildNode(mappingSession, exchangeNode);
+                    vHost.addNodeChildNode(exchangeNode);
                 }
 
         if (exchanges.size()>1)
@@ -1007,7 +1007,7 @@ public class MappingActor extends UntypedActor {
                         twinExchange.getNodeParentNode().getNodeName().equals(exchange.getNodeParentNode().getNodeName())) {
                         log.debug("");
                         log.debug("---");
-                        exchange.addTwinNode(mappingSession, twinExchange);
+                        exchange.addTwinNode(twinExchange);
                         log.debug("Twin exchanges node together ({},{})", new Object[]{twinExchange.getNodeContainer().getContainerPrimaryAdminGate().getNodeName()+"-"+twinExchange.getNodeName()},
                                          exchange.getNodeContainer().getContainerPrimaryAdminGate().getNodeName()+"-"+exchange.getNodeName());
                     }
@@ -1074,23 +1074,23 @@ public class MappingActor extends UntypedActor {
                                 if (exchangeSourceEndpointURL!=null) {
                                     log.debug("");
                                     log.debug("---");
-                                    Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(mappingSession, exchangeSourceEndpointURL, exchange.getNodeID());
+                                    Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(exchangeSourceEndpointURL, exchange.getNodeID());
                                     log.debug("Create or get endpoint ({},{},{}).", new Object[]{sourceEp.getEndpointID(), exchangeSourceEndpointURL, exchange.getNodeID()});
-                                    Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(mappingSession, queueTargetEndpointURL, queue.getNodeID());
+                                    Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(queueTargetEndpointURL, queue.getNodeID());
                                     log.debug("Create or get endpoint ({},{},{}).", new Object[]{targetEp.getEndpointID(), queueTargetEndpointURL, queue.getNodeID()});
 
                                     for (String key : binding.getProperties().keySet()) {
                                         if (binding.getProperties().get(key)!=null) {
                                             log.debug("Add property {} to rabbitmq endpoints : {}", new Object[]{key, binding.getProperties().get(key).toString()});
-                                            sourceEp.addEndpointProperty(mappingSession, key, binding.getProperties().get(key));
-                                            targetEp.addEndpointProperty(mappingSession, key, binding.getProperties().get(key));
+                                            sourceEp.addEndpointProperty(key, binding.getProperties().get(key));
+                                            targetEp.addEndpointProperty(key, binding.getProperties().get(key));
                                         }
                                     }
 
-                                    Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(mappingSession, RABBITMQ_TRANSPORT_MEM_BINDING);
+                                    Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(RABBITMQ_TRANSPORT_MEM_BINDING);
                                     log.debug("Create or get transport ({},{}).", new Object[]{transport.getTransportID(), RABBITMQ_TRANSPORT_MEM_BINDING});
 
-                                    Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(mappingSession, sourceEp.getEndpointID(), targetEp.getEndpointID(),
+                                    Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
                                                                                                       transport.getTransportID());
                                     log.debug("Link endpoints together ({},{},{},{}).", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                      targetEp.getEndpointID(), transport.getTransportID()});
@@ -1138,23 +1138,23 @@ public class MappingActor extends UntypedActor {
                                 if (exchangeSourceEndpointURL!=null) {
                                     log.debug("");
                                     log.debug("---");
-                                    Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(mappingSession, exchangeSourceEndpointURL, exchange.getNodeID());
+                                    Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(exchangeSourceEndpointURL, exchange.getNodeID());
                                     log.debug("Create or get endpoint ({},{},{}).", new Object[]{sourceEp.getEndpointID(), exchangeSourceEndpointURL, exchange.getNodeID()});
-                                    Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(mappingSession, exchangeTargetEndpointURL, exchangeToLink.getNodeID());
+                                    Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(exchangeTargetEndpointURL, exchangeToLink.getNodeID());
                                     log.debug("Create or get endpoint ({},{},{}).", new Object[]{targetEp.getEndpointID(), exchangeTargetEndpointURL, exchangeToLink.getNodeID()});
 
                                     for (String key : binding.getProperties().keySet()) {
                                         if (binding.getProperties().get(key)!=null) {
                                             log.debug("Add property {} to rabbitmq endpoints : {}", new Object[]{key, binding.getProperties().get(key).toString()});
-                                            sourceEp.addEndpointProperty(mappingSession, key, binding.getProperties().get(key));
-                                            targetEp.addEndpointProperty(mappingSession, key, binding.getProperties().get(key));
+                                            sourceEp.addEndpointProperty(key, binding.getProperties().get(key));
+                                            targetEp.addEndpointProperty(key, binding.getProperties().get(key));
                                         }
                                     }
 
-                                    Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(mappingSession, RABBITMQ_TRANSPORT_MEM_BINDING);
+                                    Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(RABBITMQ_TRANSPORT_MEM_BINDING);
                                     log.debug("Create or get transport ({},{}).", new Object[]{transport.getTransportID(), RABBITMQ_TRANSPORT_MEM_BINDING});
 
-                                    Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(mappingSession, sourceEp.getEndpointID(), targetEp.getEndpointID(),
+                                    Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
                                                                                                              transport.getTransportID());
                                     log.debug("Link endpoints together ({},{},{},{}).", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                             targetEp.getEndpointID(), transport.getTransportID()});
@@ -1212,16 +1212,16 @@ public class MappingActor extends UntypedActor {
 
                     log.debug("");
                     log.debug("---");
-                    Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(mappingSession, serverName, remoteCliPGURL, adminGateName);
+                    Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(serverName, remoteCliPGURL, adminGateName);
                     log.debug("Create or get container ({},{},{})", new Object[]{rbqClient.getContainerID(), remoteCliPGURL, adminGateName});
-                    rbqClient.setContainerCompany(mappingSession, remoteCliCMP);
-                    rbqClient.setContainerProduct(mappingSession, (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PRODUCT));
-                    rbqClient.setContainerType(mappingSession, remoteCliAPP);
+                    rbqClient.setContainerCompany(remoteCliCMP);
+                    rbqClient.setContainerProduct((String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PRODUCT));
+                    rbqClient.setContainerType(remoteCliAPP);
 
                     HashMap<String, Object> rbqClientProps = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getRemoteClientContainerProperties(remoteCliOSI, remoteCliOTM);
                     for (String key : rbqClientProps.keySet())
                         if (rbqClientProps.get(key)!=null) {
-                            rbqClient.addContainerProperty(mappingSession, key, rbqClientProps.get(key));
+                            rbqClient.addContainerProperty(key, rbqClientProps.get(key));
                             log.debug("Add property {} to rabbitmq client container {} : {}", new Object[]{key, rbqClient.getContainerPrimaryAdminGate().getNodeName(),
                                                                                                                 rbqClientProps.get(key).toString()});
                         }
@@ -1277,20 +1277,20 @@ public class MappingActor extends UntypedActor {
                                                     queue.getNodeContainer().equals(rbqBroker)) {
 
                                             String consumerNodeName = queueName + " consumer";
-                                            Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(mappingSession, consumerNodeName, rbqClient.getContainerID(), null);
+                                            Node consumerNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(consumerNodeName, rbqClient.getContainerID(), null);
                                             log.debug("Create or get node for consumer ({},{},{})", new Object[]{consumerNode.getNodeID(), consumerNodeName, rbqClient.getContainerID()});
 
                                             String sourceEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")/" + consumerTag;
-                                            Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(mappingSession, sourceEpUrl, queue.getNodeID());
+                                            Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(sourceEpUrl, queue.getNodeID());
                                             log.debug("Create or get endpoint : ({},{},{})", new Object[]{sourceEp.getEndpointID(), sourceEpUrl, queue.getNodeID()});
                                             String targetEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + consumerTag;
-                                            Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(mappingSession, targetEpUrl, consumerNode.getNodeID());
+                                            Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(targetEpUrl, consumerNode.getNodeID());
                                             log.debug("Create or get endpoint : ({},{},{})", new Object[]{targetEp.getEndpointID(), targetEpUrl, consumerNode.getNodeID()});
 
-                                            Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(mappingSession, transportName);
+                                            Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(transportName);
                                             log.debug("Create or get transport : ({},{})", new Object[]{transport.getTransportID(), transportName});
 
-                                            Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(mappingSession, sourceEp.getEndpointID(), targetEp.getEndpointID(),
+                                            Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
                                                                                                                                  transport.getTransportID());
                                             log.debug("Create or get link : ({},{},{},{})", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                                 targetEp.getEndpointID(), transport.getTransportID()});
@@ -1313,21 +1313,21 @@ public class MappingActor extends UntypedActor {
                                                     exchange.getNodeContainer().equals(rbqBroker)) {
 
                                             String publisherNodeName = exchangeName + " publisher";
-                                            Node publisherNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(mappingSession, publisherNodeName, rbqClient.getContainerID(), null);
+                                            Node publisherNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(publisherNodeName, rbqClient.getContainerID(), null);
                                             log.debug("Create or get node for publisher ({},{},{})", new Object[]{publisherNode.getNodeID(), publisherNodeName, rbqClient.getContainerID()});
 
                                             String sourceEpUrl = transportName + peerHost + ":" + peerPort + "/" + brokerHost + ":" + brokerPort + "/(" + channelNumber + ")/" + exchangeName;
-                                            Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(mappingSession, sourceEpUrl, publisherNode.getNodeID());
+                                            Endpoint sourceEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(sourceEpUrl, publisherNode.getNodeID());
                                             log.debug("Create or get endpoint : ({},{},{})", new Object[]{sourceEp.getEndpointID(), sourceEpUrl, publisherNode.getNodeID()});
 
                                             String targetEpUrl = transportName + brokerHost + ":" + brokerPort + "/" + peerHost + ":" + peerPort + "/(" + channelNumber + ")";
-                                            Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(mappingSession, targetEpUrl, exchange.getNodeID());
+                                            Endpoint targetEp = RabbitmqInjectorBootstrap.getMappingSce().getEndpointSce().createEndpoint(targetEpUrl, exchange.getNodeID());
                                             log.debug("Create or get endpoint : ({},{},{})", new Object[]{targetEp.getEndpointID(), targetEpUrl, exchange.getNodeID()});
 
-                                            Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(mappingSession, transportName);
+                                            Transport transport = RabbitmqInjectorBootstrap.getMappingSce().getTransportSce().createTransport(transportName);
                                             log.debug("Create or get transport : ({},{})", new Object[]{transport.getTransportID(), transportName});
 
-                                            Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(mappingSession, sourceEp.getEndpointID(), targetEp.getEndpointID(),
+                                            Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
                                                                                                                                  transport.getTransportID());
                                             log.debug("Create or get link : ({},{},{},{})", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                                 targetEp.getEndpointID(), transport.getTransportID()});
@@ -1352,8 +1352,8 @@ public class MappingActor extends UntypedActor {
         }
     }
 
-    private void removeEntityFromMappingDS(RabbitmqCachedComponent entity, Session mappingSession) throws MappingDSException {
-        RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().deleteCluster(mappingSession, entity.getComponentId());
+    private void removeEntityFromMappingDS(RabbitmqCachedComponent entity) throws MappingDSException {
+        RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().deleteCluster(entity.getComponentId());
         RabbitmqInjectorBootstrap.getComponentsRegistry().removeEntityFromCache(entity);
     }
 
@@ -1363,14 +1363,14 @@ public class MappingActor extends UntypedActor {
             log.debug("Injection begin... Action {} on {}", new Object[]{entity.getNextAction(), entity.getComponentURL()});
             switch (entity.getNextAction()) {
                 case RabbitmqCachedComponent.ACTION_UPDATE:
-                    applyEntityDifferencesFromLastSniff(entity, mappingSession);
-                    pushEntityToMappingDS(entity, mappingSession);
+                    applyEntityDifferencesFromLastSniff(entity);
+                    pushEntityToMappingDS(entity);
                     break;
                 case RabbitmqCachedComponent.ACTION_CREATE:
-                    pushEntityToMappingDS(entity, mappingSession);
+                    pushEntityToMappingDS(entity);
                     break;
                 case RabbitmqCachedComponent.ACTION_DELETE:
-                    removeEntityFromMappingDS(entity, mappingSession);
+                    removeEntityFromMappingDS(entity);
                     break;
                 default:
                     log.error("Action {} unknown !", new Object[]{entity.getNextAction()});
@@ -1390,7 +1390,7 @@ public class MappingActor extends UntypedActor {
                 e.printStackTrace();
             }
         }
-        RabbitmqInjectorBootstrap.getMappingSce().closeSession(mappingSession);
+        RabbitmqInjectorBootstrap.getMappingSce().closeSession();
     }
 
     @Override
