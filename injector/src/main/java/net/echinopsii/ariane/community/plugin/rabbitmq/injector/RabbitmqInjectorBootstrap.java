@@ -23,6 +23,7 @@ import net.echinopsii.ariane.community.core.injector.base.registry.InjectorCompo
 import net.echinopsii.ariane.community.core.injector.base.registry.InjectorGearsRegistry;
 import net.echinopsii.ariane.community.core.injector.base.registry.InjectorRegistryFactory;
 import net.echinopsii.ariane.community.core.mapping.ds.service.MappingSce;
+import net.echinopsii.ariane.community.core.mapping.ds.service.proxy.SProxMappingSce;
 import net.echinopsii.ariane.community.core.portal.base.model.MenuEntityType;
 import net.echinopsii.ariane.community.core.portal.base.model.TreeMenuEntity;
 import net.echinopsii.ariane.community.core.portal.base.plugin.FaceletsResourceResolverService;
@@ -73,11 +74,11 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
     private static boolean isStarted = false;
 
     @Requires
-    private MappingSce mappingService = null;
-    private static MappingSce mappingSceSgt  = null;
+    private SProxMappingSce mappingService = null;
+    private static SProxMappingSce mappingSceSgt  = null;
 
     @Bind
-    public void bindMappingService(MappingSce t) {
+    public void bindMappingService(SProxMappingSce t) {
         log.debug("Bound to Mapping Service...");
         mappingService = t;
         mappingSceSgt = t;
@@ -90,7 +91,7 @@ public class RabbitmqInjectorBootstrap implements FaceletsResourceResolverServic
         mappingSceSgt = null;
     }
 
-    public static MappingSce getMappingSce() {
+    public static SProxMappingSce getMappingSce() {
         return mappingSceSgt;
     }
 
