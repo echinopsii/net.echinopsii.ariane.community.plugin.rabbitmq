@@ -1,15 +1,15 @@
 {
     "id": "ariane.community.plugin.rabbitmq",
-    "version": "master.SNAPSHOT",
+    "version": "0.2.6",
     "type": "community",
     "deployCommandsFile": "resources/virgoscripts/deploy-plugin.rabbitmq.vsh",
     "distribs": [
-        "master.SNAPSHOT"
+        "0.8.0"
     ],
     "hook": {
         "package": "plugins.rabbitmq",
-        "module": "rabbitmqProcessor",
-        "class": "rabbitmqProcessor"
+        "module": "RabbitMQProcessor",
+        "class": "RabbitMQProcessor"
     },
     "environment": [
         {

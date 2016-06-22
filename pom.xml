@@ -6,7 +6,7 @@
     <groupId>net.echinopsii.ariane.community.plugin</groupId>
     <artifactId>net.echinopsii.ariane.community.plugin.rabbitmq</artifactId>
     <name>Ariane Community Plugin For RabbitMQ</name>
-    <version>0.2.6-SNAPSHOT</version>
+    <version>0.2.6</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -73,16 +73,16 @@
         <version.ipojo.plugin>1.11.0</version.ipojo.plugin>
 
         <!-- Ariane module dependencies -->
-        <version.net.echinopsii.ariane.community.core.mapping>0.7.5-SNAPSHOT</version.net.echinopsii.ariane.community.core.mapping>
-        <version.net.echinopsii.ariane.community.core.mapping.min>0.7.0</version.net.echinopsii.ariane.community.core.mapping.min>
-        <version.net.echinopsii.ariane.community.core.mapping.max>0.8.0</version.net.echinopsii.ariane.community.core.mapping.max>
-        <version.net.echinopsii.ariane.community.core.directory>0.7.4-SNAPSHOT</version.net.echinopsii.ariane.community.core.directory>
+        <version.net.echinopsii.ariane.community.core.mapping>0.8.0</version.net.echinopsii.ariane.community.core.mapping>
+        <version.net.echinopsii.ariane.community.core.mapping.min>0.8.0</version.net.echinopsii.ariane.community.core.mapping.min>
+        <version.net.echinopsii.ariane.community.core.mapping.max>0.9.0</version.net.echinopsii.ariane.community.core.mapping.max>
+        <version.net.echinopsii.ariane.community.core.directory>0.7.4</version.net.echinopsii.ariane.community.core.directory>
         <version.net.echinopsii.ariane.community.core.directory.min>0.7.0</version.net.echinopsii.ariane.community.core.directory.min>
         <version.net.echinopsii.ariane.community.core.directory.max>0.8.0</version.net.echinopsii.ariane.community.core.directory.max>
-        <version.net.echinopsii.ariane.community.core.portal>0.7.5-SNAPSHOT</version.net.echinopsii.ariane.community.core.portal>
+        <version.net.echinopsii.ariane.community.core.portal>0.7.5</version.net.echinopsii.ariane.community.core.portal>
         <version.net.echinopsii.ariane.community.core.portal.min>0.7.0</version.net.echinopsii.ariane.community.core.portal.min>
         <version.net.echinopsii.ariane.community.core.portal.max>0.8.0</version.net.echinopsii.ariane.community.core.portal.max>
-        <version.net.echinopsii.ariane.community.core.injector>0.7.4-SNAPSHOT</version.net.echinopsii.ariane.community.core.injector>
+        <version.net.echinopsii.ariane.community.core.injector>0.7.4</version.net.echinopsii.ariane.community.core.injector>
         <version.net.echinopsii.ariane.community.core.injector.min>0.7.0</version.net.echinopsii.ariane.community.core.injector.min>
         <version.net.echinopsii.ariane.community.core.injector.max>0.8.0</version.net.echinopsii.ariane.community.core.injector.max>
 

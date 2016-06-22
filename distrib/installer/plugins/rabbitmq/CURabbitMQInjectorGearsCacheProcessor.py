@@ -21,7 +21,7 @@ from tools.AConfUnit import AConfUnit
 __author__ = 'mffrench'
 
 
-class cpInjectorGearsCacheDir(AConfParamNotNone):
+class CPInjectorGearsCacheDir(AConfParamNotNone):
 
     name = "##rabbitmqInjectorGearsCacheDir"
     description = "RabbitMQ Injector Gears Cache Directory"
@@ -30,26 +30,39 @@ class cpInjectorGearsCacheDir(AConfParamNotNone):
     def __init__(self):
         self.value = None
 
-    def isValid(self):
-        if not super().isValid:
+    def is_valid(self):
+        if not super().is_valid:
             return False
         else:
-            if os.path.exists(self.value) and os.path.isdir(self.value) and os.access(self.value, os.W_OK) and os.access(self.value, os.W_OK):
+            if os.path.exists(self.value) and os.path.isdir(self.value) and \
+                    os.access(self.value, os.W_OK) and os.access(self.value, os.W_OK):
                 return True
             else:
-                print(self.description + " (" + self.value + ") is not valid. Check if it exists and it has good rights.")
+                print(self.description + " (" + str(self.value) +
+                      ") is not valid. Check if it exists and it has good rights.")
                 return False
 
 
-class cuInjectorGearsCacheProcessor(AConfUnit):
+class CURabbitMQInjectorGearsCacheProcessor(AConfUnit):
 
-    def __init__(self, targetConfDir):
+    def __init__(self, target_conf_dir):
         self.confUnitName = "RabbitMQ Injector Gears Cache"
         self.confTemplatePath = os.path.abspath("resources/templates/plugins/rabbitmq/infinispan.gears.cache.xml.tpl")
-        self.confFinalPath = targetConfDir + "infinispan.gears.cache.xml"
-        injectorGearsCacheDir = cpInjectorGearsCacheDir()
+        self.confFinalPath = target_conf_dir + "infinispan.gears.cache.xml"
+        injector_gears_cache_dir = CPInjectorGearsCacheDir()
         self.paramsDictionary = {
-            injectorGearsCacheDir.name: injectorGearsCacheDir
+            injector_gears_cache_dir.name: injector_gears_cache_dir
         }
-        self.setKeyParamValue(cpInjectorGearsCacheDir.name, targetConfDir)
+        self.set_key_param_value(CPInjectorGearsCacheDir.name, target_conf_dir)
 
+    def set_key_param_value(self, key, value):
+        return super(CURabbitMQInjectorGearsCacheProcessor, self).set_key_param_value(key, value)
+
+    def get_params_keys_list(self):
+        return super(CURabbitMQInjectorGearsCacheProcessor, self).get_params_keys_list()
+
+    def process(self):
+        return super(CURabbitMQInjectorGearsCacheProcessor, self).process()
+
+    def get_param_from_key(self, key):
+        return super(CURabbitMQInjectorGearsCacheProcessor, self).get_param_from_key(key)
