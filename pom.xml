@@ -82,7 +82,7 @@
         <version.net.echinopsii.ariane.community.core.portal>0.7.6-SNAPSHOT</version.net.echinopsii.ariane.community.core.portal>
         <version.net.echinopsii.ariane.community.core.portal.min>0.7.0</version.net.echinopsii.ariane.community.core.portal.min>
         <version.net.echinopsii.ariane.community.core.portal.max>0.8.0</version.net.echinopsii.ariane.community.core.portal.max>
-        <version.net.echinopsii.ariane.community.core.injector>0.7.4</version.net.echinopsii.ariane.community.core.injector>
+        <version.net.echinopsii.ariane.community.core.injector>0.7.5-SNAPSHOT</version.net.echinopsii.ariane.community.core.injector>
         <version.net.echinopsii.ariane.community.core.injector.min>0.7.0</version.net.echinopsii.ariane.community.core.injector.min>
         <version.net.echinopsii.ariane.community.core.injector.max>0.8.0</version.net.echinopsii.ariane.community.core.injector.max>
 
