@@ -1205,6 +1205,7 @@ public class MappingActor extends UntypedActor {
                 String remoteCliOTM   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OTM);
                 String remoteCliAPP   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_APP);
                 String remoteCliCMP   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_CMP);
+                String remoteCliPID   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PID);
 
                 if (remoteCliPGURL!=null && remoteCliOSI!=null && remoteCliOTM!=null && remoteCliAPP!=null && remoteCliCMP!=null) {
                     String serverName = remoteCliPGURL.split("://")[1].split("\\.")[0];
@@ -1217,6 +1218,9 @@ public class MappingActor extends UntypedActor {
                     rbqClient.setContainerCompany(remoteCliCMP);
                     rbqClient.setContainerProduct((String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PRODUCT));
                     rbqClient.setContainerType(remoteCliAPP);
+
+                    if (remoteCliPID!=null)
+                        rbqClient.addContainerProperty(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PID, remoteCliPID);
 
                     HashMap<String, Object> rbqClientProps = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getRemoteClientContainerProperties(remoteCliOSI, remoteCliOTM);
                     for (String key : rbqClientProps.keySet())
@@ -1346,7 +1350,9 @@ public class MappingActor extends UntypedActor {
                                ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OSI + ": " + remoteCliOSI + "\n" +
                                ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OTM + ": " + remoteCliOTM + "\n" +
                                ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_CMP + ": " + remoteCliCMP + "\n" +
-                               ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_APP + ": " + remoteCliAPP);
+                               ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_APP + ": " + remoteCliAPP + "\n" +
+                               ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PID + ": " + remoteCliPID
+                    );
             } else
                 log.error("Unable to find target RabbitMQ node for connection {}", connectionFromRabbitREST.getName());
         }
