@@ -809,7 +809,7 @@ public class MappingActor extends UntypedActor {
     private Container pushBrokerToMappingDS(RabbitmqCachedComponent entity, ArrayList<Gate> clusterGates, BrokerFromRabbitREST broker) throws MappingDSException {
         String adminGateUrl = broker.getUrl();
         String serverFQDN = adminGateUrl.split("://")[1].split(":")[0];
-        String serverName = adminGateUrl.split("://")[1].split("\\.")[0];
+        String serverName = adminGateUrl.split("://")[1].split(":|\\.")[0];
         String adminGateName = "webadmingate." + serverName;
 
         log.debug("");
@@ -1029,7 +1029,7 @@ public class MappingActor extends UntypedActor {
                     log.debug("");
                     log.debug("-----------------------------------");
                     log.debug("source exchange ({},{},{},{})", new Object[]{exchange.getNodeID(), exchange.getNodeName(), exchange.getNodeParentNode().getNodeName(),
-                                                                            exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY)});
+                            exchange.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY)});
 
                     String exchangeType = (String)exchange.getNodeProperties().get(ExchangeFromRabbitREST.JSON_RABBITMQ_EXCHANGE_TYPE);
 
@@ -1041,7 +1041,7 @@ public class MappingActor extends UntypedActor {
                                 exchange.getNodeContainer().equals(queue.getNodeContainer())) {
                                 log.debug("");
                                 log.debug("target queue ({},{},{},{})", new Object[]{queue.getNodeID(), destination, queue.getNodeParentNode().getNodeName(),
-                                                                                     queue.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY)});
+                                        queue.getNodeContainer().getContainerProperties().get(RABBITMQ_BROKER_NAME_KEY)});
 
                                 String exchangeSourceEndpointURL= null;
                                 String queueTargetEndpointURL = null;
@@ -1208,12 +1208,15 @@ public class MappingActor extends UntypedActor {
                 String remoteCliPID   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PID);
 
                 if (remoteCliPGURL!=null && remoteCliOSI!=null && remoteCliOTM!=null && remoteCliAPP!=null && remoteCliCMP!=null) {
-                    String serverName = remoteCliPGURL.split("://")[1].split("\\.")[0];
+                    String serverName = remoteCliPGURL.split("://")[1].split(":|\\.")[0];
                     String adminGateName = "rbqcliadmingate." + serverName;
 
                     log.debug("");
                     log.debug("---");
-                    Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer("rabbit-cli@"+serverName, remoteCliPGURL, adminGateName);
+                    String containerName = "rabbit-cli";
+                    if (remoteCliPID!=null) containerName += "-"+remoteCliPID;
+                    containerName += "@" + serverName;
+                    Container rbqClient = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(containerName, remoteCliPGURL, adminGateName);
                     log.debug("Create or get container ({},{},{})", new Object[]{rbqClient.getContainerID(), remoteCliPGURL, adminGateName});
                     rbqClient.setContainerCompany(remoteCliCMP);
                     rbqClient.setContainerProduct((String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_PRODUCT));
