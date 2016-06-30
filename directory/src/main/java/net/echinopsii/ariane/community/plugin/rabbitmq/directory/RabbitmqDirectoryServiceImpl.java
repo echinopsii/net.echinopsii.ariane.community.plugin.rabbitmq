@@ -370,19 +370,21 @@ public class RabbitmqDirectoryServiceImpl implements RabbitmqDirectoryService {
             throw e;
         }
 
-        CriteriaQuery<Team> teamcc = builder.createQuery(Team.class);
-        Root<Team> teamccRoot = teamcc.from(Team.class);
-        teamcc.select(teamccRoot).where(builder.equal(teamccRoot.<String>get("name"), teamName));
-        TypedQuery<Team> teamccQuery = em.createQuery(teamcc);
+        if (!teamName.equals(ARIANE_OTM_NOT_DEFINED)) {
+            CriteriaQuery<Team> teamcc = builder.createQuery(Team.class);
+            Root<Team> teamccRoot = teamcc.from(Team.class);
+            teamcc.select(teamccRoot).where(builder.equal(teamccRoot.<String>get("name"), teamName));
+            TypedQuery<Team> teamccQuery = em.createQuery(teamcc);
 
-        Team team = null;
-        try {
-            team = teamccQuery.getSingleResult();
-            ret.putAll(getTeamPropertiesFromTeam(team));
-        } catch (NoResultException e) {
-            log.error("unable to retrieve team {} from Directory DB!", teamName);
-        } catch (Exception e) {
-            throw e;
+            Team team = null;
+            try {
+                team = teamccQuery.getSingleResult();
+                ret.putAll(getTeamPropertiesFromTeam(team));
+            } catch (NoResultException e) {
+                log.error("unable to retrieve team {} from Directory DB!", teamName);
+            } catch (Exception e) {
+                throw e;
+            }
         }
 
         em.close();

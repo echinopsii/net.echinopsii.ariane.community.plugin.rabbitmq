@@ -25,6 +25,7 @@ import akka.japi.Creator;
 import net.echinopsii.ariane.community.core.mapping.ds.MappingDSException;
 import net.echinopsii.ariane.community.core.mapping.ds.domain.*;
 import net.echinopsii.ariane.community.core.mapping.ds.service.tools.Session;
+import net.echinopsii.ariane.community.plugin.rabbitmq.directory.RabbitmqDirectoryService;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.cache.RabbitmqCachedComponent;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears.MappingGear;
@@ -814,7 +815,7 @@ public class MappingActor extends UntypedActor {
 
         log.debug("");
         log.debug("-----------------------------------");
-        Container rbqBroker = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer("rabbit@" + serverName, adminGateUrl, adminGateName);
+        Container rbqBroker = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().createContainer(broker.getName(), adminGateUrl, adminGateName);
         log.debug("Create or get container ({},{},{})", new Object[]{rbqBroker.getContainerID(), adminGateUrl, adminGateName});
         rbqBroker.setContainerCompany(RABBITMQ_COMPANY);
         rbqBroker.setContainerProduct(RABBITMQ_PRODUCT);
@@ -990,7 +991,7 @@ public class MappingActor extends UntypedActor {
                     log.debug("");
                     log.debug("-----------------------------------");
                     Node exchangeNode = RabbitmqInjectorBootstrap.getMappingSce().getNodeSce().createNode(exchange.getName() + " (exchange)", vHost.getNodeContainer().getContainerID(), vHost.getNodeID());
-                    log.debug("Create or get node for exchange ({},{},{},{})", new Object[]{exchangeNode.getNodeID(), exchange.getName(), vHost.getNodeContainer().getContainerID(), vHost.getNodeID()});
+                    log.debug("Create or get node for exchange ({},{},{},{},{},{})", new Object[]{exchangeNode.getNodeID(), exchange.getName(), vHost.getNodeContainer().getContainerID(), vHost.getNodeContainer().getContainerName(), vHost.getNodeID(), vHost.getNodeName()});
                     for (String propsKey : exchange.getProperties().keySet()) {
                         log.debug("Add property {} to rabbitmq node {} : {}", new Object[]{propsKey, exchangeNode.getNodeName(), exchange.getProperties().get(propsKey).toString()});
                         exchangeNode.addNodeProperty(propsKey, exchange.getProperties().get(propsKey));
@@ -1155,7 +1156,8 @@ public class MappingActor extends UntypedActor {
                                     log.debug("Create or get transport ({},{}).", new Object[]{transport.getTransportID(), RABBITMQ_TRANSPORT_MEM_BINDING});
 
                                     Link link = RabbitmqInjectorBootstrap.getMappingSce().getLinkSce().createLink(sourceEp.getEndpointID(), targetEp.getEndpointID(),
-                                                                                                             transport.getTransportID());
+
+                                    transport.getTransportID());
                                     log.debug("Link endpoints together ({},{},{},{}).", new Object[]{link.getLinkID(), sourceEp.getEndpointID(),
                                                                                                             targetEp.getEndpointID(), transport.getTransportID()});
                                 }
@@ -1205,10 +1207,13 @@ public class MappingActor extends UntypedActor {
                 String remoteCliOTM   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_OTM);
                 String remoteCliAPP   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_APP);
                 String remoteCliCMP   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_CMP);
-                String remoteCliPID   = (String)connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PID);
+
+                String remoteCliPID   = null;
+                if (connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PID)!=null)
+                    remoteCliPID = connection_client_props.get(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PID).toString();
 
                 if (remoteCliPGURL!=null && remoteCliOSI!=null && remoteCliOTM!=null && remoteCliAPP!=null && remoteCliCMP!=null) {
-                    String serverName = remoteCliPGURL.split("://")[1].split(":|\\.")[0];
+                    String serverName = remoteCliPGURL.split("://")[1].split(":|/|\\.")[0];
                     String adminGateName = "rbqcliadmingate." + serverName;
 
                     log.debug("");
@@ -1226,6 +1231,7 @@ public class MappingActor extends UntypedActor {
                         rbqClient.addContainerProperty(ConnectionFromRabbitREST.JSON_RABBITMQ_CONNECTION_CLIENT_PROPERTIES_ARIANE_PID, remoteCliPID);
 
                     HashMap<String, Object> rbqClientProps = RabbitmqInjectorBootstrap.getRabbitmqDirectorySce().getRemoteClientContainerProperties(remoteCliOSI, remoteCliOTM);
+                    if (remoteCliOTM.equals(RabbitmqDirectoryService.ARIANE_OTM_NOT_DEFINED)) log.warn("Operations team for RabbitMQ client " + containerName + " has not been defined !");
                     for (String key : rbqClientProps.keySet())
                         if (rbqClientProps.get(key)!=null) {
                             rbqClient.addContainerProperty(key, rbqClientProps.get(key));

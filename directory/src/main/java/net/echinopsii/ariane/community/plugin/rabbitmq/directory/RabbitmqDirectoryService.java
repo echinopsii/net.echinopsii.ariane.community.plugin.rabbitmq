@@ -28,63 +28,65 @@ import java.util.Set;
 
 public interface RabbitmqDirectoryService {
 
+    String ARIANE_OTM_NOT_DEFINED = "OTM_NOT_DEFINED";
+
     /**
      * add provided node to rabbitmq node directory
      *
      * @param node RabbitMQ node to add
      */
-    public void addNode(RabbitmqNode node);
+    void addNode(RabbitmqNode node);
 
     /**
      * add provided cluster to rabbitmq cluster directory
      *
      * @param cluster RabbitMQ cluster to add
      */
-    public void addCluster(RabbitmqCluster cluster);
+    void addCluster(RabbitmqCluster cluster);
 
     /**
      * get all rabbitmq node from rabbitmq node directory
      *
      * @return nodes list
      */
-    public HashSet<RabbitmqNode> getNodesList();
+    HashSet<RabbitmqNode> getNodesList();
 
     /**
      * get all rabbitmq cluster from rabbitmq cluster directory
      *
      * @return clusters list
      */
-    public HashSet<RabbitmqCluster> getClustersList();
+    HashSet<RabbitmqCluster> getClustersList();
 
     /**
      * delete provided rabbitmq node from rabbitmq node directory
      *
      * @param node delete RabbitMQ node to delete
      */
-    public void delNode(RabbitmqNode node);
+    void delNode(RabbitmqNode node);
 
     /**
      * delete provided rabbitmq cluster from rabbitmq cluster directory
      *
      * @param cluster RabbitMQ cluster to delete
      */
-    public void delCluster(RabbitmqCluster cluster);
+    void delCluster(RabbitmqCluster cluster);
 
     /**
      * update provided rabbitmq node in rabbitmq node directory
      *
      * @param node RabbitMQ node to update
      */
-    public void updateNode(RabbitmqNode node);
+    void updateNode(RabbitmqNode node);
 
     /**
      * update provided rabbitmq node in rabbitmq cluster directory
      *
      * @param cluster RabbitMQ cluster to update
      */
-    public void updateCluster(RabbitmqCluster cluster);
+    void updateCluster(RabbitmqCluster cluster);
 
-    public static int FAKE_CLUSTER_ID = -1;
+    int FAKE_CLUSTER_ID = -1;
 
     /**
      * Get cluster from node. If no cluster is defined for this node return
@@ -93,7 +95,7 @@ public interface RabbitmqDirectoryService {
      * @param node RabbitMQ node in the cluster to return
      * @return the cluster from node
      */
-    public RabbitmqCluster getClusterFromNode(RabbitmqNode node);
+    RabbitmqCluster getClusterFromNode(RabbitmqNode node);
 
     /**
      * Refresh a cluster according to the cluster ID
@@ -101,7 +103,7 @@ public interface RabbitmqDirectoryService {
      * @param clusterID RabbitMQ cluster ID to refresh
      * @return refreshed cluster associated to cluster ID
      */
-    public RabbitmqCluster refreshRabbitmqCluster(Long clusterID);
+    RabbitmqCluster refreshRabbitmqCluster(Long clusterID);
 
     /**
      * Get fresh nodes list from a cluster according cluster ID
@@ -109,7 +111,7 @@ public interface RabbitmqDirectoryService {
      * @param clusterID RabbitMQ cluster ID containing nodes to return
      * @return nodes list from a cluster according cluster ID
      */
-    public Set<RabbitmqNode> getNodesFromCluster(Long clusterID);
+    Set<RabbitmqNode> getNodesFromCluster(Long clusterID);
 
     /**
      * Refresh a node according to the node ID
@@ -117,7 +119,7 @@ public interface RabbitmqDirectoryService {
      * @param nodeID RabbitMQ node ID to refresh
      * @return refreshed cluster associated to node ID
      */
-    public RabbitmqNode refreshRabbitmqNode(Long nodeID);
+    RabbitmqNode refreshRabbitmqNode(Long nodeID);
 
     /**
      * Get remote client container properties from its OS Instance Name and team name
@@ -127,5 +129,5 @@ public interface RabbitmqDirectoryService {
      *
      * @return properties
      */
-    public HashMap<String, Object> getRemoteClientContainerProperties(String osiName, String teamName);
+    HashMap<String, Object> getRemoteClientContainerProperties(String osiName, String teamName);
 }

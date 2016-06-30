@@ -92,17 +92,24 @@ class BrokerFromRabbitREST implements Serializable {
                 properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_MANAGEMENT_VERSION, node.getManagementVersion())
                 properties.put(JSON_RABBITMQ_BROKER_OVERVIEW_RABBITMQ_VERSION, node.getRabbitmqVersion())
             }
-
-            String node_req_path = JSON_RABBITMQ_NODE_PATH + this.name;
-            def node_req = (cluster != null) ? cluster.get(node_req_path) : ((node != null) ? node.get(node_req_path) : null)
-            if (node_req != null && node_req.status == 200 && node_req.data != null)
-                properties.putAll((Map<String, Object>) node_req.data)
-            properties.remove(JSON_RABBITMQ_NODE_NAME)
         } catch (Exception e) {
             if (log.isDebugEnabled())
                 e.printStackTrace();
-            log.error("PB with node " + name + " (" + node.getUrl() + "):" + e.getMessage())
+            log.error("PB on node " + name + " :" + e.getMessage())
         }
+
+        String node_req_path = JSON_RABBITMQ_NODE_PATH + this.name
+        def node_req = null
+        try {
+             node_req = (cluster != null) ? cluster.get(node_req_path) : ((node != null) ? node.get(node_req_path) : null)
+        } catch (Exception e) {
+            if (log.isDebugEnabled())
+                e.printStackTrace();
+            log.error("PB on node " + name + " while requesting " + node.getUrl() + "/" + node_req_path + ":" + e.getMessage())
+        }
+        if (node_req != null && node_req.status == 200 && node_req.data != null)
+            properties.putAll((Map<String, Object>) node_req.data)
+        properties.remove(JSON_RABBITMQ_NODE_NAME)
         return this;
     }
 
