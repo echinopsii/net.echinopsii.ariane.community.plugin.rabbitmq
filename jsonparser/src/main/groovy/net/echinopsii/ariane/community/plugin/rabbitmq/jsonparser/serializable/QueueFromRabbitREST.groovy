@@ -64,8 +64,10 @@ class QueueFromRabbitREST implements Serializable {
                     if (queue.name.equals(this.name) && queue.vhost.equals(this.vhost))
                         properties = queue
                 }
-                properties.remove(JSON_RABBITMQ_QUEUE_NAME)
-                properties.remove(JSON_RABBITMQ_QUEUE_VHOST)
+                if (properties!=null) {
+                    properties.remove(JSON_RABBITMQ_QUEUE_NAME)
+                    properties.remove(JSON_RABBITMQ_QUEUE_VHOST)
+                }
             }
         } catch (Exception e) {
             if (log.isDebugEnabled())

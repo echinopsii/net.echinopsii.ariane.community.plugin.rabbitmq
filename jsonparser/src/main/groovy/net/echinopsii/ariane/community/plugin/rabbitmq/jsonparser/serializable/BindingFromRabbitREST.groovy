@@ -76,7 +76,8 @@ class BindingFromRabbitREST implements Serializable {
                             + (String) binding.destination).equals(this.name) && binding.vhost.equals(this.vhost))
                         properties = binding
                 }
-                properties.remove(JSON_RABBITMQ_BINDING_VHOST)
+                if (properties!=null)
+                    properties.remove(JSON_RABBITMQ_BINDING_VHOST)
             }
         } catch (Exception e) {
             if (log.isDebugEnabled())
