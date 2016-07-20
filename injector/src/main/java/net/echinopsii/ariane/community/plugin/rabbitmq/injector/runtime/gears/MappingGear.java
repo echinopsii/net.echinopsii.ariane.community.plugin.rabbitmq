@@ -19,6 +19,7 @@
 
 package net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.gears;
 
+import akka.actor.PoisonPill;
 import net.echinopsii.ariane.community.core.injector.base.model.AbstractAkkaGear;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.RabbitmqInjectorBootstrap;
 import net.echinopsii.ariane.community.plugin.rabbitmq.injector.runtime.actors.MappingActor;
@@ -60,12 +61,19 @@ public class MappingGear extends AbstractAkkaGear implements Serializable {
     @Override
     public void stop() {
         super.getGearActorRefFactory().stop(super.getGearActor());
-        while(!super.getGearActor().isTerminated())
+        int dcount = 20;
+        while(!super.getGearActor().isTerminated() && dcount>0)
             try {
-                Thread.sleep(1000);
+                log.info("Waiting " + super.getGearName() + " to be stopped gracefully.");
+                Thread.sleep(5000);
+                dcount--;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        if (!super.getGearActor().isTerminated()) {
+            log.info("Send a poison pill to force stop of " + super.getGearName());
+            super.getGearActor().tell(PoisonPill.getInstance(), null);
+        }
         super.setRunning(false);
         log.info("{} is stopped", super.getGearName());
     }

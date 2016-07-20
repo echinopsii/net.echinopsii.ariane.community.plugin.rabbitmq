@@ -41,6 +41,8 @@ public class MappingActor extends UntypedActor {
     private static final Logger log = LoggerFactory.getLogger(MappingActor.class);
 
     private MappingGear gear;
+    private Long currentActorThreadID;
+    private Session mappingSession;
 
     public static Props props(final MappingGear gear) {
         return Props.create(new Creator<MappingActor>() {
@@ -1373,7 +1375,6 @@ public class MappingActor extends UntypedActor {
     }
 
     private void inject(RabbitmqCachedComponent entity) {
-        Session mappingSession = RabbitmqInjectorBootstrap.getMappingSce().openSession(this.gear.getGearId());
         try {
             log.debug("Injection begin... Action {} on {}", new Object[]{entity.getNextAction(), entity.getComponentURL()});
             switch (entity.getNextAction()) {
@@ -1405,18 +1406,38 @@ public class MappingActor extends UntypedActor {
                 e.printStackTrace();
             }
         }
-        RabbitmqInjectorBootstrap.getMappingSce().closeSession();
     }
 
     @Override
     public void onReceive(Object rabbitmqComponent) throws Exception {
-        log.debug("Actor {} receive message {}", new Object[]{getSelf().path().toStringWithoutAddress(), rabbitmqComponent.toString()});
-        if (rabbitmqComponent instanceof RabbitmqCachedComponent) {
+        log.debug("Thread {} - Actor {} receive message {}", new Object[]{Thread.currentThread().getId(),
+                getSelf().path().toStringWithoutAddress(), rabbitmqComponent.toString()});
+        if (this.mappingSession==null) {
+            this.currentActorThreadID = Thread.currentThread().getId();
             Thread.currentThread().setName("RabbitMQ Mapping Actor - " + Thread.currentThread().getId());
-            inject((RabbitmqCachedComponent) rabbitmqComponent);
-        } else {
+            this.mappingSession = RabbitmqInjectorBootstrap.getMappingSce().openSession(this.gear.getGearId());
+        } else if (this.currentActorThreadID!=Thread.currentThread().getId()) {
+            log.debug("Actor {} running thread {} has been changed to {} !", new Object[]{
+                    getSelf().path().toStringWithoutAddress(), this.currentActorThreadID, Thread.currentThread().getId()
+            });
+            RabbitmqInjectorBootstrap.getMappingSce().closeSession(this.mappingSession);
+            this.currentActorThreadID = Thread.currentThread().getId();
+            Thread.currentThread().setName("RabbitMQ Mapping Actor - " + Thread.currentThread().getId());
+            this.mappingSession = RabbitmqInjectorBootstrap.getMappingSce().openSession(this.gear.getGearId());
+        }
+
+        if (rabbitmqComponent instanceof RabbitmqCachedComponent) inject((RabbitmqCachedComponent) rabbitmqComponent);
+        else {
             log.debug("Unhandled message type {} !", rabbitmqComponent.getClass().toString());
             unhandled(rabbitmqComponent);
         }
+    }
+
+    @Override
+    public void postStop() {
+        log.debug("Thread {} - Actor {} postStop", new Object[]{Thread.currentThread().getId(),
+                getSelf().path().toStringWithoutAddress()});
+        if (this.mappingSession != null)
+            RabbitmqInjectorBootstrap.getMappingSce().closeSession(this.mappingSession);
     }
 }
