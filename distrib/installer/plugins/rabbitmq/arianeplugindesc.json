@@ -3,6 +3,7 @@
     "version": "SNAPSHOT",
     "type": "community",
     "deployCommandsFile": "resources/virgoscripts/deploy-plugin.rabbitmq.vsh",
+    "waitingStartString": "RabbitMQ Plugin Injector Component started",
     "distribs": [
         "SNAPSHOT"
     ],
