@@ -1,11 +1,11 @@
 {
     "id": "ariane.community.plugin.rabbitmq",
-    "version": "SNAPSHOT",
+    "version": "0.2.7",
     "type": "community",
     "deployCommandsFile": "resources/virgoscripts/deploy-plugin.rabbitmq.vsh",
     "waitingStartString": "RabbitMQ Plugin Injector Component started",
     "distribs": [
-        "SNAPSHOT"
+        "0.8.1"
     ],
     "hook": {
         "package": "plugins.rabbitmq",
