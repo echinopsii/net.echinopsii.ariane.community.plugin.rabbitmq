@@ -381,6 +381,9 @@ public class RabbitmqCachedComponent extends AbstractComponent implements Serial
         this.exchanges = this.lastExchanges;
         this.queues = this.lastQueues;
         this.bindings = this.lastBindings;
+        super.setLastRefresh(new Date());
+        RabbitmqInjectorBootstrap.getComponentsRegistry().putEntityToCache(this);
+        super.setRefreshing(false);
     }
 
     @Override
