@@ -273,7 +273,7 @@ public class MappingActor extends UntypedActor {
         if (!entity.getComponentType().equals(RabbitmqCachedComponent.RABBIT_MQ_CACHED_CMP_TYPE_SNODE)) {
             cluster = RabbitmqInjectorBootstrap.getMappingSce().getClusterSce().getClusterByName(entity.getComponentName());
             if (cluster==null) {
-                log.error("Cluster {} doesn't exists... Exit", entity.getComponentName());
+                log.warn("Cluster {} in cache but not more on DB...", entity.getComponentName());
                 return;
             }
 
@@ -302,7 +302,7 @@ public class MappingActor extends UntypedActor {
             String adminGateUrl = entity.getBroker().getUrl();
             standaloneNode = RabbitmqInjectorBootstrap.getMappingSce().getContainerSce().getContainerByPrimaryAdminURL(adminGateUrl);
             if (standaloneNode==null){
-                log.error("RabbitMQ Node {} doesn't exists... Exit", adminGateUrl);
+                log.warn("RabbitMQ Node {} in cache but not more on DB...", adminGateUrl);
                 return;
             }
         }
@@ -1434,7 +1434,7 @@ public class MappingActor extends UntypedActor {
     }
 
     @Override
-    public void postStop() {
+    public void postStop() throws MappingDSException {
         log.debug("Thread {} - Actor {} postStop", new Object[]{Thread.currentThread().getId(),
                 getSelf().path().toStringWithoutAddress()});
         if (this.mappingSession != null)
