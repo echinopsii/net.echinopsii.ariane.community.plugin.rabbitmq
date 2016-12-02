@@ -88,7 +88,7 @@
 
         <!-- Dependencies versions-->
         <version.com.fasterxml.jackson>2.1.2</version.com.fasterxml.jackson>
-        <version.com.typesafe.akka>2.3.4</version.com.typesafe.akka>
+        <version.com.typesafe.akka>2.3.15</version.com.typesafe.akka>
         <version.org.ccil.cowan.tagsoup>1.2</version.org.ccil.cowan.tagsoup>
         <version.org.codehaus.groovy>2.1.6</version.org.codehaus.groovy>
         <version.org.codehaus.groovy.http-builder>0.7</version.org.codehaus.groovy.http-builder>
