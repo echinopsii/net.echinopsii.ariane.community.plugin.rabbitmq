@@ -1,10 +1,10 @@
 rabbitmq.injector.scheduler.directory.query.interval=##directoryQueryInterval
 rabbitmq.injector.scheduler.component.sniff.interval=##componentSniffInterval
-ariane.community.injector.gears.registry.name=Ariane RabbitMQ plugin gears registry
+ariane.community.injector.gears.registry.name=Ariane RabbitMQ Plugin Gears Registry
 ariane.community.injector.gears.registry.cache.id=ariane.community.plugin.rabbitmq.gears.cache
 ariane.community.injector.gears.registry.cache.name=Ariane RabbitMQ plugin gears cache
 ariane.community.injector.gears.cache.configuration.path=##rabbitmqInjectorGearsCacheConfFilePath
-ariane.community.injector.components.registry.name=Ariane RabbitMQ plugin components registry
+ariane.community.injector.components.registry.name=Ariane RabbitMQ Plugin Components Registry
 ariane.community.injector.components.registry.cache.id=ariane.community.plugin.rabbitmq.components.cache
-ariane.community.injector.components.registry.cache.name=Ariane RabbitMQ plugin components cache
+ariane.community.injector.components.registry.cache.name=Ariane RabbitMQ Plugin Components Cache
 ariane.community.injector.components.cache.configuration.path=##rabbitmqInjectorComponentsCacheConfFilePath
