@@ -53,7 +53,10 @@ public class MappingGear extends AbstractAkkaGear implements Serializable {
 
     @Override
     public void start() {
-        super.setGearActor(super.getGearActorRefFactory().actorOf(MappingActor.props(this), super.getGearId()));
+        super.setGearActor(
+                super.getGearActorRefFactory().actorOf(MappingActor.props(this).withDispatcher("injector-pinned-dispatcher"),
+                super.getGearId())
+        );
         super.setRunning(true);
         log.info("{} is started", super.getGearName());
     }

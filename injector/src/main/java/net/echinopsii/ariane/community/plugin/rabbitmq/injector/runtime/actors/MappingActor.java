@@ -1417,7 +1417,8 @@ public class MappingActor extends UntypedActor {
             Thread.currentThread().setName("RabbitMQ Mapping Actor - " + Thread.currentThread().getId());
             this.mappingSession = RabbitmqInjectorBootstrap.getMappingSce().openSession(this.gear.getGearId());
         } else if (this.currentActorThreadID!=Thread.currentThread().getId()) {
-            log.debug("Actor {} running thread {} has been changed to {} !", new Object[]{
+            // SHOULD NEVER HAPPEN WITH injector-pinned-dispatcher
+            log.warn("Actor {} running thread {} has been changed to {} !", new Object[]{
                     getSelf().path().toStringWithoutAddress(), this.currentActorThreadID, Thread.currentThread().getId()
             });
             RabbitmqInjectorBootstrap.getMappingSce().closeSession(this.mappingSession);
